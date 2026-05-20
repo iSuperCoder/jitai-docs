@@ -1054,8 +1054,97 @@ Build intelligent agents with reasoning and action capabilities. From creating A
 ## Skills
 Capture reusable business experience, workflows, output standards, and prompting capabilities as Skills so multiple AI Agents can share the same professional capability set.
 
-<div style={{padding: '40px', textAlign: 'center', color: '#888', fontStyle: 'italic', border: '1px dashed #ccc', borderRadius: '8px', marginBottom: '40px'}}>
-  📝 English version coming soon... Please refer to the <a href="/zh/docs/devguide#skills">Chinese version</a> for the latest content.
+### Learning Path
+
+<div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px', marginBottom: '40px'}}>
+
+<IndexCard
+  title="Capture Reusable Domain Expertise"
+  href="devguide/skills/overview"
+  description="Understand how Skills capture business workflows, output standards, decision rules, and examples as reusable capabilities for Agents."
+>
+  <LinkGrid links={[
+    { text: "What belongs in a Skill", href: "devguide/skills/overview#what-should-be-a-skill" },
+    { text: "Skills, Agents, knowledge bases, and tools", href: "devguide/skills/overview#skill-agent-knowledge-tool" },
+    { text: "Reuse one Skill across multiple Agents", href: "devguide/skills/overview#reuse-skill-across-agents" },
+    { text: "Start from one repeatable task", href: "devguide/skills/overview#start-from-repeatable-task" }
+  ]} />
+</IndexCard>
+
+<IndexCard
+  title="Create Standard Skills"
+  href="devguide/skills/create-skill"
+  description="Create a standard Skill from the IDE Skills entry, define its name and description, and open the editor to maintain reusable capability content."
+>
+  <LinkGrid links={[
+    { text: "Create from the IDE Skills entry", href: "devguide/skills/create-skill#create-from-skills-entry" },
+    { text: "Use the name to describe capability", href: "devguide/skills/create-skill#name-the-reusable-capability" },
+    { text: "Use the description to define scope", href: "devguide/skills/create-skill#describe-scope-and-boundary" },
+    { text: "Install the Skill after creation", href: "devguide/skills/create-skill#install-skill-after-create" }
+  ]} />
+</IndexCard>
+
+<IndexCard
+  title="Design Stable and Reusable Skills"
+  href="devguide/skills/skill-best-practices"
+  description="Learn how to design Skills with clear boundaries, stable workflows, checkable output, and long-term maintainability."
+>
+  <LinkGrid links={[
+    { text: "Start from one repeatable task", href: "devguide/skills/skill-best-practices#start-from-repeatable-task" },
+    { text: "Define capability scope", href: "devguide/skills/skill-best-practices#define-capability-scope" },
+    { text: "Use execution steps", href: "devguide/skills/skill-best-practices#write-execution-steps" },
+    { text: "Stabilize output format", href: "devguide/skills/skill-best-practices#stabilize-output-format" },
+    { text: "Validate before reuse", href: "devguide/skills/skill-best-practices#validate-before-reuse" }
+  ]} />
+</IndexCard>
+
+<IndexCard
+  title="Manage Skill Attachments"
+  href="devguide/skills/skill-attachments"
+  description="Move complex rules, glossaries, templates, and examples into attachments so the main Skill prompt stays clear."
+>
+  <LinkGrid links={[
+    { text: "What belongs in attachments", href: "devguide/skills/skill-attachments#what-belongs-in-attachments" },
+    { text: "Split business rules", href: "devguide/skills/skill-attachments#split-business-rules" },
+    { text: "Maintain glossaries and templates", href: "devguide/skills/skill-attachments#maintain-glossary-and-templates" },
+    { text: "Main prompt and attachments", href: "devguide/skills/skill-attachments#main-content-vs-attachments" }
+  ]} />
+</IndexCard>
+
+<IndexCard
+  title="Install Skills in Agents"
+  href="devguide/skills/use-skill-in-agent"
+  description="Install completed Skills into Agents, then choose intelligent mode, custom mode, or disabled mode based on the Agent's task scope."
+>
+  <LinkGrid links={[
+    { text: "Why Agents need Skills", href: "devguide/skills/use-skill-in-agent#why-agent-needs-skills" },
+    { text: "Open Skills configuration", href: "devguide/skills/use-skill-in-agent#open-skills-tab-in-agent" },
+    { text: "Intelligent mode", href: "devguide/skills/use-skill-in-agent#smart-mode" },
+    { text: "Custom mode", href: "devguide/skills/use-skill-in-agent#custom-mode" },
+    { text: "Install Skills in AI Agents", href: "devguide/ai-agent/agent-skill#manage-skills" }
+  ]} />
+</IndexCard>
+
+</div>
+
+### Scenario Practices
+
+<div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '20px', marginBottom: '40px'}}>
+
+<IndexCard
+  title="Build Query Skills"
+  href="devguide/skills/query-skill-best-practices"
+  description="Use a data query scenario to learn how to design query Skills around data models, query templates, and field definitions."
+>
+  <LinkGrid links={[
+    { text: "Focus one Skill on one data scenario", href: "devguide/skills/query-skill-best-practices#one-skill-one-data-scenario" },
+    { text: "Classify query requirements", href: "devguide/skills/query-skill-best-practices#query-requirement-types" },
+    { text: "Generate and verify templates", href: "devguide/skills/query-skill-best-practices#generate-and-verify-query-templates" },
+    { text: "Core file structure", href: "devguide/skills/query-skill-best-practices#query-skill-files" },
+    { text: "Checklist", href: "devguide/skills/query-skill-best-practices#query-skill-checklist" }
+  ]} />
+</IndexCard>
+
 </div>
 
 ## AI File Storage

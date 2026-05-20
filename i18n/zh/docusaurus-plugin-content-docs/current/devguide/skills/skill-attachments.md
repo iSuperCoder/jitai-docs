@@ -1,10 +1,11 @@
 ---
 sidebar_position: 4
+sidebar_label: 管理 Skill 附件
 slug: skill-attachments
 description: "用 Skill 附件维护复杂规则、术语表、输出模板和示例，让主提示词保持清晰。"
 ---
 
-# 用附件管理复杂规则、模板和示例
+# 管理 Skill 附件
 
 当 Skill 内容变长时，不建议把所有规则、模板和示例都堆在主提示词中。可以把长期维护的补充资料拆成附件，让主提示词保持清晰，附件负责承载细节。
 
