@@ -1,10 +1,11 @@
 ---
 sidebar_position: 2
+sidebar_label: 创建标准 Skill
 slug: create-skill
 description: "在 IDE 中创建标准 Skill，填写名称和描述，并进入 Skill 编辑器维护可复用能力内容。"
 ---
 
-# 创建一个可被 Agent 复用的标准 Skill
+# 创建标准 Skill
 
 标准 Skill 是平台提供的基础 Skill 类型，适合沉淀通用业务流程、领域规范、输出格式和示例模板。创建完成后，开发者可以在 Skill 编辑器中维护内容，并在 Agent 中安装使用。
 
@@ -50,8 +51,8 @@ description: "在 IDE 中创建标准 Skill，填写名称和描述，并进入 
 - **基础信息**：维护 Skill 的名称和描述。
 - **提示词与附件**：编写 Skill 的主提示词，并维护复杂规则、模板和示例。
 
-首次创建后，建议先完成 Skill 的主提示词，再根据需要补充附件。内容编写方法见[写出 Agent 能稳定执行的 Skill 内容](./write-skill-content)。
+首次创建后，建议先完成 Skill 的主提示词，再根据需要补充附件。设计和编写原则见[设计稳定可复用的 Skill](./skill-best-practices)。
 
 ## 创建后安装到 Agent 使用 {#install-skill-after-create}
 
-Skill 创建完成后不会自动影响任何 Agent。开发者需要进入 Agent 编辑器，在`Skills`页签中选择使用方式。详细操作见[让 Agent 安装并使用已有 Skill](./use-skill-in-agent)，也可以直接阅读 AI Agent 章节中的[为 Agent 安装技能](../ai-agent/agent-skill)。
+Skill 创建完成后不会自动影响任何 Agent。开发者需要进入 Agent 编辑器，在`Skills`页签中选择使用方式。详细操作见[为 Agent 安装 Skill](./use-skill-in-agent)，也可以直接阅读 AI Agent 章节中的[为 Agent 安装技能](../ai-agent/agent-skill)。
