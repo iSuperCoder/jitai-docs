@@ -419,7 +419,7 @@ Deliver:
 - confidence scores
 - per-field accept/reject and audit notes
 
-If you need a proven starting point for implementation patterns, begin with [JitAI Tutorial](https://jit.pro/docs/tutorial) and prototype quickly against a sample schema.
+If you need a proven starting point for implementation patterns, begin with [JitAI Tutorial](https://jit.pro/docs/devguide) and prototype quickly against a sample schema.
 
 ## Governance and controlled execution (what auditors will ask)
 

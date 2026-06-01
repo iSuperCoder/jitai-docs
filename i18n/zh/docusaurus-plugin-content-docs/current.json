@@ -3,14 +3,6 @@
     "message": "2.0.x",
     "description": "The label for version current"
   },
-  "sidebar.tutorialSidebar.category.Develop Application": {
-    "message": "开发应用",
-    "description": "The label for category Develop Application in sidebar tutorialSidebar"
-  },
-  "sidebar.tutorialSidebar.category.Develop Application.link.generated-index.description": {
-    "message": "详细的应用开发教程，从基础到高级，包括数据建模、页面设计、业务逻辑等完整应用开发流程。",
-    "description": "The generated-index page description for category Develop Application in sidebar tutorialSidebar"
-  },
   "sidebar.devguideSidebar.category.Platform Installation and Node Activation": {
     "message": "平台安装与节点激活",
     "description": "The label for category Platform Installation and Node Activation in sidebar devguideSidebar"

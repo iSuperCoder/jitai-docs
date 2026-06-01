@@ -144,4 +144,4 @@ By adopting protocols that make application structure explicit—as exem
 
 **Ready to see a structural AI-native platform in action?**
 
-[Download JitAI Desktop](https://jit.pro/download) or explore the [Developer Tutorial](https://jit.pro/docs/tutorial).
+[Download JitAI Desktop](https://jit.pro/download) or explore the [Developer Tutorial](https://jit.pro/docs/devguide).

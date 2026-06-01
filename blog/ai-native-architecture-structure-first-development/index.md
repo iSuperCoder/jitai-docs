@@ -150,4 +150,4 @@ By adopting an AI-native platform like JitAI, you empower your team t
 **Ready to become an AI Architect?**
 
 - [Download JitAI Desktop](https://jit.pro/download) to start building structure-first applications today.
-- [Read the Tutorial](https://jit.pro/docs/tutorial) to build your first AI-powered Agent.
+- [Read the Tutorial](https://jit.pro/docs/devguide) to build your first AI-powered Agent.

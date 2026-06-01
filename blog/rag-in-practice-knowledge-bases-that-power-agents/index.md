@@ -334,6 +334,6 @@ Require citations, log retrieval traces, and measure groundedness and p
 
 ## Where to start with JitAI
 
-If you’re designing an enterprise agent that needs a knowledge base and controlled execution, start from a build path that treats retrieval as a governed capability and keeps workflows auditable. The fastest way to get hands-on is the [JitAI Tutorial](https://jit.pro/docs/tutorial).
+If you’re designing an enterprise agent that needs a knowledge base and controlled execution, start from a build path that treats retrieval as a governed capability and keeps workflows auditable. The fastest way to get hands-on is the [JitAI Tutorial](https://jit.pro/docs/devguide).
 
 If you want to prototype the full loop (knowledge → retrieval → agent steps → observable outcomes), you can [try JitAI](https://jit.pro/download).

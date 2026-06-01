@@ -136,4 +136,4 @@ JitAI transforms the role of AI from a "coding assistant" to a "syst
 Ready to build apps that your AI can truly understand?
 
 - [Download JitAI Desktop](https://jit.pro/download)
-- [Read the JAAP Specification](https://jit.pro/docs/tutorial)
+- [Read the JAAP Specification](https://jit.pro/docs/devguide)

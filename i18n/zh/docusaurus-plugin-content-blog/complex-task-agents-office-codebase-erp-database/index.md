@@ -438,7 +438,7 @@ ERP 落地点的价值通常分阶段释放：
 
 复杂任务智能体要走到企业可用，关键在于连接真实系统，并通过受治理的动作执行。JitAI 的设计理念与此一致：连接存量系统、建模运营现实、用结构化契约与审批把动作执行管起来。
 
-想要一条更可落地的路径，可以先从 [**JitAI 教程**](https://jit.pro/zh/docs/tutorial)开始；准备测试端到端流程时，再用 [**试用 JitAI**](https://jit.pro/zh/download) 进行安装与评估。 
+想要一条更可落地的路径，可以先从 [**JitAI 教程**](https://jit.pro/zh/docs/devguide)开始；准备测试端到端流程时，再用 [**试用 JitAI**](https://jit.pro/zh/download) 进行安装与评估。 
 
 ## 90 天交付计划：每个落点一个试点
 

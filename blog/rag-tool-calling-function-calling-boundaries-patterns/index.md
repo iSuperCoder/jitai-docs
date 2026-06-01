@@ -376,7 +376,7 @@ This is where AI-native enterprise platforms can shine. In JitAI-style�
 - the **workflow states** and approvals,
 - the **permission model** (who can trigger what),  
   then bind agent behaviors to those contracts so “AI execution” inherits governance from the platform runtime.  
-  If you want a concrete walkthrough of building governed flows, start with the [JitAI Tutorial](https://jit.pro/docs/tutorial). If you prefer to explore hands-on, you can also [try JitAI](https://jit.pro/download).
+  If you want a concrete walkthrough of building governed flows, start with the [JitAI Tutorial](https://jit.pro/docs/devguide). If you prefer to explore hands-on, you can also [try JitAI](https://jit.pro/download).
 
 ### Pattern 5: Multi-step workflows with “contracts at every step”
 

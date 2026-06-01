@@ -171,4 +171,4 @@ By adopting an architecture that exposes frontend state and functions 
 
 Download the JitAI Desktop version to explore the "Grading Assistant" demo and see this architecture in action.
 
-[Download JitAI](https://jit.pro/download) | [View Developer Tutorial](https://jit.pro/docs/tutorial)
+[Download JitAI](https://jit.pro/download) | [View Developer Tutorial](https://jit.pro/docs/devguide)

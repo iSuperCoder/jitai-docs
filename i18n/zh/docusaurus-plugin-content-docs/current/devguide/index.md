@@ -13,7 +13,7 @@ import IndexCard, { LinkGrid } from '@site/src/components/IndexCard';
 
 **使用建议**：新手按顺序学习，有经验的开发者可直接查看场景化进阶指南。
 
-首先，你需要完成基本的[下载安装](tutorial/download-installation)！
+首先，你需要完成基本的[下载安装](devguide/installation-activation/download-installation)。
 
 ## 基础概念 {#basic-concepts}
 
@@ -56,7 +56,8 @@ description="学习如何下载和安装 JitAI 平台，包括桌面版和服务
 
 > <LinkGrid links={[
 
-    { text: "详细安装步骤", href: "devguide/installation-activation/download-installation#detailed-installation-steps" }
+    { text: "桌面版", href: "devguide/installation-activation/download-installation#desktop-version" },
+    { text: "服务器版", href: "devguide/installation-activation/download-installation#server-version" }
 
 ]} />
 </IndexCard>

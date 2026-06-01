@@ -43,14 +43,14 @@ const CONTENT: DownloadContent = {
     subtitle:
         "Choose the installer that suits your system and get started quickly",
     helpText: "Having installation issues? Click to learn more",
-    helpUrl: "/docs/tutorial/download-installation",
+    helpUrl: "/docs/devguide/installation-activation/download-installation",
 
     mobile: {
         title: "Download Tip",
         description:
             "JitAI is a desktop productivity tool designed for developers. For the full experience, please visit and download on a Windows or macOS device",
         buttonText: "View Documentation",
-        buttonUrl: "/docs/tutorial",
+        buttonUrl: "/docs/devguide",
     },
 
     desktop: {

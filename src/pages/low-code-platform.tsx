@@ -540,7 +540,7 @@ const LowCodePlatformPage = () => {
                             Try JitAI
                         </a>
                         <a
-                            href="https://jit.pro/docs/tutorial"
+                            href="https://jit.pro/docs/devguide"
                             className={styles.infoSecondary}
                             target="_blank"
                             rel="noreferrer"

@@ -13,8 +13,8 @@ description: "扩展自己的元素族类的详细指南和说明。"
 
 本文将采用方式2，通过实战案例，一步步指导开发者完成智能客服和钉钉机器人的集成。
 
-:::tip 你已经完成入门教程了吗？
-如果你还没有完成[桌面版安装](../tutorial/download-installation)和[入门教程导读](../tutorial)，请先完成这些入门教程。
+:::tip 完成安装配置了吗？
+如果你还没有完成[下载安装](../devguide/installation-activation/download-installation)，请先完成基础配置。
 :::
 
 ## 将智能客服集成到钉钉机器人 {#integrating-intelligent-customer-service}

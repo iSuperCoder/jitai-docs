@@ -244,10 +244,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     position: "left",
                     items: [
                         {
-                            label: "Tutorial",
-                            to: "/docs/tutorial",
-                        },
-                        {
                             label: "Developer Guide",
                             to: "/docs/devguide",
                         },
@@ -312,10 +308,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 {
                     title: "Documentation",
                     items: [
-                        {
-                            label: "Tutorial",
-                            to: "/docs/tutorial",
-                        },
                         {
                             label: "Developer Guide",
                             to: "/docs/devguide",

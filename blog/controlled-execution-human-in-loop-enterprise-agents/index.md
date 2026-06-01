@@ -423,7 +423,7 @@ Enterprise teams often struggle when agent logic sits outside the syst
 - permissions already define **who can change what**
 - write-back is tracked as **auditable events**
 
-That is a natural fit for an AI-native low-code and enterprise development platform. If you want a hands-on example of structuring actions, approvals, and governed write-back, start with the [JitAI Tutorial](https://jit.pro/docs/tutorial).  
+That is a natural fit for an AI-native low-code and enterprise development platform. If you want a hands-on example of structuring actions, approvals, and governed write-back, start with the [JitAI Tutorial](https://jit.pro/docs/devguide).  
 When you’re ready to prototype a controlled agent workflow end-to-end, you can [try JitAI](https://jit.pro/download).
 
 ## What to measure: turning HITL into an operating model

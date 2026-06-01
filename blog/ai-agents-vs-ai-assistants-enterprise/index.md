@@ -340,7 +340,7 @@ Here is a reference pattern that works across platforms and industries
 - Online monitoring for drift, failure modes, and cost
 - A feedback loop to update prompts, tools, and policies
 
-If you want a hands-on path to implement these building blocks in an AI-native low-code environment, the [JitAI Tutorial](https://jit.pro/docs/tutorial?utm_source=chatgpt.com) walks through the platform concepts in a way that maps cleanly to assistant and agent product forms.
+If you want a hands-on path to implement these building blocks in an AI-native low-code environment, the [JitAI Tutorial](https://jit.pro/docs/devguide) walks through the platform concepts in a way that maps cleanly to assistant and agent product forms.
 
 ## Governance: design for auditability from day one
 

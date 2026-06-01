@@ -171,4 +171,4 @@ A: 是的。对于复杂的决策，人类需要“人机回环 (Human-in-the-
 准备好构建真正的 AI 原生应用了吗？
 
 - [下载 JitAI 桌面版](https://jit.pro/download)
-- [查看开发者指南](https://jit.pro/docs/tutorial)
+- [查看开发者指南](https://jit.pro/zh/docs/devguide)

@@ -153,4 +153,4 @@ The future of software development isn't just about AI writing code; 
 
 This protocol-first approach is the bridge between today's manual engineering and tomorrow's AI-native automation.
 
-[**Explore the JitAI Tutorial**](https://jit.pro/docs/tutorial) | [**Download JitNode**](https://jit.pro/download)
+[**Explore the JitAI Tutorial**](https://jit.pro/docs/devguide) | [**Download JitNode**](https://jit.pro/download)

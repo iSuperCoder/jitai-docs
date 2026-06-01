@@ -487,7 +487,7 @@ ERP Schema 常见变化来源：
 
 更实用的做法是引入企业开发平台视角：把生成的 ORM 对象当成**一等元素**，自带治理、生命周期管理与统一运行时。
 
-如果你想上手体验从“连接数据库→建模→执行”的端到端流程，可以从 [JitAI 教程](https://jit.pro/zh/docs/tutorial) 开始。  
+如果你想上手体验从“连接数据库→建模→执行”的端到端流程，可以从 [JitAI 教程](https://jit.pro/zh/docs/devguide) 开始。  
 如果你想在本地快速试验建模与执行闭环，可以下载 [试用 JitAI](https://jit.pro/zh/download)。
 
 ## 常见失败模式（以及规避方式）

@@ -300,7 +300,7 @@ A better approach is to **map tables into application data models**, 
 
 This is where “connect database” becomes more than connectivity. It becomes **semantic alignment**: your system turns raw tables into typed entities with permissions, workflows, and audit behavior.
 
-In JitAI, the practical workflow is to connect an external database, map tables into governed data models, and bind write-back to model-level actions and approval workflows. If you want a concrete walkthrough of how that mapping layer works, start with the [**JitAI Tutorial**](https://jit.pro/docs/tutorial).
+In JitAI, the practical workflow is to connect an external database, map tables into governed data models, and bind write-back to model-level actions and approval workflows. If you want a concrete walkthrough of how that mapping layer works, start with the [**JitAI Tutorial**](https://jit.pro/docs/devguide).
 
 Once models are first-class, agents stop “guessing columns” and start executing within guardrails you can enforce and test.
 

@@ -340,7 +340,7 @@ AI agent 以目标为主。你给它一个目标（或它从请求中推导目
 - 在线监控漂移、失败模式与成本
 - 反馈闭环，用于更新提示词、工具与策略
 
-如果你希望用 AI 原生低代码环境快速把这些积木搭起来，[JitAI 教程](https://jit.pro/zh/docs/tutorial) 会以贴近平台概念的方式讲解，能自然映射到 assistant 与 agent 两类产品形态。
+如果你希望用 AI 原生低代码环境快速把这些积木搭起来，[JitAI 教程](https://jit.pro/zh/docs/devguide) 会以贴近平台概念的方式讲解，能自然映射到 assistant 与 agent 两类产品形态。
 
 ## 治理：从第一天就按可审计来设计
 

@@ -140,4 +140,4 @@ The era of AI as a simple chatbot overlay is ending. To build enter
 Ready to build systems that AI can actually understand?
 
 - [Download JitAI Desktop](https://jit.pro/download) to start building AI-native apps.
-- [Explore the Tutorial](https://jit.pro/docs/tutorial) to see JAAP in action.
+- [Explore the Tutorial](https://jit.pro/docs/devguide) to see JAAP in action.

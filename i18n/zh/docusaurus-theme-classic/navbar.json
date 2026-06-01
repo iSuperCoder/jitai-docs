@@ -19,10 +19,6 @@
         "message": "开发",
         "description": "Navbar item with label Developer"
     },
-    "item.label.Tutorial": {
-        "message": "入门教程",
-        "description": "Navbar item with label Tutorial"
-    },
     "item.label.Developer Guide": {
         "message": "开发者指南",
         "description": "Navbar item with label Developer Guide"

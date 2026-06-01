@@ -381,7 +381,7 @@ MAS will separate platforms that can *operate* agentic systems from th
 - Promotion pipelines (dev → staging → prod)
 - Monitoring with rollback triggers
 
-If you’re building on an AI-native platform shape, the advantage is that these become first-class primitives rather than custom glue. For a hands-on walkthrough of structured application building and governed execution, see the [JitAI Tutorial](https://jit.pro/docs/tutorial).
+If you’re building on an AI-native platform shape, the advantage is that these become first-class primitives rather than custom glue. For a hands-on walkthrough of structured application building and governed execution, see the [JitAI Tutorial](https://jit.pro/docs/devguide).
 
 When you want to explore an agent-ready development flow end-to-end (data, UI, workflow, and controls), you can also [try JitAI](https://jit.pro/download).
 

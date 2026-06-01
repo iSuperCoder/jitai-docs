@@ -150,4 +150,4 @@ By leveraging **Application Inheritance**, developers can maintain a "si
 
 **Ready to evolve your software architecture?**
 
-[Download JitAI Desktop](https://jit.pro/download) to experiment with JAAP, or explore the [JitAI Tutorial](https://jit.pro/docs/tutorial) to build your first inherited application today.
+[Download JitAI Desktop](https://jit.pro/download) to experiment with JAAP, or explore the [JitAI Tutorial](https://jit.pro/docs/devguide) to build your first inherited application today.

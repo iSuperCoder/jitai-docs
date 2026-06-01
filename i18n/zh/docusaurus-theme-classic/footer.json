@@ -17,7 +17,7 @@
     },
     "link.item.label.Download": {
         "message": "下载安装",
-        "description": "The label of footer link with label=Download linking to /docs/tutorial/download-installation"
+        "description": "The label of footer link with label=Download linking to /docs/devguide/installation-activation/download-installation"
     },
     "link.item.label.Blog": {
         "message": "博客",
@@ -26,10 +26,6 @@
     "link.item.label.Try Online": {
         "message": "在线试用",
         "description": "The label of footer link with label=Try Online linking to https://demo.jit.pro/wanyun/AdminApp"
-    },
-    "link.item.label.Tutorial": {
-        "message": "入门教程",
-        "description": "The label of footer link with label=Tutorial linking to /docs/tutorial/"
     },
     "link.item.label.Reference": {
         "message": "参考手册",

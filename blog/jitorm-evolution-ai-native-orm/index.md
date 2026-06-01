@@ -168,4 +168,4 @@ The evolution from "Software" to "Smartware" requires a fundamental ret
 
 **Ready to build your first AI-native data layer?**
 
-[Download JitAI Desktop](https://jit.pro/download) or explore the [JitAI Tutorial](https://jit.pro/docs/tutorial) to get started.
+[Download JitAI Desktop](https://jit.pro/download) or explore the [JitAI Tutorial](https://jit.pro/docs/devguide) to get started.

@@ -342,7 +342,7 @@ export const jsonLd = {
     - 输出附带证据（记录、计数、筛选条件、时间戳）
     - 可导出结果集（CSV/Excel）以维持运营连续性
 
-平台化方式能缩短从“只有表”到“可用工作流”的时间。你可以在 [**JitAI 教程**](https://jit.pro/zh/docs/tutorial) 里查看这一类工作流模式。
+平台化方式能缩短从“只有表”到“可用工作流”的时间。你可以在 [**JitAI 教程**](https://jit.pro/zh/docs/devguide) 里查看这一类工作流模式。
 
 ### 第 30–90 天：为高价值动作加入审批与受治理写回
 
@@ -438,7 +438,7 @@ ERP 停服期间，团队需要速度，同时也要避免把环境变成脆弱
 - 一致地执行权限与审批
 - 维护能跨人员/跨供应商长期存在的审计记录
 
-想快速走通“数据库 → 模型 → 智能体工具”的流程，可从 [**试用 JitAI**](https://jit.pro/zh/download) 开始；需要建模模式的上手演练，查看 [**JitAI 教程**](https://jit.pro/zh/docs/tutorial)。
+想快速走通“数据库 → 模型 → 智能体工具”的流程，可从 [**试用 JitAI**](https://jit.pro/zh/download) 开始；需要建模模式的上手演练，查看 [**JitAI 教程**](https://jit.pro/zh/docs/devguide)。
 
 ## 常见坑与规避方式
 

@@ -320,7 +320,7 @@ When these are present, AI agents can operate as *bounded executors* 
 
 JitAI’s positioning as an **AI-native** enterprise application development platform maps naturally to declarative thinking: you model business elements (data, workflows, permissions, UI) as first-class artifacts, and then let runtime orchestration execute them safely.
 
-If you want a hands-on path to see how declarative models become working systems, start with the [JitAI Tutorial](https://jit.pro/docs/tutorial). When you’re ready to experiment with building a small governed workflow end-to-end, you can [try JitAI](https://jit.pro/download).
+If you want a hands-on path to see how declarative models become working systems, start with the [JitAI Tutorial](https://jit.pro/docs/devguide). When you’re ready to experiment with building a small governed workflow end-to-end, you can [try JitAI](https://jit.pro/download).
 
 ## A decision checklist: what to make declarative first
 

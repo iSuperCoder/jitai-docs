@@ -328,7 +328,7 @@ Deliver these capabilities first:
     - Outputs include evidence (records, counts, filters, timestamps)
     - Exportable result sets (CSV/Excel) for operational continuity
 
-A platform approach reduces the time from “tables” to “usable workflows.” You can explore the workflow pattern in [**JitAI Tutorial**](https://jit.pro/docs/tutorial).
+A platform approach reduces the time from “tables” to “usable workflows.” You can explore the workflow pattern in [**JitAI Tutorial**](https://jit.pro/docs/devguide).
 
 ### Day 30–90: add approvals and governed write-back for high-value actions
 
@@ -424,7 +424,7 @@ A platform approach helps you:
 - Enforce permissions and approvals consistently
 - Keep an audit trail that survives personnel and vendor changes
 
-If you want to test-drive the “database → models → agent tools” workflow, start here: [**try JitAI**](https://jit.pro/download). For a hands-on walkthrough of the modeling pattern, use [**JitAI Tutorial**](https://jit.pro/docs/tutorial).
+If you want to test-drive the “database → models → agent tools” workflow, start here: [**try JitAI**](https://jit.pro/download). For a hands-on walkthrough of the modeling pattern, use [**JitAI Tutorial**](https://jit.pro/docs/devguide).
 
 ## Common pitfalls (and how to avoid them)
 

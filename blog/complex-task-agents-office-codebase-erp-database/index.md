@@ -432,7 +432,7 @@ Many teams start in office workflows to standardize evidence and appro
 
 Complex-task agents become enterprise-grade when they can connect to real systems and operate through governed actions. JitAI is designed around this idea: connect to existing systems, model operational reality, and execute actions through structured contracts and approvals.
 
-If you want a practical path to database-connected agent delivery, start with the [JitAI Tutorial](https://jit.pro/docs/tutorial). When you are ready to test end-to-end flows, install and evaluate using [try JitAI](https://jit.pro/download).
+If you want a practical path to database-connected agent delivery, start with the [JitAI Tutorial](https://jit.pro/docs/devguide). When you are ready to test end-to-end flows, install and evaluate using [try JitAI](https://jit.pro/download).
 
 ## A 90-day delivery plan: one pilot per landing zone
 

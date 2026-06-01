@@ -135,7 +135,7 @@ To fix this, we must stop treating APIs as just endpoints and start�
 **Next Steps:**
 
 - **Audit your APIs:** Are they self-describing?
-- **Explore JAAP:** Read the [JitAI Introduction](https://jit.pro/docs/tutorial) to see how structural protocols work.
+- **Explore JAAP:** Read the [JitAI Introduction](https://jit.pro/docs/devguide) to see how structural protocols work.
 - **Download JitAI:** Try building an AI-native app where the structure is explicit. [Download JitNode](https://jit.pro/download).
 
 ## FAQ

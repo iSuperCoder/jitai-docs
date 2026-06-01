@@ -225,7 +225,7 @@ export const jsonLd = {
 
 对企业级 Agentic workflow 来说，原因很直接：一旦智能体能够执行业务动作，平台需要用与核心应用一致的方式约束 **数据正确性、回写安全性、权限可审计性**。
 
-如果你想跟随引导式的实操流程了解 JitAI 的开发工作流，请从 [**JitAI 教程**](https://jit.pro/zh/docs/tutorial) 开始。若你希望在本地或私有环境复现实验步骤，请通过[试用 JitAI](https://jit.pro/zh/download)。
+如果你想跟随引导式的实操流程了解 JitAI 的开发工作流，请从 [**JitAI 教程**](https://jit.pro/zh/docs/devguide) 开始。若你希望在本地或私有环境复现实验步骤，请通过[试用 JitAI](https://jit.pro/zh/download)。
 
 ## 架构评审可复用的定义
 

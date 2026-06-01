@@ -12,7 +12,7 @@ This developer guide offers a comprehensive learning path—from organizational 
 
 **How to use this guide**: Beginners should follow the sequential learning path. Experienced developers can jump directly to scenario-based advanced guides.
 
-First, you need to complete the basic [Download and Installation](tutorial/download-installation)!
+First, complete [Download and Installation](devguide/installation-activation/download-installation).
 
 
 ## Basic concepts
@@ -51,7 +51,8 @@ Set up your development environment by installing the platform and activating no
   description="Download and install JitAI platform for your deployment scenario—desktop or server versions available."
 >
   <LinkGrid links={[
-    { text: "Detailed Installation Steps", href: "devguide/installation-activation/download-installation#detailed-installation-steps" }
+    { text: "Desktop Version", href: "devguide/installation-activation/download-installation#desktop-version" },
+    { text: "Server Version", href: "devguide/installation-activation/download-installation#server-version" }
   ]} />
 </IndexCard>
 

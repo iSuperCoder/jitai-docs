@@ -12,7 +12,7 @@ import TabItem from '@theme/TabItem';
 
 ## 🛠️ 环境准备 {#environment-setup}
 :::info 
-确保你已经完成了基础安装和配置。如果还未安装，请参考 [下载安装](../../tutorial/download-installation) 章节。
+确保你已经完成了基础安装和配置。如果还未安装，请参考 [下载安装](../installation-activation/download-installation) 章节。
 :::
 
 支持多种主流IDE进行本地开发调试，你可以根据个人偏好选择：

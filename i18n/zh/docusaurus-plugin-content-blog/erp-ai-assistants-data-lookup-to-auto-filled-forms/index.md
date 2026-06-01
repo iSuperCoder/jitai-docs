@@ -430,7 +430,7 @@ ERP 表单往往不接受自由文本，需要编码：物料号、供应商号
 - 暴露可控动作：查询/草稿/提案/提交
 - 把审批与可审计性内置到写回流程中
 
-这正是 JitAI 重点覆盖的产品形态：在遗留 ERP 之上构建受治理的动作层与助手交互，逐步把流程现代化。你可以先跟随 [JitAI 教程](https://jit.pro/zh/docs/tutorial) 进行上手实践，再在准备好用自家 Schema 做原型时 [试用 JitAI](https://jit.pro/zh/download)。
+这正是 JitAI 重点覆盖的产品形态：在遗留 ERP 之上构建受治理的动作层与助手交互，逐步把流程现代化。你可以先跟随 [JitAI 教程](https://jit.pro/zh/docs/devguide) 进行上手实践，再在准备好用自家 Schema 做原型时 [试用 JitAI](https://jit.pro/zh/download)。
 
 ## FAQ
 

@@ -397,7 +397,7 @@ MAS becomes significantly easier when your platform already provides:
 
 This is why many teams treat agent systems as a *product capability* embedded into the enterprise runtime, not a thin chat layer.
 
-If you want a concrete starting point, the quickest path is building one governed workflow end-to-end (read → propose → approve → write-back) and then splitting roles into multiple agents as complexity grows. The **JitAI Tutorial** is a good on-ramp for that “workflow-first” approach. ([JitAI Tutorial](https://jit.pro/docs/tutorial))
+If you want a concrete starting point, the quickest path is building one governed workflow end-to-end (read → propose → approve → write-back) and then splitting roles into multiple agents as complexity grows. The **JitAI Tutorial** is a good on-ramp for that “workflow-first” approach. ([JitAI Tutorial](https://jit.pro/docs/devguide))
 
 When you’re ready to test a real project with your own data and permissions, you can **try JitAI** and treat the first deliverable as an operational prototype: measurable latency, explicit approval gates, and a complete audit trail. ([try JitAI](https://jit.pro/download))
 

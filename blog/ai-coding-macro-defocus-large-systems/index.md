@@ -123,4 +123,4 @@ By adopting protocols like JAAP and platforms like JitAI, engineering 
 
 Ready to bring your AI development into focus?
 
-Download [JitAI](https://jit.pro/download) Desktop or explore the [Developer Guide](https://jit.pro/docs/tutorial) to see JAAP in action.
+Download [JitAI](https://jit.pro/download) Desktop or explore the [Developer Guide](https://jit.pro/docs/devguide) to see JAAP in action.
