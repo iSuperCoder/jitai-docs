@@ -188,6 +188,7 @@ body img {
   min-height: 100vh;
   background: var(--bg-primary);
   box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 /* ===== 公共组件样式系统 ===== */
@@ -199,6 +200,7 @@ body img {
   margin: 0 auto;
   padding: 0 var(--container-padding);
   box-sizing: border-box;
+  min-width: 0;
 }
 
 .sectionTitle {
@@ -476,6 +478,7 @@ body img {
   font-weight: var(--font-weight-extrabold);
   line-height: var(--line-height-tight);
   margin: 0 0 var(--space-6);
+  overflow-wrap: anywhere;
 }
 
 .homeHeroTitle span {
@@ -488,6 +491,7 @@ body img {
   line-height: var(--line-height-relaxed);
   max-width: 760px;
   margin: 0 0 var(--space-10);
+  overflow-wrap: anywhere;
 }
 
 .homeHeroButtons {
@@ -596,10 +600,46 @@ body img {
   margin: 0;
 }
 
+.outcomeGrid {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color-light);
+  border-radius: var(--border-radius-card);
+  box-sizing: border-box;
+  box-shadow: var(--shadow-lg);
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: repeat(3, 1fr);
+  min-width: 0;
+  padding: var(--space-8);
+}
+
+.outcomeCard {
+  border-left: 3px solid rgba(61, 101, 253, 0.22);
+  min-width: 0;
+  padding-left: var(--space-5);
+}
+
+.outcomeCard h2 {
+  color: var(--color-primary);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-extrabold);
+  line-height: var(--line-height-tight);
+  margin: 0 0 var(--space-3);
+}
+
+.outcomeCard p {
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
 .capabilityGrid {
   display: grid;
   gap: var(--space-8);
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
+  min-width: 0;
 }
 
 .homeCard,
@@ -609,7 +649,9 @@ body img {
   background: var(--bg-card);
   border: 1px solid var(--border-color-light);
   border-radius: var(--border-radius-card);
+  box-sizing: border-box;
   box-shadow: var(--shadow-md);
+  min-width: 0;
   transition: var(--transition-primary);
 }
 
@@ -626,6 +668,18 @@ body img {
 }
 
 .deploymentIcon {
+  align-items: center;
+  background: rgba(61, 101, 253, 0.08);
+  border-radius: var(--border-radius-lg);
+  color: var(--color-primary);
+  display: inline-flex;
+  height: 48px;
+  justify-content: center;
+  margin-bottom: var(--space-5);
+  width: 48px;
+}
+
+.cardIcon {
   align-items: center;
   background: rgba(61, 101, 253, 0.08);
   border-radius: var(--border-radius-lg);
@@ -659,6 +713,7 @@ body img {
   font-weight: var(--font-weight-semibold);
   line-height: var(--line-height-tight);
   margin: 0 0 var(--space-4);
+  overflow-wrap: anywhere;
 }
 
 .homeCard p,
@@ -667,11 +722,13 @@ body img {
   font-size: var(--font-size-base);
   line-height: var(--line-height-relaxed);
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .architectureStack {
   display: grid;
   gap: var(--space-6);
+  min-width: 0;
 }
 
 .architectureLayer {
@@ -682,6 +739,7 @@ body img {
   display: grid;
   gap: var(--space-6);
   grid-template-columns: repeat(2, 1fr);
+  min-width: 0;
 }
 
 .layerHeader {
@@ -724,12 +782,15 @@ body img {
   display: grid;
   gap: var(--space-4);
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  min-width: 0;
 }
 
 .architectureItem {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color-light);
   border-radius: var(--border-radius-lg);
+  box-sizing: border-box;
+  min-width: 0;
   padding: var(--space-4);
   text-align: center;
 }
@@ -746,6 +807,7 @@ body img {
   color: var(--text-secondary);
   display: block;
   font-size: var(--font-size-sm);
+  overflow-wrap: anywhere;
 }
 
 .comparisonTable {
@@ -799,6 +861,7 @@ body img {
   display: grid;
   gap: var(--space-8);
   grid-template-columns: repeat(3, 1fr);
+  min-width: 0;
 }
 
 .deploymentCard {
@@ -875,8 +938,16 @@ body img {
     padding: var(--space-20) 0 var(--space-12);
   }
 
+  .sectionContent {
+    max-width: 100%;
+  }
+
   .homeHeroTitle {
     font-size: var(--font-size-5xl);
+  }
+
+  .homeSectionHeader h2 {
+    overflow-wrap: anywhere;
   }
 
   .homeHeroDescription,
@@ -885,10 +956,14 @@ body img {
   }
 
   .homeHeroButtons {
+    display: grid;
+    gap: var(--space-3);
     margin-bottom: var(--space-10);
+    max-width: 340px;
   }
 
   .statsGrid,
+  .outcomeGrid,
   .capabilityGrid {
     grid-template-columns: 1fr;
   }
@@ -949,16 +1024,27 @@ body img {
 }
 
 @media (max-width: 480px) {
+  .sectionContent {
+    padding: 0 var(--space-5);
+  }
+
   .homeHeroTitle {
-    font-size: var(--font-size-4xl);
+    font-size: 2rem;
+  }
+
+  .homeSectionHeader h2,
+  .ctaPanel h2 {
+    font-size: var(--font-size-3xl);
   }
 
   .homePrimaryButton,
   .homeSecondaryButton {
+    box-sizing: border-box;
     width: 100%;
   }
 
   .statsGrid,
+  .outcomeGrid,
   .homeCard,
   .architectureLayer,
   .deploymentCard {

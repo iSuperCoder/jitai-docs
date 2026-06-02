@@ -42,14 +42,14 @@ const CONTENT: DownloadContent = {
     title: "下载安装",
     subtitle: "选择适合您系统的安装包，快速开始使用",
     helpText: "遇到安装问题？点击查看更多",
-    helpUrl: "/zh/docs/tutorial/download-installation",
+    helpUrl: "/zh/docs/devguide/installation-activation/download-installation",
 
     mobile: {
         title: "下载提示",
         description:
             "JitAI 是专为开发者打造的桌面端生产力工具，为了获得完整的功能体验，请在 Windows 或 macOS 设备上访问并下载",
         buttonText: "浏览开发文档",
-        buttonUrl: "/zh/docs/tutorial",
+        buttonUrl: "/zh/docs/devguide",
     },
 
     desktop: {

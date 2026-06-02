@@ -341,6 +341,6 @@ export const jsonLd = {
 
 ## 从 JitAI 开始
 
-如果你正在设计需要知识库与可控执行的企业智能体，可以从“把检索做成可治理能力、让工作流可审计”的路径入手。最快的上手方式是阅读 [**JitAI 教程**](https://jit.pro/zh/docs/tutorial)。
+如果你正在设计需要知识库与可控执行的企业智能体，可以从“把检索做成可治理能力、让工作流可审计”的路径入手。最快的上手方式是阅读 [**JitAI 教程**](https://jit.pro/zh/docs/devguide)。
 
 如果你希望快速验证完整闭环（知识 → 检索 → 智能体步骤 → 可观测结果），可以直接 [**试用 JitAI**](https://jit.pro/zh/download)。

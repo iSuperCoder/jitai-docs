@@ -547,7 +547,7 @@ const AiSolutionPage = () => {
                         </a>
                         <a
                             className={styles.ctaSecondary}
-                            href="https://jit.pro/docs/tutorial"
+                            href="https://jit.pro/docs/devguide"
                             target="_blank"
                             rel="noreferrer"
                         >

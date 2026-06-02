@@ -20,7 +20,7 @@ This guide is designed to help beginners quickly get started. By completing this
 
 ### Prerequisites
 
-1. [Download and install the Desktop Version](../../tutorial/download-installation) (skip if already installed)
+1. [Download and install the Desktop Version](../installation-activation/download-installation) (skip if already installed)
 2. Obtain an API key for a large language model service.
 3. Prepare a document to serve as your knowledge base content source (supports Word, PDF, TXT, and Markdown formats)
 
@@ -68,7 +68,6 @@ See [Using AI elements in pages](../using-ai-in-portals-and-pages/using-ai-eleme
 ## Congratulations!
 
 You have successfully mastered the fundamentals of the JitAI development platform and built your first AI customer service agent.
-
 
 
 

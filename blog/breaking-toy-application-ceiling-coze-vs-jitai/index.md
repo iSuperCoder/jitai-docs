@@ -174,4 +174,4 @@ By adopting a full-stack development paradigm—where AI is deeply inte
 
 Ready to build real enterprise AI applications?
 
-Download the [JitAI](https://jit.pro/download) to start building locally, or explore the JitAI [Tutorial](https://jit.pro/docs/tutorial) to see how structure and process come together.
+Download the [JitAI](https://jit.pro/download) to start building locally, or explore the JitAI [Developer Guide](https://jit.pro/docs/devguide) to see how structure and process come together.

@@ -471,7 +471,7 @@ Teams can implement auto-modeling as scripts, yet they usually hit the
 
 This is where an enterprise development platform approach becomes practical: treat generated ORM objects as **first-class elements** that ship with governance, lifecycle management, and a consistent runtime.
 
-If you want a hands-on walkthrough of how a database-connected agent workflow is built end-to-end, start with the [JitAI Tutorial](https://jit.pro/docs/tutorial).  
+If you want a hands-on walkthrough of how a database-connected agent workflow is built end-to-end, start with the [JitAI Tutorial](https://jit.pro/docs/devguide).  
 If you want to experiment locally with the modeling-and-execution loop, you can download to [try JitAI](https://jit.pro/download).
 
 ## Common failure modes (and how to avoid them)

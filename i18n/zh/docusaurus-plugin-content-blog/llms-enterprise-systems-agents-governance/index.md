@@ -366,7 +366,7 @@ LLM 能带来“自然语言生成应用”的演示，但企业价值更取决
 
 这也对应“AI 功能”与“AI 原生执行”的差异。
 
-在 JitAI 的思路里，LLM 被当作系统内部可控的执行组件：能参与工作流、操作结构化业务对象、在权限与审计约束下安全回写。如果你想要一个上手路径，可以先从 [**JitAI 教程**](https://jit.pro/zh/docs/tutorial)开始，然后再试用 [**JitAI**](https://jit.pro/zh/download)。
+在 JitAI 的思路里，LLM 被当作系统内部可控的执行组件：能参与工作流、操作结构化业务对象、在权限与审计约束下安全回写。如果你想要一个上手路径，可以先从 [**JitAI 教程**](https://jit.pro/zh/docs/devguide)开始，然后再试用 [**JitAI**](https://jit.pro/zh/download)。
 
 ## 一条可复用的构建路径：交付可安全执行的 LLM 系统
 

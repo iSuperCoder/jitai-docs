@@ -149,4 +149,4 @@ For architects and senior developers, this means shifting focus from m
 
 **Ready to see Elementization in action?**
 
-[Download the JitAI Desktop Version](https://jit.pro/download) or explore the [Developer Guide](https://jit.pro/docs/tutorial) to build your first Element-based application today.
+[Download the JitAI Desktop Version](https://jit.pro/download) or explore the [Developer Guide](https://jit.pro/docs/devguide) to build your first Element-based application today.

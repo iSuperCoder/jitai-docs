@@ -13,8 +13,8 @@ When existing Type elements in the JitAI development framework cannot meet speci
 
 This article adopts approach 2, using a practical example to guide developers step by step through integrating intelligent customer service with DingTalk robots.
 
-:::tip Have you completed the getting started tutorials?
-If you haven't completed the [Desktop Version Installation](../tutorial/download-installation) and [Getting Started](../tutorial), please complete these tutorials first.
+:::tip Have you completed the setup steps?
+If you haven't completed [Download and Installation](../devguide/installation-activation/download-installation), finish the setup first.
 :::
 
 ## Integrating intelligent customer service with DingTalk robots {#integrating-intelligent-customer-service}

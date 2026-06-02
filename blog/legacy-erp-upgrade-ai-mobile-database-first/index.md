@@ -266,7 +266,7 @@ Below is a minimal, reusable sequence that turns a legacy ERP into a
 6.  **Gate consequential write-back with approvals, then audit and verify.**  
     Human-in-the-loop is the bridge from usefulness to production safety, especially for systems of record.
 
-This is where a platform approach helps. In JitAI, teams typically import database tables into ORM-like data models, reuse those models for mobile UI and agent tools, and then apply approvals and auditing as part of the execution layer; the workflow is easier to see end-to-end when it’s built in a single governed runtime. If you want a concrete walkthrough, start with the [JitAI Tutorial](https://jit.pro/docs/tutorial).
+This is where a platform approach helps. In JitAI, teams typically import database tables into ORM-like data models, reuse those models for mobile UI and agent tools, and then apply approvals and auditing as part of the execution layer; the workflow is easier to see end-to-end when it’s built in a single governed runtime. If you want a concrete walkthrough, start with the [JitAI Tutorial](https://jit.pro/docs/devguide).
 
 ## Why this approach compounds instead of fragmenting
 

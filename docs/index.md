@@ -5,4 +5,4 @@ description: "JitAI documentation home. Complete guides, tutorials, API referenc
 
 import {Redirect} from '@docusaurus/router';
 
-<Redirect to="/docs/tutorial" />
+<Redirect to="/docs/devguide" />

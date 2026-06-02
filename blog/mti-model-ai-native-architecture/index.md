@@ -162,4 +162,4 @@ The MTI model solves a fundamental challenge in the age of AI engine
 **Next Steps:**
 
 - **Download:** Experience the MTI model in action with the JitAI Desktop version. [Download here](https://jit.pro/download).
-- **Learn:** Read the developer guide on extending element families. [Documentation](https://jit.pro/docs/tutorial).
+- **Learn:** Read the developer guide on extending element families. [Documentation](https://jit.pro/docs/devguide).

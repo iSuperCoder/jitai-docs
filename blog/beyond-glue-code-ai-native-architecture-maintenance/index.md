@@ -141,4 +141,4 @@ To build maintainable, enterprise-grade AI applications, architects must�
 
 Ready to dismantle your glue code?
 
-Download [JitAI](https://jit.pro/download) to experience AI-native development, or explore the [Tutorials](https://jit.pro/docs/tutorial) to build your first Agent in minutes.
+Download [JitAI](https://jit.pro/download) to experience AI-native development, or explore the [Developer Guide](https://jit.pro/docs/devguide) to build your first Agent in minutes.

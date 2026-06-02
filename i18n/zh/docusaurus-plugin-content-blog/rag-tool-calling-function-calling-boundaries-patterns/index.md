@@ -376,7 +376,7 @@ RAG 不做的事：
 - 权限模型（谁能触发什么）
 
 再把 agent 行为绑定到这些契约上，让“AI 执行”天然继承平台运行时的治理能力。  
-想看具体的可治理流程搭建示例，可以从 [JitAI 教程](https://jit.pro/zh/docs/tutorial) 开始；想直接动手体验，也可以试试 [JitAI](https://jit.pro/zh/download)。
+想看具体的可治理流程搭建示例，可以从 [JitAI 教程](https://jit.pro/zh/docs/devguide) 开始；想直接动手体验，也可以试试 [JitAI](https://jit.pro/zh/download)。
 
 ### 模式 5：多步工作流：每一步都有契约
 

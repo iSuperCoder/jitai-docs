@@ -28,14 +28,8 @@ const CONTENT = {
             id: "develop",
             label: "Developer",
             type: "dropdown",
-            url: "/docs/tutorial",
+            url: "/docs/devguide",
             children: [
-                {
-                    id: "tutorial",
-                    label: "Tutorial",
-                    type: "currentPage",
-                    url: "/docs/tutorial",
-                },
                 {
                     id: "devguide",
                     label: "Developer Guide",

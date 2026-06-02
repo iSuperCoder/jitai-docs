@@ -53,7 +53,7 @@ const HeroSection: React.FC<{ currentLocale?: string }> = ({
     };
 
     const handleModalConfirm = () => {
-        window.open("./docs/tutorial", "_blank");
+        window.open("./docs/devguide", "_blank");
         setIsModalOpen(false);
     };
 

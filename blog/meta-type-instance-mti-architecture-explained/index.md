@@ -162,4 +162,4 @@ The Meta-Type-Instance model is not just an architectural preference; i
 
 Ready to build with explicit structure?
 
-[Download JitAI Desktop](https://jit.pro/download) to explore the MTI architecture in the Developer Portal, or read the [JitAI Tutorial](https://jit.pro/docs/tutorial) to build your first AI Agent.
+[Download JitAI Desktop](https://jit.pro/download) to explore the MTI architecture in the Developer Portal, or read the [JitAI Tutorial](https://jit.pro/docs/devguide) to build your first AI Agent.

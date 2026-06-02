@@ -171,4 +171,4 @@ The "Chatbot Era" was a necessary first step, helping us understand t
 **Ready to build true AI-native applications?**
 
 - Download [JitAI Desktop](https://jit.pro/download)
-- Start the [Developer Tutorial](https://jit.pro/docs/tutorial)
+- Start the [Developer Tutorial](https://jit.pro/docs/devguide)

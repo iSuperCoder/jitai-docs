@@ -368,7 +368,7 @@ A practical platform advantage appears when you can:
 
 This is the difference between “AI features” and **AI-native execution**.
 
-In JitAI’s approach, the LLM is treated as a controllable execution component inside a governed system—so it can participate in workflows, operate over structured business objects, and write back safely with auditability and permissions. If you want a hands-on walkthrough, start with the [JitAI Tutorial](https://jit.pro/docs/tutorial), then [try JitAI](https://jit.pro/download).
+In JitAI’s approach, the LLM is treated as a controllable execution component inside a governed system—so it can participate in workflows, operate over structured business objects, and write back safely with auditability and permissions. If you want a hands-on walkthrough, start with the [JitAI Tutorial](https://jit.pro/docs/devguide), then [try JitAI](https://jit.pro/download).
 
 ## A practical build path: shipping an LLM system that can act safely
 

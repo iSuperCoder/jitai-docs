@@ -29,14 +29,8 @@ const CONTENT = {
             id: "develop",
             label: "开发",
             type: "dropdown",
-            url: "/zh/docs/tutorial",
+            url: "/zh/docs/devguide",
             children: [
-                {
-                    id: "tutorial",
-                    label: "入门教程",
-                    type: "currentPage",
-                    url: "/zh/docs/tutorial",
-                },
                 {
                     id: "devguide",
                     label: "开发者指南",

@@ -21,7 +21,7 @@ description: "AI智能客服完整教程：创建 LLM → 知识库 → AI Agent
 
 ## 让我们开始吧！ {#getting-started}
 ### 准备工作 {#prerequisites}
-1. [下载桌面版安装包](../../tutorial/download-installation)（如已安装可跳过）
+1. [下载桌面版安装包](../installation-activation/download-installation)（如已安装可跳过）
 2. 准备大模型服务 API Key，需开发者自行注册申请（本案例使用[阿里云百炼平台](https://bailian.console.aliyun.com/?tab=model#/api-key)）
 3. 准备一份文档，作为知识库内容来源（支持 Word、PDF、TXT、Markdown 格式）
 
@@ -129,4 +129,3 @@ description: "AI智能客服完整教程：创建 LLM → 知识库 → AI Agent
 
 ## 相关文档
 - **[新增后端Type元素](../../extguide/extend-element-family-classes)** - 学习Type元素扩展开发，包含钉钉机器人集成实战案例
-

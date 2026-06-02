@@ -156,4 +156,4 @@ To ensure your ReAct agent is functioning correctly, you must inspect�
 
 **Ready to build your first Full-Stack Agent?**
 
-Download the [JitAI Desktop Version](https://jit.pro/download) today and follow the [AI Customer Service Tutorial](https://jit.pro/docs/tutorial) to deploy a production-grade agent in minutes.
+Download the [JitAI Desktop Version](https://jit.pro/download) today and follow the [AI Customer Service Tutorial](https://jit.pro/docs/devguide) to deploy a production-grade agent in minutes.

@@ -318,7 +318,7 @@ SQL 是典型代表：它分离“想要什么”和“怎么执行”，查询
 
 JitAI 作为 AI 原生企业应用开发平台的定位，与声明式思路契合：把业务元素（数据、流程、权限、UI）建模为一等产物，再由运行时编排安全执行。
 
-想直观看到声明式模型如何变成可运行系统，可以从 [JitAI 教程](https://jit.pro/zh/docs/tutorial) 开始；准备好搭一个端到端的可治理小流程后，可以试用 [JitAI](https://jit.pro/zh/download)。
+想直观看到声明式模型如何变成可运行系统，可以从 [JitAI 教程](https://jit.pro/zh/docs/devguide) 开始；准备好搭一个端到端的可治理小流程后，可以试用 [JitAI](https://jit.pro/zh/download)。
 
 ## 决策清单：优先声明式化的顺序
 

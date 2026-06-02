@@ -290,7 +290,7 @@ The response is not more prompting. It’s product discipline: constrai
 
 If you’re building this in-house, you’ll end up assembling the same components: database connectivity, a semantic model, permission-aware query execution, evidence packaging, and an audit trail. The engineering work is less about “chat” and more about turning ERP structure into reusable, inspectable capabilities.
 
-That’s the shape JitAI is designed around: generating model elements from existing database schemas, so “questions” map to governed methods and reusable query patterns, and teams can evolve from read to governed actions as controls mature. If you want a concrete walkthrough of that approach, start with the [JitAI Tutorial](https://jit.pro/docs/tutorial).
+That’s the shape JitAI is designed around: generating model elements from existing database schemas, so “questions” map to governed methods and reusable query patterns, and teams can evolve from read to governed actions as controls mature. If you want a concrete walkthrough of that approach, start with the [JitAI Tutorial](https://jit.pro/docs/devguide).
 
 Once you have a first set of query-grade workflows, a good next step is to stand up a sandbox connection and validate the 7-day checklist against your own schema and reporting definitions. You can [try JitAI](https://jit.pro/download) to explore that flow with a sample setup and adapt it to your ERP database constraints.
 

@@ -141,4 +141,4 @@ Visual orchestration transforms the development of **multi-agent systems*
 
 **Ready to build your first orchestrated AI Assistant?**
 
-[Download JitAi Desktop](https://jit.pro/download) | [View the Orchestration Tutorial](https://jit.pro/docs/tutorial)
+[Download JitAi Desktop](https://jit.pro/download) | [View the Orchestration Tutorial](https://jit.pro/docs/devguide)

@@ -153,4 +153,4 @@ The transition to AI-native development requires us to stop treating A
 
 Ready to build structured AI applications?
 
-[Download JitAI Desktop](https://jit.pro/download) or [Start the Tutorial](https://jit.pro/docs/tutorial).
+[Download JitAI Desktop](https://jit.pro/download) or [Start the Tutorial](https://jit.pro/docs/devguide).

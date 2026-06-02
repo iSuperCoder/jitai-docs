@@ -12,7 +12,7 @@ This guide walks you through setting up a local development and debugging enviro
 
 ## 🛠️ Environment setup
 :::info 
-Ensure you have completed the basic installation and configuration. If not yet installed, refer to the [Download and Installation](../../tutorial/download-installation) guide.
+Ensure you have completed the basic installation and configuration. If not yet installed, refer to the [Download and Installation](../installation-activation/download-installation) guide.
 :::
 
 JitAI supports multiple mainstream IDEs for local development and debugging. Choose the one that best suits your workflow:

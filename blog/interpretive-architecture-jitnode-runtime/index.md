@@ -131,4 +131,4 @@ JitAI’s interpretive architecture represents a significant shift in ho
 
 Ready to experience hot-swapping development?
 
-[Download JitNode Desktop](https://jit.pro/download) | [Read the Tutorial](https://jit.pro/docs/tutorial)
+[Download JitNode Desktop](https://jit.pro/download) | [Read the Tutorial](https://jit.pro/docs/devguide)
