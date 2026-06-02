@@ -23,19 +23,19 @@ DeepAgent 与 ReActAgent 的区别：
 
 在元素目录树中依次点击 `+`、`AI Agent`、`DeepAgent`，填写名称后进入编辑器。
 
-编辑器与 ReActAgent 相同，但配置面板多出`子 Agent`页签。
+编辑器与 ReActAgent 相同，但在 `能力编排` 中多出 `子 Agent` 配置。
 
 <!-- TODO: 配图 - 截图：编辑器中的"子 Agent" Tab -->
 
 ## 选择 DeepAgent 可委派的子 Agent
 
-在`子 Agent`页签中，支持三种模式：
+在 `能力编排` -> `子 Agent` 中，支持三种模式：
 
 - **智能模式**：运行时获取应用中可委派的 ReActAgent 类型 Agent 清单，由 DeepAgent 根据任务选择合适的子 Agent 并委派。
 - **自定义**：手动搜索并勾选可被当前 DeepAgent 委派的 ReActAgent 类型 Agent。适合职责边界明确、希望固定协作成员的场景。
 - **禁用**：不启用子 Agent 能力，DeepAgent 不会获得子 Agent 清单，也不会暴露委派任务的工具。
 
-在 DeepAgent 的`子 Agent`页签中，可被选择或运行时发现的子 Agent 是 ReActAgent 类型的 Agent 实例。该页签用于管理“哪些 Agent 可以被委派”，不会在选中某个子 Agent 后展开该 Agent 的完整配置区。
+在 DeepAgent 的 `子 Agent` 配置中，可被选择或运行时发现的子 Agent 是 ReActAgent 类型的 Agent 实例。该配置用于管理“哪些 Agent 可以被委派”，不会在选中某个子 Agent 后展开该 Agent 的完整配置区。
 
 FlowAgent 不作为 DeepAgent 子 Agent 机制中的被委派对象。如果需要按固定流程编排多个 Agent，使用 FlowAgent 的`调用 Agent`节点；如果需要让父 Agent 根据任务动态选择专家 Agent，则使用 DeepAgent，并将具体专家能力拆成 ReActAgent。
 
