@@ -18,7 +18,6 @@ export interface DownloadContent {
             intelDownloadText: string;
             appleDownloadUrl: string;
             appleDownloadText: string;
-            macSecurityUrl: string;
         };
     };
     server: {
@@ -67,7 +66,6 @@ const CONTENT: DownloadContent = {
             intelDownloadText: "Intel芯片安装包",
             appleDownloadUrl: "https://apk.jit.pro/latest/darwin/arm/JitAI-installer-apple.dmg",
             appleDownloadText: "Apple芯片安装包",
-            macSecurityUrl: "/zh/download/mac-security",
         },
     },
 

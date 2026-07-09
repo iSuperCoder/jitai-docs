@@ -8,6 +8,7 @@ const MacSecurityPage: React.FC = () => {
     <PageLayout 
       pageId="mac-security"
       containerClassName={styles.container}
+      withLayout={false}
     >
       <MacSecurityPageComponent/>
     </PageLayout>

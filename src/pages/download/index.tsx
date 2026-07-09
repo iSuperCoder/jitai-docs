@@ -8,6 +8,7 @@ const DownloadPage: React.FC = () => {
     <PageLayout 
       pageId="download"
       containerClassName={styles.container}
+      withLayout={false}
     >
       <DownloadSection />
     </PageLayout>

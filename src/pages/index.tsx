@@ -1,590 +1,557 @@
 import React from "react";
+import Head from "@docusaurus/Head";
 import Link from "@docusaurus/Link";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
-import {
-    ArrowRight,
-    BadgeCheck,
-    Code2,
-    GitBranch,
-    HardDrive,
-    Layers3,
-    LockKeyhole,
-    MonitorCog,
-    Server,
-    Sparkles,
-} from "lucide-react";
-import PageLayout from "@site/src/components/PageLayout";
-import styles from "@site/src/pages/index.module.css";
+import OfficialHeader from "@site/src/components/OfficialHeader";
+import styles from "./index.module.css";
 
-const CONTENT = {
-    zh: {
-        eyebrow: "Enterprise AI Agent Platform",
-        titlePrefix: "构建真正能",
-        titleHighlight: "执行业务",
-        titleSuffix: "的企业 AI 智能体",
-        description:
-            "JitAI 让智能体不只回答问题，而是能在安全权限内理解意图、拆解任务、调用系统、处理数据并协同用户完成真实业务。",
-        primaryCta: "开始使用",
-        secondaryCta: "了解智能体能力",
-        outcomes: [
+const PLATFORM_NAME = "企业级智能体开发运行一体化平台";
+const TAGLINE = "从 Demo 到生产，重塑企业AI生产力";
+const COPYRIGHT_YEAR = new Date().getFullYear();
+
+const getDownloadUrl = (locale: string) =>
+    locale === "zh" ? "/zh/download" : "/download";
+
+const getFooterNavItems = (locale: string) =>
+    locale === "zh"
+        ? [
+              { label: "首页", href: "#" },
+              { label: "能力", href: "#capabilities" },
+              { label: "优势", href: "#delivery" },
+              { label: "价值", href: "#value" },
+              { label: "联系我们", href: "/zh/contact" },
+          ]
+        : [
+              { label: "Home", href: "#" },
+              { label: "Capabilities", href: "#capabilities" },
+              { label: "Advantages", href: "#delivery" },
+              { label: "Value", href: "#value" },
+              { label: "Contact", href: "/contact" },
+          ];
+
+const HERO_TAGS = [
+    "企业级",
+    "BS 多用户协同",
+    "私有化部署",
+    "对话式开发",
+    "全维度自定义",
+    "开发运行一体化",
+];
+
+const CAPABILITIES = [
+    {
+        title: "AI 对话式无门槛开发",
+        desc: "内置开发智能体，自然语言替代编码。业务人员即可完成业务要素的改造、智能体的搭建和功能模块的开发。",
+    },
+    {
+        title: "全要素自定义",
+        desc: "LLM、Skills、Functions、数据模型、UI 界面——五大核心业务要素全部支持自主配置与迭代，平台完全适配企业。",
+    },
+    {
+        title: "双模同源开发",
+        desc: "AI 智能体与传统业务系统原生统一，共享同一套函数、数据模型和数据库。不是拼接，是底层一体。",
+    },
+    {
+        title: "开发即运行",
+        desc: "改造完成的要素即时生效，无需部署流程。从需求到交付从「周级」压缩到「分钟级」，迭代效率提升 30 倍。",
+    },
+    {
+        title: "企业级协同架构",
+        desc: "BS 架构，多部门多角色权限矩阵，支持千人级团队协作。业务要素可跨部门共享复用，沉淀为组织资产。",
+    },
+    {
+        title: "私有化安全部署",
+        desc: "全部数据和业务资产部署在企业自有服务器，物理隔离。满足金融、政务等行业的合规要求。",
+    },
+];
+
+const DELIVERY_STATS = [
+    { value: "90%+", label: "人力成本降低" },
+    { value: "小时级", label: "系统上线周期" },
+    { value: "30x", label: "迭代效率提升" },
+];
+
+const VALUE_SECTIONS = [
+    {
+        eyebrow: "价值一",
+        title: "专属业务智能体工作流",
+        subtitle: "低成本、高效率打造企业自己的 Agentic 工作流",
+        dark: true,
+        visual: "workflow",
+        points: [
             {
-                value: "自主执行",
-                label:
-                    "从意图识别、任务规划到工具调用，智能体可按业务规则完成指令。",
+                title: "7×24 小时数字员工",
+                desc: "让 AI 不知疲倦地深度参与核心业务流程，执行重复性、规则性任务，确保业务运转的连续性与高效性。",
             },
             {
-                value: "接入业务",
-                label:
-                    "连接服务函数、数据模型、知识库、文件、用户和前端页面，让 AI 进入真实流程。",
+                title: "重塑业务协作模式",
+                desc: "打破部门墙与信息孤岛，实现跨系统、跨岗位的自动化协同与决策，优化甚至颠覆传统业务流程。",
             },
             {
-                value: "企业可控",
-                label:
-                    "权限、安全、模型、记忆和部署策略统一配置，保证智能体用不越界。",
+                title: "直接驱动业务增长",
+                desc: "提升客户转化率、降低运营成本、缩短服务响应时间——不是辅助工具，是直接创造业务价值的 AI Worker。",
             },
         ],
-        agentCapabilities: {
-            label: "AGENT CAPABILITIES",
-            title: "AI 不只回答，它能按权限完成任务",
-            subtitle:
-                "把复杂能力收在可配置边界里，先开箱使用，再按业务逐步增强。",
-            items: [
-                {
-                    number: "01",
-                    title: "会判断，也会行动",
-                    description:
-                        "自主识别用户意图，判断是否需要查询知识、调用工具、操作系统或请求人工确认，再按业务规则推进任务。",
-                },
-                {
-                    number: "02",
-                    title: "能处理长程复杂任务",
-                    description:
-                        "将复杂目标拆成多个步骤和子任务，持续跟踪上下文、状态、阶段结果与关键记忆，避免任务越跑越散。",
-                },
-                {
-                    number: "03",
-                    title: "能驱动企业子系统",
-                    description:
-                        "可调用 Skills、服务函数、模型、知识库、文件空间、数据库、外部网络、用户和前端 UI，让 AI 真正进入业务执行链路。",
-                },
-                {
-                    number: "04",
-                    title: "能力边界可配置",
-                    description:
-                        "支持自动选择和人工指定智能体可用的工具、对象、数据、模型和交互入口，把灵活性放在可控范围内。",
-                },
-            ],
-        },
-        platform: {
-            label: "PLATFORM EXPERIENCE",
-            title: "AI 开发、传统 IT 和治理，在一个平台里完成",
-            subtitle:
-                "JitAI 把智能体模块和传统 IT 功能模块放在同一套应用体系中，减少重复建设和跨系统治理成本。",
-            items: [
-                {
-                    icon: Code2,
-                    title: "自然语言开发",
-                    description:
-                        "开发者描述需求，开发智能体自动创建和调整智能体、页面、数据模型、服务函数等应用模块。",
-                },
-                {
-                    icon: MonitorCog,
-                    title: "可视化治理",
-                    description:
-                        "模型、工具、知识库、权限和运行参数可在 GUI 中统一管理，不必每次都消耗 tokens 重新开发。",
-                },
-                {
-                    icon: GitBranch,
-                    title: "源码白盒",
-                    description:
-                        "应用所有模块都是源码级资产，既支持 AI coding，也支持 human coding，复杂逻辑可以继续深度扩展。",
-                },
-                {
-                    icon: Layers3,
-                    title: "开箱即用，逐步深入",
-                    description:
-                        "一键安装、模板启动、热更新交付。先让第一个智能体跑起来，再按业务深度配置和扩展。",
-                },
-            ],
-        },
-        assurance: {
-            label: "ENTERPRISE READY",
-            title: "企业级能力，默认收敛在可控边界内",
-            subtitle:
-                "部署、安全、权限和模型选择不需要另建一套体系，智能体与业务应用共用企业治理底座。",
-            cards: [
-                {
-                    title: "安全与隐私",
-                    description: "自动隐私保护，数据可留在企业内网。",
-                    icon: LockKeyhole,
-                    items: [
-                        "支持私有化部署",
-                        "可接入公有 MaaS 或私有化模型",
-                        "支持备选模型和专用多模态模型",
-                    ],
-                },
-                {
-                    title: "独立权限边界",
-                    description: "系统功能层权限独立于智能体运行逻辑。",
-                    icon: BadgeCheck,
-                    items: [
-                        "角色、组织、用户权限统一控制",
-                        "工具和函数调用可按权限限制",
-                        "防止智能体越权访问数据和操作",
-                    ],
-                },
-                {
-                    title: "部署与组织能力",
-                    description: "从个人试用到企业生产环境都能平滑推进。",
-                    icon: Server,
-                    items: [
-                        "一键安装、开箱即用、热更新",
-                        "跨平台、分布式、多端访问",
-                        "多组织、多用户、多登录方式",
-                    ],
-                },
-            ],
-        },
-        architecture: {
-            label: "ARCHITECTURE",
-            title: "快速开始，也能长期扩展",
-            subtitle:
-                "JitAI 把业务应用、开发治理和运行底座放在同一技术体系里，既适合快速落地，也支持源码级持续演进。",
-            layers: [
-                {
-                    number: "01",
-                    title: "BizApp",
-                    subtitle: "业务应用层 · 智能体与业务模块",
-                    items: [
-                        ["AI 智能体", "自主执行任务"],
-                        ["IT 功能模块", "传统业务能力"],
-                        ["页面与 UI", "多端交互入口"],
-                        ["数据与知识", "模型/文件/知识库"],
-                        ["服务函数", "可调用业务动作"],
-                    ],
-                },
-                {
-                    number: "02",
-                    title: "JitIDE",
-                    subtitle: "开发治理层 · 自然语言与可视化配置",
-                    items: [
-                        ["AI 开发", "自然语言构建"],
-                        ["可视化治理", "统一配置和微调"],
-                        ["源码管理", "AI/Human coding"],
-                        ["模型配置", "多模型策略"],
-                    ],
-                },
-                {
-                    number: "03",
-                    title: "JitNode",
-                    subtitle: "运行时层 · 私有化与分布式运行",
-                    items: [
-                        ["私有化部署", "数据自主可控"],
-                        ["热更新", "平台和 App 演进"],
-                        ["权限控制", "系统级边界"],
-                        ["分布式运行", "跨平台扩展"],
-                    ],
-                },
-            ],
-        },
-        cta: {
-            title: "让第一个智能体先跑起来",
-            subtitle:
-                "从一个具体岗位或流程开始，用 JitAI 构建可执行、可治理、可持续扩展的企业 AI 智能体。",
-            button: "联系我们",
-        },
     },
-    en: {
-        eyebrow: "Enterprise AI Agent Platform",
-        titlePrefix: "Build enterprise AI agents that ",
-        titleHighlight: "execute real work",
-        titleSuffix: "",
-        description:
-            "JitAI helps agents move beyond chat. They can understand intent, break down tasks, call systems, process data, and collaborate with users inside governed enterprise boundaries.",
-        primaryCta: "Get Started",
-        secondaryCta: "Explore Capabilities",
-        outcomes: [
+    {
+        eyebrow: "价值二",
+        title: "一个平台，替代 N 套系统",
+        subtitle: "告别碎片化，实现一体化智能基座",
+        dark: false,
+        visual: "platform",
+        reverse: true,
+        points: [
             {
-                value: "Autonomous",
-                label:
-                    "Agents can identify intent, plan tasks, and call tools according to business rules.",
+                title: "统一技术底座",
+                desc: "一站式承载业务开发、智能体定制、自动化编排和 AI 员工落地，打破数据孤岛，消除重复建设。",
             },
             {
-                value: "Connected",
-                label:
-                    "Connect services, data models, knowledge bases, files, users, and frontend UI to real workflows.",
+                title: "全链路降本提效",
+                desc: "直接削减多系统采购与维护成本，统一交互体验降低学习成本，消除信息壁垒减少管理内耗。",
             },
             {
-                value: "Governed",
-                label:
-                    "Permissions, security, models, memory, and deployment policies are configured in one place.",
+                title: "可持续演进",
+                desc: "不再被各厂商版本升级牵着走。统一底座让企业按自己的节奏渐进式智能化升级，而非推倒重来。",
             },
         ],
-        agentCapabilities: {
-            label: "AGENT CAPABILITIES",
-            title: "AI does not just answer. It completes governed work.",
-            subtitle:
-                "JitAI keeps powerful agent capabilities inside configurable boundaries, so teams can start quickly and deepen capabilities over time.",
-            items: [
-                {
-                    number: "01",
-                    title: "Decide and act",
-                    description:
-                        "Agents infer user intent, decide whether to retrieve knowledge, call tools, operate systems, or request human confirmation, then move the task forward.",
-                },
-                {
-                    number: "02",
-                    title: "Run long tasks",
-                    description:
-                        "Complex goals can be decomposed into steps and subtasks while context, state, stage outputs, and working memory stay organized.",
-                },
-                {
-                    number: "03",
-                    title: "Drive enterprise subsystems",
-                    description:
-                        "Agents can call skills, services, functions, models, knowledge bases, file spaces, databases, networks, users, and frontend UI.",
-                },
-                {
-                    number: "04",
-                    title: "Configure every boundary",
-                    description:
-                        "Teams can let agents choose available capabilities automatically or manually define which tools, objects, data, models, and channels they may use.",
-                },
-            ],
-        },
-        platform: {
-            label: "PLATFORM EXPERIENCE",
-            title: "AI development, traditional IT, and governance in one platform",
-            subtitle:
-                "JitAI puts agent modules and traditional IT modules into the same application system, reducing duplicated engineering and cross-system governance work.",
-            items: [
-                {
-                    icon: Code2,
-                    title: "Natural-language development",
-                    description:
-                        "Developers describe requirements, and development agents create or adjust agents, pages, data models, service functions, and other modules.",
-                },
-                {
-                    icon: MonitorCog,
-                    title: "Visual governance",
-                    description:
-                        "Models, tools, knowledge bases, permissions, and runtime settings can be managed in GUI instead of being rebuilt through tokens every time.",
-                },
-                {
-                    icon: GitBranch,
-                    title: "Source-visible modules",
-                    description:
-                        "Every software module is a source-level asset, supporting both AI coding and human coding for deep business customization.",
-                },
-                {
-                    icon: Layers3,
-                    title: "Ready now, extensible later",
-                    description:
-                        "One-click installation, templates, and hot updates help teams start fast, then expand through configuration and code when needed.",
-                },
-            ],
-        },
-        assurance: {
-            label: "ENTERPRISE READY",
-            title: "Enterprise capability, kept inside controlled boundaries",
-            subtitle:
-                "Deployment, security, permissions, and model strategy are part of the same governance foundation shared by agents and business applications.",
-            cards: [
-                {
-                    title: "Security and privacy",
-                    description: "Automatic privacy protection with data kept under enterprise control.",
-                    icon: LockKeyhole,
-                    items: [
-                        "Private deployment supported",
-                        "Use public MaaS or private models",
-                        "Fallback and dedicated multimodal models",
-                    ],
-                },
-                {
-                    title: "Independent permission boundary",
-                    description: "System-level permissions stay separate from agent reasoning logic.",
-                    icon: BadgeCheck,
-                    items: [
-                        "Unified roles, organizations, and user access",
-                        "Tool and function calls can be restricted",
-                        "Prevents agents from crossing data boundaries",
-                    ],
-                },
-                {
-                    title: "Deployment and organization",
-                    description: "Move from individual trials to production environments smoothly.",
-                    icon: Server,
-                    items: [
-                        "One-click install, ready to use, hot updates",
-                        "Cross-platform, distributed, multi-channel access",
-                        "Multi-org, multi-user, multi-login support",
-                    ],
-                },
-            ],
-        },
-        architecture: {
-            label: "ARCHITECTURE",
-            title: "Start fast, then extend for the long term",
-            subtitle:
-                "JitAI brings business applications, development governance, and runtime infrastructure into one technical system for both quick delivery and source-level evolution.",
-            layers: [
-                {
-                    number: "01",
-                    title: "BizApp",
-                    subtitle: "Application layer · agents and business modules",
-                    items: [
-                        ["AI Agents", "Autonomous task execution"],
-                        ["IT Modules", "Traditional business capabilities"],
-                        ["Pages and UI", "Multi-channel interaction"],
-                        ["Data and Knowledge", "Models/files/knowledge bases"],
-                        ["Service Functions", "Callable business actions"],
-                    ],
-                },
-                {
-                    number: "02",
-                    title: "JitIDE",
-                    subtitle: "Development governance · natural language and visual configuration",
-                    items: [
-                        ["AI Development", "Build with natural language"],
-                        ["Visual Governance", "Configure and tune centrally"],
-                        ["Source Management", "AI/Human coding"],
-                        ["Model Strategy", "Multi-model configuration"],
-                    ],
-                },
-                {
-                    number: "03",
-                    title: "JitNode",
-                    subtitle: "Runtime layer · private and distributed execution",
-                    items: [
-                        ["Private Deployment", "Enterprise data control"],
-                        ["Hot Updates", "Platform and app evolution"],
-                        ["Access Control", "System-level boundaries"],
-                        ["Distributed Runtime", "Cross-platform scaling"],
-                    ],
-                },
-            ],
-        },
-        cta: {
-            title: "Get the first agent running",
-            subtitle:
-                "Start from one role or workflow, then use JitAI to build executable, governable, and extensible enterprise AI agents.",
-            button: "Contact Us",
-        },
     },
-};
+    {
+        eyebrow: "价值三",
+        title: "自主可控的 AI 生产力",
+        subtitle: "拒绝技术锁定，构建属于企业自己的 AI 核心能力",
+        dark: true,
+        visual: "private",
+        points: [
+            {
+                title: "独立技术底座",
+                desc: "摆脱外部厂商依赖与黑盒限制。核心代码、数据、模型全部自主掌控，按自己的业务节奏持续演进。",
+            },
+            {
+                title: "全栈能力内化",
+                desc: "深度掌握业务规则、逻辑和代码，可自主优化升级。不依赖厂商排期，想改就改。",
+            },
+            {
+                title: "沉淀组织资产",
+                desc: "打造私有化的 AI Worker 矩阵，每一个智能体都是可复用、可传承的企业核心资产。",
+            },
+        ],
+    },
+];
 
-const getArchitectureIcon = (title: string) => {
-    if (title === "BizApp") return Layers3;
-    if (title === "JitIDE") return Code2;
-    if (title === "JitNode") return HardDrive;
-    return Layers3;
+const handleTopLink = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
 const HomePage: React.FC = () => {
-    const { i18n } = useDocusaurusContext();
-    const isZh = i18n.currentLocale === "zh";
-    const content = isZh ? CONTENT.zh : CONTENT.en;
-
     return (
-        <PageLayout pageId="index" containerClassName={styles.container}>
-            <section className={styles.homeHero}>
-                <div className={styles.sectionContent}>
-                    <div className={styles.heroLabel}>{content.eyebrow}</div>
-                    <h1 className={styles.homeHeroTitle}>
-                        {content.titlePrefix}
-                        <span>{content.titleHighlight}</span>
-                        {content.titleSuffix}
-                    </h1>
-                    <p className={styles.homeHeroDescription}>
-                        {content.description}
-                    </p>
-                    <div className={styles.homeHeroButtons}>
-                        <Link
-                            to={isZh ? "/zh/contact" : "/contact"}
-                            className={styles.homePrimaryButton}
-                        >
-                            {content.primaryCta}
-                            <ArrowRight size={20} />
-                        </Link>
-                        <a href="#agent-capabilities" className={styles.homeSecondaryButton}>
-                            {content.secondaryCta}
-                            <ArrowRight size={20} />
-                        </a>
-                    </div>
-                    <div className={styles.outcomeGrid}>
-                        {content.outcomes.map((outcome) => (
-                            <article className={styles.outcomeCard} key={outcome.value}>
-                                <h2>{outcome.value}</h2>
-                                <p>{outcome.label}</p>
-                            </article>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            <section id="agent-capabilities" className={styles.homeSection}>
-                <div className={styles.sectionContent}>
-                    <SectionHeader
-                        label={content.agentCapabilities.label}
-                        title={content.agentCapabilities.title}
-                        subtitle={content.agentCapabilities.subtitle}
-                    />
-                    <div className={styles.capabilityGrid}>
-                        {content.agentCapabilities.items.map((item) => (
-                            <article className={styles.homeCard} key={item.title}>
-                                <div className={styles.featureNumber}>
-                                    {item.number}
-                                </div>
-                                <h3>{item.title}</h3>
-                                <p>{item.description}</p>
-                            </article>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            <section id="platform" className={`${styles.homeSection} ${styles.sectionSoft}`}>
-                <div className={styles.sectionContent}>
-                    <SectionHeader
-                        label={content.platform.label}
-                        title={content.platform.title}
-                        subtitle={content.platform.subtitle}
-                    />
-                    <div className={styles.capabilityGrid}>
-                        {content.platform.items.map((item) => {
-                            const Icon = item.icon;
-                            return (
-                                <article className={styles.homeCard} key={item.title}>
-                                    <div className={styles.cardIcon}>
-                                        <Icon size={28} />
-                                    </div>
-                                    <h3>{item.title}</h3>
-                                    <p>{item.description}</p>
-                                </article>
-                            );
-                        })}
-                    </div>
-                </div>
-            </section>
-
-            <section id="enterprise-ready" className={styles.homeSection}>
-                <div className={styles.sectionContent}>
-                    <SectionHeader
-                        label={content.assurance.label}
-                        title={content.assurance.title}
-                        subtitle={content.assurance.subtitle}
-                    />
-                    <div className={styles.deploymentGrid}>
-                        {content.assurance.cards.map((card) => {
-                            const Icon = card.icon;
-                            return (
-                                <article className={styles.deploymentCard} key={card.title}>
-                                    <div className={styles.deploymentIcon}>
-                                        <Icon size={28} />
-                                    </div>
-                                    <h3>{card.title}</h3>
-                                    <p>{card.description}</p>
-                                    <ul>
-                                        {card.items.map((item) => (
-                                            <li key={item}>
-                                                <BadgeCheck size={18} />
-                                                <span>{item}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </article>
-                            );
-                        })}
-                    </div>
-                </div>
-            </section>
-
-            <section
-                id="architecture"
-                className={`${styles.homeSection} ${styles.sectionSoft}`}
+        <>
+            <Head
+                title="JitAI — 企业级智能体开发运行一体化平台"
             >
-                <div className={styles.sectionContent}>
-                    <SectionHeader
-                        label={content.architecture.label}
-                        title={content.architecture.title}
-                        subtitle={content.architecture.subtitle}
-                    />
-                    <div className={styles.architectureStack}>
-                        {content.architecture.layers.map((layer) => (
-                            <ArchitectureLayer key={layer.title} layer={layer} />
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            <section id="contact" className={styles.ctaSection}>
-                <div className={styles.sectionContent}>
-                    <div className={styles.ctaPanel}>
-                        <Sparkles size={28} />
-                        <h2>{content.cta.title}</h2>
-                        <p>{content.cta.subtitle}</p>
-                        <Link
-                            to={isZh ? "/zh/contact" : "/contact"}
-                            className={styles.homePrimaryButton}
-                        >
-                            {content.cta.button}
-                            <ArrowRight size={20} />
-                        </Link>
-                    </div>
-                </div>
-            </section>
-        </PageLayout>
+                <meta
+                    name="description"
+                    content="JitAI 是企业级 BS 架构、多用户协同、支持全私有化部署的智能体开发运行一体化平台。从 Demo 到生产，重塑企业AI生产力。"
+                />
+                <meta
+                    name="keywords"
+                    content="JitAI,企业智能体,AI平台,智能体开发,私有化部署,Agentic Company,企业AI"
+                />
+                <meta
+                    property="og:title"
+                    content="JitAI — 企业级智能体开发运行一体化平台"
+                />
+                <meta
+                    property="og:description"
+                    content="JitAI 是企业级 BS 架构、多用户协同、支持全私有化部署的智能体开发运行一体化平台。从 Demo 到生产，重塑企业AI生产力。"
+                />
+            </Head>
+            <div className={`${styles.homePage} custom-page`}>
+                <OfficialHeader />
+                <main className={styles.main}>
+                    <HeroSection />
+                    <ProblemSection />
+                    <CapabilitiesSection />
+                    <DeliverySection />
+                    <ValueSection />
+                    <ContactSection />
+                </main>
+                <HomeFooter />
+            </div>
+        </>
     );
 };
 
-interface SectionHeaderProps {
-    label: string;
-    title: string;
-    subtitle: string;
-}
+const HeroSection: React.FC = () => (
+    <section className={`${styles.section} ${styles.hero}`}>
+        <div className={styles.heroGlow} aria-hidden="true">
+            <div className={styles.glowLarge} />
+            <div className={styles.glowSmall} />
+        </div>
+        <div className={styles.shell}>
+            <div className={styles.heroContent}>
+                <p className={styles.heroEyebrow}>
+                    JitAI 企业级智能体开发运行一体化平台
+                </p>
+                <h1>
+                    用 AI 重塑生产力
+                    <br />
+                    <span>打造 Agentic 企业系统</span>
+                </h1>
+                <p className={styles.heroLead}>
+                    告别桌面级玩具，构建真正属于你企业的 AI 数字员工。
+                </p>
+                <div className={styles.tagList}>
+                    {HERO_TAGS.map((tag) => (
+                        <span key={tag}>{tag}</span>
+                    ))}
+                </div>
+                <div className={styles.heroActions}>
+                    <DownloadButton size="md" />
+                </div>
+            </div>
+        </div>
+        <div className={styles.scrollCue} aria-hidden="true">
+            <ArrowDownIcon />
+        </div>
+    </section>
+);
 
-const SectionHeader: React.FC<SectionHeaderProps> = ({ label, title, subtitle }) => (
-    <div className={styles.homeSectionHeader}>
-        <div className={styles.sectionLabel}>{label}</div>
-        <h2>{title}</h2>
-        <p>{subtitle}</p>
+const ProblemSection: React.FC = () => (
+    <section className={`${styles.section} ${styles.subtleSection}`}>
+        <div className={styles.shell}>
+            <div className={styles.centerBlock}>
+                <Badge>核心问题</Badge>
+                <h2>为什么你的 AI 总是落不了地？</h2>
+                <p className={styles.sectionLead}>AI 不认识你的业务流程、规则和数据。</p>
+                <div className={styles.dividerTitle}>
+                    <span />
+                    <strong>JITAI</strong>
+                    <span />
+                </div>
+                <p className={styles.problemStatement}>
+                    JitAI 平台，把业务要素改造为 AI 可感知和调用的元素，
+                    <br />
+                    并「装入」AI 智能体，使之真正驱动你的业务。
+                </p>
+            </div>
+            <div className={styles.transformDiagram}>
+                <ElementGroup
+                    label="你的业务要素"
+                    items={["业务规则", "审批流程", "行业知识", "客户数据"]}
+                    muted
+                />
+                <div className={styles.transformBridge}>
+                    <span />
+                    <div>
+                        <strong>JitAI 改造</strong>
+                        <small>内置开发智能体</small>
+                    </div>
+                    <span />
+                </div>
+                <ElementGroup
+                    label="AI 可调用的元素"
+                    items={["LLM 模型", "Skills 技能", "Functions 函数", "数据 Models", "UI Cards"]}
+                    accent
+                />
+            </div>
+        </div>
+    </section>
+);
+
+const CapabilitiesSection: React.FC = () => (
+    <section
+        id="capabilities"
+        className={`${styles.section} ${styles.darkSection}`}
+    >
+        <div className={styles.shell}>
+            <SectionHeader
+                eyebrow="核心能力"
+                title={
+                    <>
+                        一个平台搞定业务要素的
+                        <br />
+                        <span>AI 化改造、接入与运行</span>
+                    </>
+                }
+                desc="从对话式开发、到自动部署、到最终运行，JitAI 覆盖业务 AI 化改造到 AI 智能体真实驱动业务的全链路。"
+            />
+            <div className={styles.capabilityGrid}>
+                {CAPABILITIES.map((item) => (
+                    <article className={styles.capabilityCard} key={item.title}>
+                        <h3>{item.title}</h3>
+                        <p>{item.desc}</p>
+                    </article>
+                ))}
+            </div>
+        </div>
+    </section>
+);
+
+const DeliverySection: React.FC = () => (
+    <section
+        id="delivery"
+        className={`${styles.section} ${styles.subtleSection}`}
+    >
+        <div className={styles.shell}>
+            <SectionHeader
+                eyebrow="交付能力"
+                title="小时级交付，生产级质量"
+                desc="基于自研 SDD 规范化体系，支持一次性输出可直接上线的完整业务系统。"
+                accentOpacity="strong"
+            />
+            <div className={styles.statsGrid}>
+                {DELIVERY_STATS.map((stat) => (
+                    <div key={stat.label}>
+                        <strong>{stat.value}</strong>
+                        <span>{stat.label}</span>
+                    </div>
+                ))}
+            </div>
+            <p className={styles.deliveryLine}>
+                能分钟级生成你企业专属的：营销智能体 · 客服智能体 · 数据分析 ·
+                审批流系统 · CRM/ERP · 协同办公 OA
+            </p>
+        </div>
+    </section>
+);
+
+const ValueSection: React.FC = () => (
+    <section id="value">
+        {VALUE_SECTIONS.map((section) => (
+            <ValuePanel key={section.title} section={section} />
+        ))}
+    </section>
+);
+
+const ValuePanel: React.FC<{
+    section: (typeof VALUE_SECTIONS)[number];
+}> = ({ section }) => (
+    <section
+        className={`${styles.section} ${styles.valuePanel} ${
+            section.dark ? styles.darkSection : styles.subtleSection
+        }`}
+    >
+        <div className={styles.shell}>
+            <div
+                className={`${styles.valueGrid} ${
+                    section.reverse ? styles.valueGridReverse : ""
+                }`}
+            >
+                <div className={styles.valueCopy}>
+                    <span className={styles.valueEyebrow}>{section.eyebrow}</span>
+                    <h2>{section.title}</h2>
+                    <p className={styles.valueSubtitle}>{section.subtitle}</p>
+                    <div className={styles.valuePoints}>
+                        {section.points.map((point, index) => (
+                            <div className={styles.valuePoint} key={point.title}>
+                                <span>{String(index + 1).padStart(2, "0")}</span>
+                                <div>
+                                    <h3>{point.title}</h3>
+                                    <p>{point.desc}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <ValueVisual type={section.visual} />
+            </div>
+        </div>
+    </section>
+);
+
+const ValueVisual: React.FC<{ type: string }> = ({ type }) => {
+    if (type === "platform") {
+        return (
+            <div className={styles.valueVisual}>
+                <div className={styles.visualCard}>
+                    <div className={styles.systemTags}>
+                        {["CRM", "ERP", "OA", "BI", "AI"].map((item) => (
+                            <span key={item}>{item}</span>
+                        ))}
+                    </div>
+                    <strong className={styles.visualArrow}>→</strong>
+                    <div className={styles.visualLogo}>JitAI</div>
+                    <p>
+                        多系统堆砌
+                        <br />→ 一体化基座
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    if (type === "private") {
+        return (
+            <div className={styles.valueVisual}>
+                <div className={styles.visualCard}>
+                    <strong className={styles.lockMark}>🔒</strong>
+                    <h3>完全私有化</h3>
+                    <p>
+                        数据不出域
+                        <br />
+                        资产不外流
+                        <br />
+                        能力不锁定
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className={styles.valueVisual}>
+            <div className={styles.visualCard}>
+                <strong className={styles.aiMark}>AI</strong>
+                <h3>Agentic Workflow</h3>
+                <p>
+                    从流程自动化
+                    <br />
+                    到价值创造
+                </p>
+            </div>
+        </div>
+    );
+};
+
+const ContactSection: React.FC = () => (
+    <section id="contact" className={`${styles.section} ${styles.contactSection}`}>
+        <div className={styles.shell}>
+            <div className={styles.contactBlock}>
+                <h2>准备好构建属于你的 AI 数字员工了吗？</h2>
+                <p>
+                    预约专属演示，了解 JitAI 如何帮助企业落地 AI，转型为智能驱动型组织。
+                </p>
+                <DownloadButton size="lg" />
+                <strong>JitAI，与您共创智能未来！</strong>
+            </div>
+        </div>
+    </section>
+);
+
+const HomeFooter: React.FC = () => {
+    const { i18n } = useDocusaurusContext();
+    const navItems = getFooterNavItems(i18n.currentLocale);
+
+    return (
+        <footer className={styles.footer}>
+            <div className={styles.shell}>
+                <div className={styles.footerTop}>
+                    <div className={styles.footerBrand}>
+                        <span>JitAI · {PLATFORM_NAME}</span>
+                        <p>{TAGLINE}</p>
+                    </div>
+                    <nav className={styles.footerLinks}>
+                        {navItems.map((item) => (
+                            <a
+                                key={item.href}
+                                href={item.href}
+                                onClick={
+                                    item.href === "#" ? handleTopLink : undefined
+                                }
+                            >
+                                {item.label}
+                            </a>
+                        ))}
+                    </nav>
+                </div>
+                <div className={styles.footerBottom}>
+                    <span>© {COPYRIGHT_YEAR} JitAI. All rights reserved.</span>
+                </div>
+            </div>
+        </footer>
+    );
+};
+
+const DownloadButton: React.FC<{ size: "md" | "lg" }> = ({ size }) => {
+    const { i18n } = useDocusaurusContext();
+
+    return (
+        <Link
+            to={getDownloadUrl(i18n.currentLocale)}
+            className={`${styles.downloadButton} ${
+                size === "lg" ? styles.downloadButtonLarge : ""
+            }`}
+        >
+            下载 JitAI 平台
+            <ArrowRightIcon />
+        </Link>
+    );
+};
+
+const Badge: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <div className={styles.badge}>
+        <span />
+        <strong>{children}</strong>
     </div>
 );
 
-const ArchitectureLayer: React.FC<{
-    layer: {
-        number: string;
-        title: string;
-        subtitle: string;
-        items: string[][];
-    };
-}> = ({ layer }) => {
-    const Icon = getArchitectureIcon(layer.title);
-
-    return (
-        <article className={styles.architectureLayer}>
-            <div className={styles.layerHeader}>
-                <div className={styles.layerNumber}>{layer.number}</div>
-                <Icon className={styles.layerIcon} size={24} />
-                <div>
-                    <h3>{layer.title}</h3>
-                    <p>{layer.subtitle}</p>
-                </div>
-            </div>
-            <ArchitectureItems items={layer.items} />
-        </article>
-    );
-};
-
-const ArchitectureItems: React.FC<{ items: string[][] }> = ({ items }) => (
-    <div className={styles.architectureItems}>
-        {items.map(([name, desc]) => (
-            <div className={styles.architectureItem} key={name}>
-                <strong>{name}</strong>
-                <span>{desc}</span>
-            </div>
-        ))}
+const SectionHeader: React.FC<{
+    eyebrow: string;
+    title: React.ReactNode;
+    desc: string;
+    accentOpacity?: "soft" | "strong";
+}> = ({ eyebrow, title, desc, accentOpacity = "soft" }) => (
+    <div className={styles.sectionHeader}>
+        <span
+            className={`${styles.sectionEyebrow} ${
+                accentOpacity === "strong" ? styles.sectionEyebrowStrong : ""
+            }`}
+        >
+            {eyebrow}
+        </span>
+        <h2>{title}</h2>
+        <p>{desc}</p>
     </div>
+);
+
+const ElementGroup: React.FC<{
+    label: string;
+    items: string[];
+    muted?: boolean;
+    accent?: boolean;
+}> = ({ label, items, muted, accent }) => (
+    <div className={styles.elementGroup}>
+        <span className={accent ? styles.accentLabel : ""}>{label}</span>
+        <div>
+            {items.map((item) => (
+                <strong
+                    className={`${muted ? styles.mutedPill : ""} ${
+                        accent ? styles.accentPill : ""
+                    }`}
+                    key={item}
+                >
+                    {item}
+                </strong>
+            ))}
+        </div>
+    </div>
+);
+
+const ArrowRightIcon: React.FC = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        fill="currentColor"
+        viewBox="0 0 256 256"
+        aria-hidden="true"
+    >
+        <path d="M221.66,133.66l-72,72a8,8,0,0,1-11.32-11.32L196.69,136H40a8,8,0,0,1,0-16H196.69L138.34,61.66a8,8,0,0,1,11.32-11.32l72,72A8,8,0,0,1,221.66,133.66Z" />
+    </svg>
+);
+
+const ArrowDownIcon: React.FC = () => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        fill="currentColor"
+        viewBox="0 0 256 256"
+        aria-hidden="true"
+    >
+        <path d="M205.66,149.66l-72,72a8,8,0,0,1-11.32,0l-72-72a8,8,0,0,1,11.32-11.32L120,196.69V40a8,8,0,0,1,16,0V196.69l58.34-58.35a8,8,0,0,1,11.32,11.32Z" />
+    </svg>
 );
 
 export default HomePage;
