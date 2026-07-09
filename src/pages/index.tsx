@@ -12,6 +12,9 @@ const COPYRIGHT_YEAR = new Date().getFullYear();
 const getDownloadUrl = (locale: string) =>
     locale === "zh" ? "/zh/download" : "/download";
 
+const getCapabilityUrl = (locale: string, slug: string) =>
+    locale === "zh" ? `/zh/capabilities/${slug}` : `/capabilities/${slug}`;
+
 const getFooterNavItems = (locale: string) =>
     locale === "zh"
         ? [
@@ -30,45 +33,83 @@ const getFooterNavItems = (locale: string) =>
           ];
 
 const HERO_TAGS = [
-    "企业级",
-    "BS 多用户协同",
+    "接入真实业务",
+    "对话式 AI 开发",
+    "全要素自定义",
+    "主动式企业管家",
+    "企业级协同",
     "私有化部署",
-    "对话式开发",
-    "全维度自定义",
+    "双模一体",
     "开发运行一体化",
 ];
 
 const CAPABILITIES = [
     {
-        title: "AI 对话式无门槛开发",
-        desc: "内置开发智能体，自然语言替代编码。业务人员即可完成业务要素的改造、智能体的搭建和功能模块的开发。",
+        slug: "agent-business",
+        title: "接入真实业务的智能体框架",
+        desc: "无限接入业务系统与数据要素，实现从感知、决策到执行的全链路贯通，让 AI 智能体真正执行业务。",
     },
     {
-        title: "全要素自定义",
-        desc: "LLM、Skills、Functions、数据模型、UI 界面——五大核心业务要素全部支持自主配置与迭代，平台完全适配企业。",
+        slug: "conversational-dev",
+        title: "无门槛对话式 AI 开发",
+        desc: "内置专用开发智能体，业务人员通过自然语言对话即可快速完成业务 AI 化改造、应用开发与迭代。",
     },
     {
-        title: "双模同源开发",
-        desc: "AI 智能体与传统业务系统原生统一，共享同一套函数、数据模型和数据库。不是拼接，是底层一体。",
+        slug: "full-customization",
+        title: "全要素灵活自定义",
+        desc: "LLM 模型、技能插件、函数、数据模型、UI 组件等 30+ 类业务要素，全部支持自主配置与开发。",
     },
     {
-        title: "开发即运行",
-        desc: "改造完成的要素即时生效，无需部署流程。从需求到交付从「周级」压缩到「分钟级」，迭代效率提升 30 倍。",
-    },
-    {
+        slug: "enterprise-architecture",
         title: "企业级协同架构",
-        desc: "BS 架构，多部门多角色权限矩阵，支持千人级团队协作。业务要素可跨部门共享复用，沉淀为组织资产。",
+        desc: "BS 云架构设计，支持多角色权限管控、多人实时协作与组织架构映射，适配规模化办公场景。",
     },
     {
+        slug: "private-deployment",
         title: "私有化安全部署",
-        desc: "全部数据和业务资产部署在企业自有服务器，物理隔离。满足金融、政务等行业的合规要求。",
+        desc: "数据、模型与业务资产 100% 留存企业内部，物理隔离杜绝外泄，满足金融、政务等合规要求。",
+    },
+    {
+        slug: "devops-unified",
+        title: "开发运行一体化",
+        desc: "开发-测试-运行无缝衔接与实时同步，无需复杂部署流程，分钟级完成业务落地与迭代。",
+    },
+    {
+        slug: "active-hub",
+        title: "主动式企业管家",
+        desc: "内置主动型智能体，主动感知系统事件与状态，自动推理对策并采取措施，实现业务流程的自动化与智能化闭环。",
+    },
+    {
+        slug: "dual-mode",
+        title: "双模同源一体",
+        desc: "AI 智能体与传统业务系统原生统一，共享同一套函数、数据模型和数据库，实现新旧技术体系无缝融合。",
     },
 ];
 
-const DELIVERY_STATS = [
-    { value: "90%+", label: "人力成本降低" },
-    { value: "小时级", label: "系统上线周期" },
-    { value: "30x", label: "迭代效率提升" },
+const DELIVERY_CARDS = [
+    {
+        title: "人工投入度：极致精简",
+        desc: "告别传统开发的人力密集模式，全流程自动化生成，仅需少量人工干预即可完成生产级系统构建，人力成本降低 90% 以上。",
+    },
+    {
+        title: "交付时长：小时级上线",
+        desc: "从需求输入到系统上线仅需小时级周期，对比传统开发模式效率提升 95% 以上，极速响应市场变化与业务迭代需求。",
+    },
+    {
+        title: "Tokens 消耗量：成本最优",
+        desc: "JitAI 的 SDD 规范和开发框架大幅降低应用的代码量，从而极大降低生成应用所需 tokens。",
+    },
+];
+
+const SDD_FEATURES = [
+    {
+        title: "元素化技术系统模型",
+        desc: "将企业业务系统抽象为标准化的技术元素（数据模型、业务函数、UI 组件、API 接口等），为 AI 生成提供结构化、可组合的开发范式，确保生成结果架构清晰、逻辑一致。",
+    },
+    {
+        title: "Agentic 商业系统模型",
+        desc: "将企业商业逻辑建模为智能体可理解、可执行的业务流程框架，让 AI 生成的系统天然贴合企业业务运作方式，而非泛泛的通用模板。",
+    },
 ];
 
 const VALUE_SECTIONS = [
@@ -191,7 +232,7 @@ const HeroSection: React.FC = () => (
         <div className={styles.shell}>
             <div className={styles.heroContent}>
                 <p className={styles.heroEyebrow}>
-                    JitAI 企业级智能体开发运行一体化平台
+                    JitAI 一体化企业级智能体平台
                 </p>
                 <h1>
                     用 AI 重塑生产力
@@ -259,34 +300,45 @@ const ProblemSection: React.FC = () => (
     </section>
 );
 
-const CapabilitiesSection: React.FC = () => (
-    <section
-        id="capabilities"
-        className={`${styles.section} ${styles.darkSection}`}
-    >
-        <div className={styles.shell}>
-            <SectionHeader
-                eyebrow="核心能力"
-                title={
-                    <>
-                        一个平台搞定业务要素的
-                        <br />
-                        <span>AI 化改造、接入与运行</span>
-                    </>
-                }
-                desc="从对话式开发、到自动部署、到最终运行，JitAI 覆盖业务 AI 化改造到 AI 智能体真实驱动业务的全链路。"
-            />
-            <div className={styles.capabilityGrid}>
-                {CAPABILITIES.map((item) => (
-                    <article className={styles.capabilityCard} key={item.title}>
-                        <h3>{item.title}</h3>
-                        <p>{item.desc}</p>
-                    </article>
-                ))}
+const CapabilitiesSection: React.FC = () => {
+    const { i18n } = useDocusaurusContext();
+
+    return (
+        <section
+            id="capabilities"
+            className={`${styles.section} ${styles.darkSection}`}
+        >
+            <div className={styles.shell}>
+                <SectionHeader
+                    eyebrow="核心能力"
+                    title={
+                        <>
+                            一个平台搞定全业务要素的
+                            <br />
+                            <span>AI 化改造、接入与运行</span>
+                        </>
+                    }
+                    desc="从对话式开发、到自动部署、到最终运行，JitAI 覆盖业务 AI 化改造到 AI 智能体真实驱动业务的全链路。"
+                />
+                <div className={styles.capabilityGrid}>
+                    {CAPABILITIES.map((item) => (
+                        <Link
+                            className={styles.capabilityCard}
+                            key={item.slug}
+                            to={getCapabilityUrl(i18n.currentLocale, item.slug)}
+                        >
+                            <h3>{item.title}</h3>
+                            <p>{item.desc}</p>
+                            <span className={styles.capabilityMore}>
+                                了解更多 →
+                            </span>
+                        </Link>
+                    ))}
+                </div>
             </div>
-        </div>
-    </section>
-);
+        </section>
+    );
+};
 
 const DeliverySection: React.FC = () => (
     <section
@@ -295,23 +347,41 @@ const DeliverySection: React.FC = () => (
     >
         <div className={styles.shell}>
             <SectionHeader
-                eyebrow="交付能力"
-                title="小时级交付，生产级质量"
-                desc="基于自研 SDD 规范化体系，支持一次性输出可直接上线的完整业务系统。"
+                eyebrow="效果优势"
+                title="全球领先的 AI 化交付能力"
+                desc="基于自研 SDD 规范化开发体系，以最优化成本，生成真正生产级可用的智能体业务系统。"
                 accentOpacity="strong"
             />
-            <div className={styles.statsGrid}>
-                {DELIVERY_STATS.map((stat) => (
-                    <div key={stat.label}>
-                        <strong>{stat.value}</strong>
-                        <span>{stat.label}</span>
-                    </div>
+            <div className={styles.deliveryCards}>
+                {DELIVERY_CARDS.map((card) => (
+                    <article className={styles.deliveryCard} key={card.title}>
+                        <span />
+                        <h3>{card.title}</h3>
+                        <p>{card.desc}</p>
+                    </article>
                 ))}
             </div>
             <p className={styles.deliveryLine}>
-                能分钟级生成你企业专属的：营销智能体 · 客服智能体 · 数据分析 ·
-                审批流系统 · CRM/ERP · 协同办公 OA
+                全场景系统一站式生成：营销智能体 · 销售智能体 · 审计智能体 ·
+                财务智能体 · 业务管理系统 · CRM/ERP 核心 · 协同办公 OA ......
             </p>
+            <div className={styles.sddPanel}>
+                <span>底层引擎</span>
+                <h3>JitAI 自研 SDD 规范化开发体系</h3>
+                <p>
+                    基于独创的元素化技术系统模型和 agentic
+                    商业系统模型，为 LLM 生成业务应用建立标准化约束与统一架构范式。这一体系从根本上消除了
+                    AI 生成系统的无序性与不可控性，确保每一次生成都是可预期、可维护的生产级代码。
+                </p>
+                <div className={styles.sddGrid}>
+                    {SDD_FEATURES.map((feature) => (
+                        <article key={feature.title}>
+                            <h4>{feature.title}</h4>
+                            <p>{feature.desc}</p>
+                        </article>
+                    ))}
+                </div>
+            </div>
         </div>
     </section>
 );
