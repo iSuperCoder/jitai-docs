@@ -24,6 +24,7 @@ type DetailSection = {
     title: string;
     desc?: string;
     cards?: DetailCard[];
+    cardsLayout?: "two" | "three";
     panels?: FeaturePanel[];
     checks?: string[];
     comparison?: ComparisonRow[];
@@ -45,7 +46,7 @@ const CAPABILITY_DETAILS: Record<string, CapabilityDetail> = {
         sections: [
             {
                 title: "从「执行通用任务」到「执行专属真实业务」",
-                desc: "当前多数 AI 智能体只能执行写邮件、搜资料、翻译摘要等通用任务。JitAI 的框架突破了这一局限--通过深度接入企业专属的业务系统与数据要素，让智能体真正深入企业的实际业务流程，执行审批、派单、数据更新、客户服务等真实业务操作。",
+                desc: "当前多数 AI 智能体只能执行写邮件、搜资料、翻译摘要等通用任务。JitAI 的框架突破了这一局限——通过深度接入企业专属的业务系统与数据要素，让智能体真正深入企业的实际业务流程，执行审批、派单、数据更新、客户服务等真实业务操作。",
                 cards: [
                     {
                         title: "感知",
@@ -63,7 +64,7 @@ const CAPABILITY_DETAILS: Record<string, CapabilityDetail> = {
             },
             {
                 title: "高度集成与开放的智能体框架",
-                desc: "框架的强大之处在于高度集成化与高度开放性两面一体--既是开箱即用的能力底座，又是无所不连的业务网关。",
+                desc: "框架的强大之处在于高度集成化与高度开放性两面一体——既是开箱即用的能力底座，又是无所不连的业务网关。",
                 panels: [
                     {
                         mark: "合",
@@ -105,6 +106,7 @@ const CAPABILITY_DETAILS: Record<string, CapabilityDetail> = {
             },
             {
                 title: "四大核心特性",
+                cardsLayout: "two",
                 cards: [
                     {
                         title: "零门槛自然交互",
@@ -141,6 +143,7 @@ const CAPABILITY_DETAILS: Record<string, CapabilityDetail> = {
             },
             {
                 title: "六大自定义维度",
+                cardsLayout: "two",
                 cards: [
                     {
                         title: "自定义 LLM 大模型",
@@ -272,7 +275,7 @@ const CAPABILITY_DETAILS: Record<string, CapabilityDetail> = {
     },
     "active-hub": {
         eyebrow: "核心能力",
-        title: "主动式智能中枢",
+        title: "主动式企业管家",
         subtitle: "内置主动式智能体，实现业务流程的自动化与智能化闭环。",
         sections: [
             {
@@ -336,7 +339,7 @@ const CAPABILITY_DETAILS: Record<string, CapabilityDetail> = {
         sections: [
             {
                 title: "一套平台，两种能力",
-                desc: "JitAI 在同一平台内同时支持 AI 智能体与传统业务系统的开发与运行。不是简单的功能叠加，而是底层技术体系的真正统一--两种形态共享同一套函数、数据模型和数据库。",
+                desc: "JitAI 在同一平台内同时支持 AI 智能体与传统业务系统的开发与运行。不是简单的功能叠加，而是底层技术体系的真正统一——两种形态共享同一套函数、数据模型和数据库。",
             },
             {
                 title: "双模能力拆解",
@@ -357,11 +360,11 @@ const CAPABILITY_DETAILS: Record<string, CapabilityDetail> = {
             },
             {
                 title: "为什么双模一体是核心能力",
-                desc: "企业智能化转型的最大痛点不是“能不能做 AI”，而是 AI 系统与原有业务系统的割裂--数据不通、流程断裂、运维复杂。JitAI 的双模一体架构从根本上解决了这一矛盾：在同一套技术底座上，既能用 AI 重构业务流程，又能保持与传统 IT 系统的无缝衔接。不是推倒重来，而是渐进式智能化升级。",
+                desc: "企业智能化转型的最大痛点不是“能不能做 AI”，而是 AI 系统与原有业务系统的割裂——数据不通、流程断裂、运维复杂。JitAI 的双模一体架构从根本上解决了这一矛盾：在同一套技术底座上，既能用 AI 重构业务流程，又能保持与传统 IT 系统的无缝衔接。不是推倒重来，而是渐进式智能化升级。",
             },
             {
                 title: "价值主张",
-                desc: "一套平台，同时驾驭 AI 技术与 IT 技术的核心载体，实现新旧技术体系的无缝融合与业务驱动的全链路实现。企业不需要在“拥抱 AI”和“保留现有系统”之间做选择--JitAI 帮你两全其美。",
+                desc: "一套平台，同时驾驭 AI 技术与 IT 技术的核心载体，实现新旧技术体系的无缝融合与业务驱动的全链路实现。企业不需要在“拥抱 AI”和“保留现有系统”之间做选择——JitAI 帮你两全其美。",
             },
         ],
     },
@@ -377,9 +380,6 @@ const OfficialCapabilityDetail: React.FC<OfficialCapabilityDetailProps> = ({
     const detail = CAPABILITY_DETAILS[slug];
     const { i18n } = useDocusaurusContext();
     const homePath = i18n.currentLocale === "zh" ? "/zh/#capabilities" : "/#capabilities";
-    const handleBack = () => {
-        window.location.assign(homePath);
-    };
 
     if (!detail) {
         return null;
@@ -392,14 +392,13 @@ const OfficialCapabilityDetail: React.FC<OfficialCapabilityDetailProps> = ({
             </Head>
             <main className={styles.page}>
                 <div className={styles.shell}>
-                    <button
+                    <a
                         className={styles.backLink}
-                        onClick={handleBack}
-                        type="button"
+                        href={homePath}
                     >
                         <ArrowLeftIcon />
                         返回核心能力
-                    </button>
+                    </a>
                     <header className={styles.hero}>
                         <span>{detail.eyebrow}</span>
                         <h1>{detail.title}</h1>
@@ -425,7 +424,9 @@ const DetailSectionView: React.FC<{ section: DetailSection }> = ({
     <section className={styles.detailSection}>
         <h2>{section.title}</h2>
         {section.desc ? <p className={styles.sectionDesc}>{section.desc}</p> : null}
-        {section.cards ? <CardGrid cards={section.cards} /> : null}
+        {section.cards ? (
+            <CardGrid cards={section.cards} layout={section.cardsLayout} />
+        ) : null}
         {section.panels ? <PanelGrid panels={section.panels} /> : null}
         {section.checks ? <CheckGrid checks={section.checks} /> : null}
         {section.comparison ? (
@@ -434,8 +435,17 @@ const DetailSectionView: React.FC<{ section: DetailSection }> = ({
     </section>
 );
 
-const CardGrid: React.FC<{ cards: DetailCard[] }> = ({ cards }) => (
-    <div className={styles.cardGrid}>
+const CardGrid: React.FC<{
+    cards: DetailCard[];
+    layout?: DetailSection["cardsLayout"];
+}> = ({ cards, layout }) => (
+    <div
+        className={`${styles.cardGrid} ${
+            layout === "two" || cards.length !== 3
+                ? styles.cardGridTwo
+                : styles.cardGridThree
+        }`}
+    >
         {cards.map((card, index) => (
             <article className={styles.infoCard} key={card.title}>
                 <span>{String(index + 1).padStart(2, "0")}</span>
@@ -454,9 +464,11 @@ const PanelGrid: React.FC<{ panels: FeaturePanel[] }> = ({ panels }) => (
                     <span>{panel.mark}</span>
                     <h3>{panel.title}</h3>
                 </div>
-                {panel.desc.map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                ))}
+                <ul>
+                    {panel.desc.map((paragraph) => (
+                        <li key={paragraph}>{paragraph}</li>
+                    ))}
+                </ul>
             </article>
         ))}
     </div>

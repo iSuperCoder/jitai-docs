@@ -324,6 +324,7 @@ const CapabilitiesSection: React.FC = () => {
                     {CAPABILITIES.map((item) => (
                         <Link
                             className={styles.capabilityCard}
+                            id={`capability-${item.slug}`}
                             key={item.slug}
                             to={getCapabilityUrl(i18n.currentLocale, item.slug)}
                         >
@@ -362,8 +363,7 @@ const DeliverySection: React.FC = () => (
                 ))}
             </div>
             <p className={styles.deliveryLine}>
-                全场景系统一站式生成：营销智能体 · 销售智能体 · 审计智能体 ·
-                财务智能体 · 业务管理系统 · CRM/ERP 核心 · 协同办公 OA ......
+                全场景系统一站式生成：营销智能体 · 销售智能体 · 审计智能体 · 财务智能体 · 业务管理系统 · CRM/ERP 核心 · 协同办公 OA ......
             </p>
             <div className={styles.sddPanel}>
                 <span>底层引擎</span>
@@ -396,38 +396,58 @@ const ValueSection: React.FC = () => (
 
 const ValuePanel: React.FC<{
     section: (typeof VALUE_SECTIONS)[number];
+}> = ({ section }) => {
+    const copy = <ValueCopy section={section} />;
+    const visual = <ValueVisual type={section.visual} />;
+
+    return (
+        <section
+            className={`${styles.section} ${styles.valuePanel} ${
+                section.dark ? styles.darkSection : styles.subtleSection
+            }`}
+        >
+            <div className={styles.shell}>
+                <div
+                    className={`${styles.valueGrid} ${
+                        section.reverse ? styles.valueGridReverse : ""
+                    }`}
+                >
+                    {section.reverse ? (
+                        <>
+                            {visual}
+                            {copy}
+                        </>
+                    ) : (
+                        <>
+                            {copy}
+                            {visual}
+                        </>
+                    )}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const ValueCopy: React.FC<{
+    section: (typeof VALUE_SECTIONS)[number];
 }> = ({ section }) => (
-    <section
-        className={`${styles.section} ${styles.valuePanel} ${
-            section.dark ? styles.darkSection : styles.subtleSection
-        }`}
-    >
-        <div className={styles.shell}>
-            <div
-                className={`${styles.valueGrid} ${
-                    section.reverse ? styles.valueGridReverse : ""
-                }`}
-            >
-                <div className={styles.valueCopy}>
-                    <span className={styles.valueEyebrow}>{section.eyebrow}</span>
-                    <h2>{section.title}</h2>
-                    <p className={styles.valueSubtitle}>{section.subtitle}</p>
-                    <div className={styles.valuePoints}>
-                        {section.points.map((point, index) => (
-                            <div className={styles.valuePoint} key={point.title}>
-                                <span>{String(index + 1).padStart(2, "0")}</span>
-                                <div>
-                                    <h3>{point.title}</h3>
-                                    <p>{point.desc}</p>
-                                </div>
-                            </div>
-                        ))}
+    <div className={styles.valueCopy}>
+        <span className={styles.valueEyebrow}>{section.eyebrow}</span>
+        <h2>{section.title}</h2>
+        <p className={styles.valueSubtitle}>{section.subtitle}</p>
+        <div className={styles.valuePoints}>
+            {section.points.map((point, index) => (
+                <div className={styles.valuePoint} key={point.title}>
+                    <span>{String(index + 1).padStart(2, "0")}</span>
+                    <div>
+                        <h3>{point.title}</h3>
+                        <p>{point.desc}</p>
                     </div>
                 </div>
-                <ValueVisual type={section.visual} />
-            </div>
+            ))}
         </div>
-    </section>
+    </div>
 );
 
 const ValueVisual: React.FC<{ type: string }> = ({ type }) => {
