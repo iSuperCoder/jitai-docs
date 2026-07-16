@@ -1,664 +1,358 @@
-/* DownloadSection 样式 - 遵循统一设计规范 */
-
-/* 页面特定变量 */
-:root {
-  --page-title-line-height: 1.5;
-  --card-title-line-height: 1.3;
-}
-
-/* 中文主题变量 */
-:root[lang="zh"] {
-  --page-title-line-height: 1.4;
-  --card-title-line-height: 1.4;
-}
-
-/* ===== 页面容器 ===== */
 .download {
+  --download-background: #ffffff;
+  --download-foreground: #0f172a;
+  --download-muted: #475569;
+  --download-soft: #f8fafc;
+  --download-border: #e2e8f0;
+  --download-accent: #4361ee;
+  --download-accent-soft: rgba(67, 97, 238, 0.08);
+  --download-font:
+    "JitHomeGeist", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji";
+
+  background:
+    radial-gradient(circle at 12% 12%, rgba(67, 97, 238, 0.07), transparent 28rem),
+    var(--download-background);
+  color: var(--download-foreground);
+  font-family: var(--download-font);
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  position: relative;
   overflow: hidden;
-  font-family: var(--font-primary);
-  padding: var(--section-padding);
+  padding: 120px 0 96px;
 }
 
-/* ===== 页面布局 ===== */
+.download *,
+.download *::before,
+.download *::after {
+  box-sizing: border-box;
+  font-family: var(--download-font) !important;
+}
+
 .sectionContent {
   margin: 0 auto;
-  max-width: 1400px;
+  max-width: 1120px;
+  padding: 0 32px;
   width: 100%;
 }
 
-
-/* ===== 页面标题 ===== */
 .pageHeader {
+  margin: 0 auto 48px;
+  max-width: 720px;
   text-align: center;
-  margin-bottom: var(--space-4);
-  margin-top: var(--space-8);
 }
 
 .pageTitle {
-  font-size: var(--font-size-title);
-  font-weight: var(--font-weight-extrabold);
-  color: var(--color-secondary);
-  margin-bottom: var(--space-6);
-  line-height: var(--page-title-line-height) !important;
+  color: var(--download-foreground);
+  font-size: 48px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.1;
+  margin: 0;
 }
 
 .pageSubtitle {
-  font-size: var(--font-size-subtitle);
-  color: var(--text-secondary);
-  max-width: 800px;
-  margin: 0 auto;
-  line-height: var(--line-height-relaxed);
+  color: var(--download-muted);
+  font-size: 18px;
+  line-height: 1.6;
+  margin: 18px auto 0;
 }
 
-
-/* ===== 下载内容区域 ===== */
 .downloadContent {
-  margin: var(--space-12) 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  align-items: stretch;
+  display: grid;
+  gap: 20px;
 }
 
-/* ===== 网格布局 ===== */
 .desktopCards {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-6);
-  align-items: stretch;
+  gap: 20px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.dockerCard {
-  width: 100%;
-}
-
-/* ===== 移动端顶部提示条 ===== */
-.mobileTopBanner {
-  background: #EFF6FF; /* 浅蓝色背景 */
-  border-bottom: 1px solid #DBEAFE;
-  color: #1E40AF; /* 深蓝色文字 */
-  padding: var(--space-6) var(--space-2);
-  text-align: center;
-  position: relative;
-  width: 100%;
-  margin-top: 64px; /* 避开固定导航栏 */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-/* 添加一个左侧强调线 */
-.mobileTopBanner::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: #3B82F6; /* 提示蓝色 */
-}
-
-.mobileTopBannerContent {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.mobileTopBannerTitle {
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  margin: 0;
-  color: #1E3A8A; /* 更深的标题色 */
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-/* 添加提示图标 */
-.mobileTopBannerTitle::before {
-  content: "ⓘ"; /* 简单的信息图标，也可以用 SVG */
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  background: #3B82F6;
-  color: white;
-  border-radius: 50%;
-  font-size: 18px;
-  font-weight: bold;
-  font-family: serif; /* 让 i 看起来更像图标 */
-}
-
-.mobileTopBannerDescription {
-  font-size: var(--font-size-sm);
-  margin: 0;
-  opacity: 1;
-  line-height: 1.5;
-  color: #1E40AF;
-}
-
-/* ===== 版本卡片 ===== */
 .versionCard {
-  background: var(--bg-card);
-  backdrop-filter: blur(15px);
-  border-radius: var(--border-radius-card);
-  border: 1px solid var(--border-color-light);
-  box-shadow: var(--shadow-md);
-  transition: var(--transition-primary);
-  padding: var(--card-padding);
+  align-items: flex-start;
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid var(--download-border);
+  border-radius: 16px;
   display: flex;
-  align-items: center;
-  gap: var(--space-8);
-  position: relative;
-  overflow: hidden;
+  gap: 20px;
+  min-height: 220px;
+  padding: 28px;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
 }
 
 .versionCard:hover {
-  box-shadow: var(--shadow-md) !important;
-  border-color: var(--color-primary);
-  background: var(--bg-card-hover);
+  border-color: rgba(67, 97, 238, 0.24);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
 }
 
-.versionHeader {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+.dockerCard {
+  min-height: 0;
 }
 
 .versionIcon {
-  width: 80px;
-  height: 80px;
-  display: flex;
   align-items: center;
+  background: var(--download-accent-soft);
+  border: 1px solid rgba(67, 97, 238, 0.12);
+  border-radius: 14px;
+  color: var(--download-accent);
+  display: flex;
+  flex: 0 0 auto;
+  height: 56px;
   justify-content: center;
-  color: var(--color-secondary);
-  flex-shrink: 0;
+  width: 56px;
 }
 
 .iconSvg {
-  width: 64px;
-  height: 64px;
   display: block;
-  flex-shrink: 0;
+  height: 32px;
+  width: 32px;
 }
 
 .iconWindows {
-  transform: scale(0.9);
+  transform: scale(0.92);
 }
 
 .iconMac {
-  transform: scale(1.05);
+  transform: scale(1.02);
 }
 
 .iconDocker {
-  transform: scale(1.0);
+  transform: scale(1);
+}
+
+.versionHeader {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .versionTitle {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-secondary);
+  color: var(--download-foreground);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.25;
   margin: 0;
 }
 
 .versionDescription {
-  font-size: var(--font-size-base);
-  color: var(--text-secondary);
-  line-height: var(--line-height-normal);
-  margin: var(--space-2) 0;
+  color: var(--download-muted);
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 10px 0 22px;
 }
 
-.versionInfo {
-  margin-bottom: var(--space-6);
-}
-
-.requirements {
-  margin-bottom: var(--space-6);
-}
-
-.requirementsTitle {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  margin-bottom: var(--space-3);
-}
-
-.requirementsList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.requirementsList li {
-  padding: var(--space-2) 0;
-  color: var(--text-secondary);
-  position: relative;
-  padding-left: var(--space-6);
-}
-
-.requirementsList li::before {
-  content: "✓";
-  position: absolute;
-  left: 0;
-  color: #10b981;
-  font-weight: var(--font-weight-bold);
-}
-
-/* ===== 下载按钮 ===== */
 .downloadActions {
   display: flex;
-  flex-direction: row;
-  gap: var(--space-3);
-  margin: 0;
   flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
 }
 
-.downloadButton {
-  display: flex;
+.downloadButton,
+.downloadButtonSecondary,
+.copyButton {
   align-items: center;
-  justify-content: center;
-  padding: var(--space-3) var(--space-5);
-  background: var(--color-primary);
-  color: var(--color-white);
-  text-decoration: none;
-  border-radius: var(--border-radius-button);
-  font-weight: var(--font-weight-semibold);
-  transition: var(--transition-primary);
-  box-shadow: var(--shadow-md);
-  font-size: var(--font-size-base);
-  letter-spacing: 0.02em;
-  border: none;
+  border-radius: 999px;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 500;
+  justify-content: center;
+  line-height: 1.25;
+  min-height: 44px;
+  padding: 12px 22px;
+  text-decoration: none;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    opacity 150ms ease;
+  white-space: nowrap;
 }
 
-.downloadButton::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
+.downloadButton,
+.copyButton {
+  background: var(--download-accent);
+  border: 1px solid var(--download-accent);
+  color: #ffffff;
 }
 
-.downloadButton:hover::before {
-  left: 100%;
-}
-
-.downloadButton:hover {
-  box-shadow: var(--hover-shadow-primary);
-  color: var(--color-white);
+.downloadButton:hover,
+.copyButton:hover {
+  color: #ffffff;
+  opacity: 0.9;
   text-decoration: none;
 }
 
-/* ===== 次按钮样式 ===== */
 .downloadButtonSecondary {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-3) var(--space-5);
-  background: transparent;
-  color: var(--color-primary);
-  border: 2px solid var(--color-primary);
-  text-decoration: none;
-  border-radius: var(--border-radius-button);
-  font-weight: var(--font-weight-semibold);
-  transition: var(--transition-primary);
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  font-size: var(--font-size-base);
-  letter-spacing: 0.02em;
-}
-
-.downloadButtonSecondary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.downloadButtonSecondary:hover::before {
-  left: 100%;
+  background: #ffffff;
+  border: 1px solid var(--download-border);
+  color: var(--download-foreground);
 }
 
 .downloadButtonSecondary:hover {
-  box-shadow: var(--hover-shadow-primary);
-  background: transparent;
-  color: var(--color-primary);
+  border-color: rgba(67, 97, 238, 0.32);
+  color: var(--download-accent);
   text-decoration: none;
 }
 
-/* ===== 安装步骤 ===== */
-.installationSteps {
-  margin-bottom: var(--space-6);
-}
-
-.stepsTitle {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--text-primary);
-  margin-bottom: var(--space-3);
-}
-
-.stepsList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  counter-reset: step-counter;
-}
-
-.stepsList li {
-  padding: var(--space-3) 0;
-  color: var(--text-secondary);
-  position: relative;
-  padding-left: var(--space-10);
-  counter-increment: step-counter;
-}
-
-.stepsList li::before {
-  content: counter(step-counter);
-  position: absolute;
-  left: 0;
-  top: var(--space-3);
-  width: var(--space-6);
-  height: var(--space-6);
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-  color: var(--color-white);
-  border-radius: var(--border-radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
-}
-
-/* ===== 警告框 ===== */
-.warningBox {
-  background: #fef3cd;
-  border: 1px solid #fde68a;
-  border-radius: var(--border-radius-md);
-  padding: var(--space-4);
-  display: flex;
-  gap: var(--space-3);
-  margin-top: var(--space-6);
-}
-
-.warningIcon {
-  font-size: var(--font-size-xl);
-  color: #d97706;
-}
-
-.warningContent {
-  flex: 1;
-}
-
-.warningTitle {
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
-  color: #d97706;
-  margin: 0 0 var(--space-2) 0;
-}
-
-.warningText {
-  font-size: var(--font-size-sm);
-  color: #92400e;
-  margin: 0;
-  line-height: var(--line-height-normal);
-}
-
-/* ===== 代码块容器 ===== */
 .codeContainer {
-  position: relative;
+  margin-top: 4px;
   width: 100%;
 }
 
-/* ===== 代码块 ===== */
 .codeBlock {
-  background: var(--color-gray-900);
-  border-radius: var(--border-radius-md);
-  margin: 0;
+  background: #0b1120;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
   overflow: hidden;
   width: 100%;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--color-gray-700);
 }
 
 .codeContent {
-  display: flex;
   align-items: flex-start;
-  justify-content: flex-start;
-  padding: var(--space-4);
-  margin: 0;
-  overflow-x: auto;
-  flex-wrap: wrap;
-  gap: 0;
+  display: flex;
+  gap: 10px;
+  padding: 18px;
 }
 
 .codePrompt {
-  color: #00ff88;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-sm);
-  margin-right: var(--space-2);
-  flex-shrink: 0;
-  line-height: var(--line-height-normal);
-  margin-top: 0;
+  color: #8fb0ff;
+  flex: 0 0 auto;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace !important;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.6;
 }
 
 .codeText {
-  display: flex;
-  flex: 1;
-  align-items: flex-start;
-  gap: var(--space-2);
+  min-width: 0;
 }
 
 .codeContent code {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-  font-size: var(--font-size-sm);
   background: transparent;
-  color: var(--color-gray-200);
-  line-height: var(--line-height-normal);
-  white-space: pre-wrap;
-  word-break: break-all;
-  flex: 1;
+  color: #e5edff;
+  display: block;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace !important;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
   padding: 0;
+  white-space: pre-wrap;
 }
 
-/* ===== 代码块操作按钮 ===== */
 .codeActions {
   display: flex;
-  align-items: center;
-  /* justify-content: flex-end; */
-  margin-top: var(--space-3);
-  padding: 0;
+  margin-top: 14px;
 }
 
 .copyButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-3) var(--space-5);
-  background: var(--color-primary);
-  color: var(--color-white);
-  text-decoration: none;
-  border-radius: var(--border-radius-button);
-  font-weight: var(--font-weight-semibold);
-  transition: var(--transition-primary);
-  box-shadow: var(--shadow-md);
-  font-size: var(--font-size-base);
-  border: none;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
+  border: 0;
 }
 
-.copyButton::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s;
-}
-
-.copyButton:hover::before {
-  left: 100%;
-}
-
-.copyButton:hover {
-  box-shadow: var(--hover-shadow-primary);
-  color: var(--color-white);
-  text-decoration: none;
-}
-
-/* ===== 帮助链接 ===== */
 .helpLink {
-  margin-top: var(--space-8);
+  margin-top: 32px;
   text-align: center;
-  padding: 0 var(--space-4);
 }
 
 .helpLink a {
-  color: var(--color-primary);
+  color: var(--download-muted);
+  font-size: 14px;
   text-decoration: none;
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  transition: var(--transition-fast);
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
+  transition: color 150ms ease;
 }
 
 .helpLink a:hover {
-  color: var(--color-secondary);
-  text-decoration: underline;
+  color: var(--download-accent);
 }
 
 .helpLink a::after {
-  content: "→";
-  font-size: var(--font-size-xs);
-  transition: transform var(--transition-fast);
+  content: "->";
+  margin-left: 8px;
 }
 
-.helpLink a:hover::after {
-  transform: translateX(var(--space-1));
+.mobileTopBanner {
+  background: var(--download-soft);
+  border-bottom: 1px solid var(--download-border);
+  color: var(--download-muted);
+  margin: -56px 0 48px;
+  padding: 18px 24px;
+  text-align: center;
+  width: 100%;
 }
 
-/* ===== 响应式设计 ===== */
-@media (max-width: 768px) {
-  .pageTitle {
-    font-size: var(--font-size-4xl);
+.mobileTopBannerContent {
+  margin: 0 auto;
+  max-width: 560px;
+}
+
+.mobileTopBannerTitle {
+  color: var(--download-foreground);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.mobileTopBannerDescription {
+  color: var(--download-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 6px 0 0;
+}
+
+@media (max-width: 900px) {
+  .download {
+    padding: 104px 0 72px;
   }
-  
-  .pageSubtitle {
-    font-size: var(--font-size-base);
-  }
-  
-  .versionTitle {
-    font-size: var(--font-size-xl);
-  }
-  
-  .versionIcon {
-    width: 56px;
-    height: 56px;
-  }
-  
-  .iconSvg {
-    width: 44px;
-    height: 44px;
-  }
-  
+
   .desktopCards {
     grid-template-columns: 1fr;
-    gap: var(--space-4);
-  }
-  
-  .versionCard {
-    padding: var(--space-6);
-    flex-direction: column;
-    text-align: center;
-    gap: var(--space-6);
   }
 
-  .versionHeader {
-    text-align: center;
-  }
-  
-  .downloadActions {
-    justify-content: center;
-  }
-  
-  .codeContent {
-    padding: var(--space-3);
-  }
-  
-  .codeText {
-    margin-bottom: var(--space-3);
-  }
-  
-  .codeContent code {
-    text-align: left;
-  }
-  
-  .codeActions {
-    justify-content: center;
-    margin-top: var(--space-2);
+  .versionCard {
+    min-height: 0;
   }
 }
 
-@media (max-width: 480px) {
-  .download {
-    padding: 0;
-    padding-bottom: var(--space-16);
-  }
-  
+@media (max-width: 640px) {
   .sectionContent {
-    padding: 0 var(--space-4);
+    padding: 0 16px;
   }
-  
+
   .pageHeader {
-    margin: var(--space-8) 0;
+    margin-bottom: 36px;
+    text-align: left;
   }
-  
+
   .pageTitle {
-    font-size: var(--font-size-3xl);
+    font-size: 34px;
   }
-  
+
+  .pageSubtitle {
+    font-size: 16px;
+  }
+
   .versionCard {
-    padding: var(--space-4);
+    flex-direction: column;
+    gap: 16px;
+    padding: 22px;
   }
-  
-  .versionIcon {
-    width: 50px;
-    height: 50px;
+
+  .downloadActions,
+  .codeActions {
+    width: 100%;
   }
-  
-  .iconSvg {
-    width: 40px;
-    height: 40px;
+
+  .downloadButton,
+  .downloadButtonSecondary,
+  .copyButton {
+    width: 100%;
   }
 }

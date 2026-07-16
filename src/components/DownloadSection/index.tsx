@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import styles from './styles.module.css';
-import globalStyles from '../../pages/index.module.css';
 import CONTENT_EN from './constant-en';
 import CONTENT_ZH from './constant-zh';
 
@@ -41,12 +40,15 @@ const DownloadSection: React.FC<DownloadSectionProps> = ({ currentLocale }) => {
   };
 
   const handleMacDownload = (url: string) => {
-    // 先打开安全提示页面
-    window.open(url);
-    // 延迟打开下载链接，避免浏览器拦截
+    const iframe = document.createElement("iframe");
+    iframe.src = url;
+    iframe.style.display = "none";
+    iframe.setAttribute("aria-hidden", "true");
+    document.body.appendChild(iframe);
+
     setTimeout(() => {
-      window.location.href = CONTENT.desktop.mac.macSecurityUrl;
-    }, 100);
+      iframe.remove();
+    }, 30000);
   };
 
   const renderMobileContent = () => (
@@ -96,13 +98,15 @@ const DownloadSection: React.FC<DownloadSectionProps> = ({ currentLocale }) => {
             <h2 className={styles.versionTitle}>{CONTENT.desktop.mac.title}</h2>
             <p className={styles.versionDescription}>{CONTENT.desktop.mac.description}</p>
             <div className={styles.downloadActions}>
-              <button 
+              <button
+                type="button"
                 onClick={() => handleMacDownload(CONTENT.desktop.mac.appleDownloadUrl)}
                 className={`${styles.downloadButton} ${'analytics-downloadMac' + (isMobile ? '-mobile' : '')} ${'analytics-downloadMacApple' + (isMobile ? '-mobile' : '')}`}
               >
                 {CONTENT.desktop.mac.appleDownloadText}
               </button>
-              <button 
+              <button
+                type="button"
                 onClick={() => handleMacDownload(CONTENT.desktop.mac.intelDownloadUrl)}
                 className={`${styles.downloadButtonSecondary} ${'analytics-downloadMac' + (isMobile ? '-mobile' : '')} ${'analytics-downloadMacIntel' + (isMobile ? '-mobile' : '')}`}
               >
@@ -140,6 +144,7 @@ const DownloadSection: React.FC<DownloadSectionProps> = ({ currentLocale }) => {
             {/* 复制按钮 - 位于代码块外面右下角 */}
             <div className={styles.codeActions}>
               <button 
+                type="button"
                 className={`${styles.copyButton} ${'analytics-copyDocker' + (isMobile ? '-mobile' : '')}`}
                 onClick={handleCopy}
               >
@@ -155,7 +160,7 @@ const DownloadSection: React.FC<DownloadSectionProps> = ({ currentLocale }) => {
   return (
     <section id="download-section" className={`${styles.download}`}>
       {isMobile && renderMobileContent()}
-      <div className={`${globalStyles.sectionContent} ${styles.sectionContent}`}>
+      <div className={styles.sectionContent}>
         {/* 页面标题 */}
         <div className={`${styles.pageHeader}`}>
           <h1 className={styles.pageTitle}>{CONTENT.title}</h1>
