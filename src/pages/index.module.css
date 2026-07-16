@@ -1017,6 +1017,16 @@
     padding-top: 24px;
 }
 
+.footerIcp {
+    color: rgba(255, 255, 255, 0.3);
+    text-decoration: none;
+    transition: color 150ms ease;
+}
+
+.footerIcp:hover {
+    color: #ffffff;
+}
+
 @media (min-width: 640px) {
     .shell {
         padding: 0 24px;

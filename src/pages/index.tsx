@@ -547,6 +547,14 @@ const HomeFooter: React.FC = () => {
                 </div>
                 <div className={styles.footerBottom}>
                     <span>© {COPYRIGHT_YEAR} JitAI. All rights reserved.</span>
+                    <a
+                        className={styles.footerIcp}
+                        href="https://beian.miit.gov.cn/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        鄂ICP备18017077号-7
+                    </a>
                 </div>
             </div>
         </footer>
