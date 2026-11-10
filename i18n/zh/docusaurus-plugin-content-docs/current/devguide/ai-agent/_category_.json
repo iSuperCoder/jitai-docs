@@ -1,9 +1,0 @@
-{
-  "label": "AI Agent",
-  "position": 9,
-  "link": {
-    "type": "generated-index",
-    "slug": "devguide/ai-agent",
-    "description": "了解四种 AI Agent 类型，学习如何创建 Agent、添加工具、扩展能力，以及将 Agent 融入你的应用。"
-  }
-}

@@ -1,15 +1,15 @@
-# Quickly BuildProduction-Grade AIApps
+# JitAI
 
-> The world's first interpreted app framework enabling AI agents to perceive and orchestrate systems in real-time, boosting development efficiency by 10x!
+> Build AI-native business systems and unleash the full potential of AI.
 
 Website: https://jit.pro
 
-- [Quickly BuildProduction-Grade AIApps](https://jit.pro): The world's first interpreted app framework enabling AI agents to perceive and orchestrate systems in real-time, boosting development efficiency by 10x!
-- [Blog](https://jit.pro/blog): Explore the latest trends in AI application development, learn practical technical tutorials, and discover the latest features and success stories of the JitAI platform
-- [Download](https://jit.pro/download): Download JitAI desktop edition for local development, or choose server edition for production deployment. Supports Windows, Mac and Docker installation methods.
-- [Tutorial Index](https://jit.pro/docs/tutorial): Welcome to the JitAI Getting Started Tutorial! We provide progressive, practice-oriented step-by-step learning guides to help you quickly master JitAI application development and build powerful AI apps.
-- [Developer Guide Index](https://jit.pro/docs/devguide): Experience a revolutionary approach to application development. Build powerful enterprise-grade applications using cutting-edge AI technology.
-- [Extending Guide Index](https://jit.pro/docs/extguide): JitAI provides a rich set of official development frameworks, enabling you to build solutions tailored to specific needs on the JitAI ecosystem.
-- [Reference Index](https://jit.pro/docs/reference): JitAI reference documentation provides comprehensive API documentation, configuration instructions, and technical specifications. Developers can query element configuration parameters, method invocation interfaces, data structure definitions, and platform protocol specifications to quickly resolve technical issues during development.
-- [Open Source](https://jit.pro/docs/opensource): Explore our open source projects at https://github.com/jitai-team
-
+- [Home](https://jit.pro/): JitAI platform overview.
+- [Solutions](https://jit.pro/solutions): Business applications of AI-native systems.
+- [Technical whitepaper](https://jit.pro/whitepaper): Architecture and technical principles.
+- [Scenarios](https://jit.pro/cases): Example implementation scenarios.
+- [Partners](https://jit.pro/partners): Partnership opportunities.
+- [Download](https://jit.pro/download): Desktop installers and server installation command.
+- [About](https://jit.pro/about): Company and delivery options.
+- [Contact](https://jit.pro/contact): Business and installation support.
+- [中文官网](https://jit.pro/zh): 中文产品、技术和合作介绍。

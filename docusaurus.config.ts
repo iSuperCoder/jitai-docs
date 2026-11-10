@@ -98,39 +98,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         [
             "classic",
             {
-                docs: {
-                    sidebarPath: "./sidebars.ts",
-                    editUrl:
-                        "https://github.com/jitai-team/jitai-docs/tree/master",
-                    lastVersion: "current",
-                    versions: {
-                        current: {
-                            label: "2.0.x",
-                            banner: "none",
-                        },
-                        "1.6.x": {
-                            label: "1.6.x",
-                            path: "1.6.x",
-                            banner: "none",
-                        },
-                    },
-                },
-                blog: {
-                    showReadingTime: true,
-                    postsPerPage: 9999, // 显示全部文章，不分页
-                    feedOptions: {
-                        type: ["rss", "atom"],
-                        xslt: true,
-                    },
-                    // Please change this to your repo.
-                    // Remove this to remove the "edit this page" links.
-                    editUrl:
-                        "https://github.com/jitai-team/jitai-docs/tree/master",
-                    // Useful options to enforce blogging best practices
-                    onInlineTags: "throw",
-                    onInlineAuthors: "throw",
-                    onUntruncatedBlogPosts: "throw",
-                },
+                // 旧中英文文档、历史版本与博客已下线；资讯由服务器独立数据目录承载。
+                docs: false,
+                blog: false,
                 theme: {
                     customCss: [
                         "./src/css/variables.css",
@@ -184,7 +154,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     // 添加客户端模块
     clientModules: [
-        "./src/clientModules/readingProgress.js",
         "./src/clientModules/utmTracker.js",
         "./src/clientModules/fixLocaleLinks.js",
     ],
@@ -240,41 +209,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     to: "/industry-agents",
                     position: "left",
                 },
+                // 主题布局仍用于 404 等页面，只保留当前有效入口。
                 {
-                    label: "Developer",
+                    label: "Whitepaper",
+                    to: "/whitepaper",
                     position: "left",
-                    items: [
-                        {
-                            label: "Developer Guide",
-                            to: "/docs/devguide",
-                        },
-                        {
-                            label: "Reference",
-                            to: "/docs/reference",
-                        },
-                        {
-                            label: "Extending",
-                            to: "/docs/extguide",
-                        },
-                        {
-                            label: "Forum",
-                            href: "https://forum.jit.pro",
-                        },
-                    ],
+                },
+                {
+                    label: "Forum",
+                    href: "https://forum.jit.pro",
+                    position: "left",
                 },
                 {
                     label: "Contact Us",
                     to: "/contact",
                     position: "left",
-                },
-                {
-                    type: "search",
-                    position: "right",
-                },
-                {
-                    type: "docsVersionDropdown",
-                    position: "right",
-                    dropdownActiveClassDisabled: true,
                 },
                 {
                     type: "localeDropdown",
@@ -300,27 +249,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                             label: "Try Online",
                             to: "https://demo.jit.pro/wanyun/AdminApp",
                         },
-                        {
-                            label: "Blog",
-                            to: "/blog",
-                        },
                     ],
                 },
                 {
-                    title: "Documentation",
+                    title: "Technology",
                     items: [
-                        {
-                            label: "Developer Guide",
-                            to: "/docs/devguide",
-                        },
-                        {
-                            label: "Extending",
-                            to: "/docs/extguide",
-                        },
-                        {
-                            label: "Reference",
-                            to: "/docs/reference",
-                        },
+                        { label: "Whitepaper", to: "/whitepaper" },
+                        { label: "Solutions", to: "/solutions" },
                     ],
                 },
                 {
@@ -368,14 +303,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 dark: "dark",
             },
         },
-        algolia: {
-            appId: "DZ5X5FUUCG",
-            apiKey: "a3d6338cf6bd1e789ab3c6d7064e0796",
-            indexName: "crawler_doc_spider",
-            contextualSearch: true, // 启用上下文搜索，根据当前语言过滤结果
-            searchPagePath: "search",
-            insights: false,
-        },
+        // 原 Algolia 搜索面向已删除的文档与博客，停止生成旧搜索页。
     } satisfies Preset.ThemeConfig,
 };
 

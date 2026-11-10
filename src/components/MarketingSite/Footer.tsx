@@ -1,6 +1,7 @@
 import React from 'react';
-import { useMarketingCopy, CONTACT_EMAIL, FORUM_URL, LOGO_DARK, LOGO_LIGHT } from './copy';
+import { useMarketingCopy, CONTACT_EMAIL, FORUM_URL, LOGO_DARK, LOGO_LIGHT, NEWS_PATH } from './copy';
 
+/** 官网页脚：theme 决定 Logo；资讯与论坛使用固定入口，其余营销链接按当前语言生成。 */
 export default function Footer({ theme }: { theme: 'light' | 'dark' }) {
   const { text, path } = useMarketingCopy();
   const groups = [
@@ -9,6 +10,7 @@ export default function Footer({ theme }: { theme: 'light' | 'dark' }) {
     ] },
     { title: text('合作与场景', 'Partnerships & scenarios'), links: [
       ['/partners', text('渠道伙伴合作', 'Partner with JitAI')], ['/cases', text('场景示例', 'Scenario examples')], ['/contact', text('商务交流', 'Talk to our team')],
+      [NEWS_PATH, text('资讯中心', 'News & Insights')],
     ] },
     { title: text('关于', 'About'), links: [
       ['/about', text('关于我们', 'About JitAI')], [FORUM_URL, text('论坛', 'Forum')], ['/privacy', text('隐私协议', 'Privacy policy')], ['/terms-of-service', text('服务条款', 'Terms of service')],
@@ -21,7 +23,7 @@ export default function Footer({ theme }: { theme: 'light' | 'dark' }) {
         <p>{text('AI 原生应用平台。让企业拥有可自生长的 AI 经营大脑。', 'An AI-native application platform. Give enterprises a business AI brain that continually evolves.')}</p>
         <div className="tag-row mt-16"><span className="tag">{text('业务系统 AI 原生', 'AI-native systems')}</span><span className="tag">{text('开发过程 AI 原生', 'AI-native development')}</span></div>
       </div>
-      {groups.map(group => <div className="footer-col" key={group.title}><h2 className="h5">{group.title}</h2><ul>{group.links.map(([url, label]) => <li key={url}><a href={url.startsWith('/') ? path(url) : url}>{label}</a></li>)}</ul></div>)}
+      {groups.map(group => <div className="footer-col" key={group.title}><h2 className="h5">{group.title}</h2><ul>{group.links.map(([url, label]) => <li key={url}><a href={url === NEWS_PATH ? NEWS_PATH : url.startsWith('/') ? path(url) : url}>{label}</a></li>)}</ul></div>)}
     </div>
     <div className="footer-bottom">
       <div>© {new Date().getFullYear()} JitAI. {text('保留所有权利。', 'All rights reserved.')}</div>

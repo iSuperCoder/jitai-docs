@@ -1,0 +1,2 @@
+# 仅服务于轻量 HTML 迁移；不需要 Node、Docusaurus 或前端依赖安装。
+beautifulsoup4==4.12.3

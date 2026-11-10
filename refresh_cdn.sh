@@ -1,10 +1,21 @@
 #!/usr/bin/env bash
+# 主站 CDN 刷新入口：扫描主站静态页面；资讯数据目录由 scripts/news 独立管理刷新。
+# 凭证沿用运行主机的 aliyun CLI 环境，本脚本不保存密钥。DRY_RUN=1 仅打印 URL。
 set -euo pipefail
 
 DOMAIN="${DOMAIN:-https://jit.pro}"
 BUILD_DIR="${BUILD_DIR:-build}"
+# 统一末尾斜线，保证 find 输出路径和资讯排除路径一致。
+BUILD_DIR="${BUILD_DIR%/}"
 REGION_ID="${REGION_ID:-cn-hangzhou}"
 DRY_RUN="${DRY_RUN:-0}"
+# 必须与资讯生成器一致；同时兼容实体目录和符号链接，不能依赖 find 恰好不跟随链接。
+NEWS_PUBLIC_PATH="${NEWS_PUBLIC_PATH:-/zh/news/}"
+if [[ ! "$NEWS_PUBLIC_PATH" =~ ^/([a-zA-Z0-9_-]+/)+$ ]]; then
+  echo "Invalid NEWS_PUBLIC_PATH" >&2
+  exit 1
+fi
+news_directory="$BUILD_DIR${NEWS_PUBLIC_PATH%/}"
 
 # entry: only refresh public entry files. This is the default.
 # targeted: refresh public entry files plus docs directory prefixes.
@@ -85,8 +96,11 @@ should_include_entry_html() {
 }
 
 add_static_entry_files() {
+  # 可选元文件不存在时正常跳过，不能让最后一个文件的缺失触发 set -e 中止刷新。
   while IFS= read -r path; do
-    [[ -f "$BUILD_DIR$path" ]] && add_file "$path"
+    if [[ -f "$BUILD_DIR$path" ]]; then
+      add_file "$path"
+    fi
   done <<'EOF'
 /robots.txt
 /sitemap.xml
@@ -96,19 +110,21 @@ EOF
 }
 
 add_entry_files() {
+  # 只扫描主站入口；prune 在遍历前跳过资讯，避免主站发布重复刷新独立内容。
   while IFS= read -r html_file; do
     rel_path="${html_file#"$BUILD_DIR"/}"
     should_include_entry_html "$rel_path" && add_html_route "$rel_path"
-  done < <(find "$BUILD_DIR" -type f -name '*.html' | sort)
+  done < <(find "$BUILD_DIR" -path "$news_directory" -prune -o -type f -name '*.html' -print | sort)
 
   add_static_entry_files
 }
 
 add_generated_html_files() {
+  # full 也仅表示主站全部页面，不包含资讯列表、详情或其资源。
   while IFS= read -r html_file; do
     rel_path="${html_file#"$BUILD_DIR"/}"
     add_html_route "$rel_path"
-  done < <(find "$BUILD_DIR" -type f -name '*.html' | sort)
+  done < <(find "$BUILD_DIR" -path "$news_directory" -prune -o -type f -name '*.html' -print | sort)
 
   add_static_entry_files
 }
@@ -131,6 +147,15 @@ case "$REFRESH_SCOPE" in
     exit 1
     ;;
 esac
+
+# 已退役的博客和文档不再出现在文件扫描里，必须显式清理缓存；入口别名也需刷新，目录刷新仅覆盖后代。
+# 所有模式都执行，避免发布模式不同导致旧文章继续对外可见。
+for retired in /blog /zh/blog /docs /zh/docs; do
+  add_directory "$retired/"
+  for suffix in '' / .html /index.html; do
+    add_file "$retired$suffix"
+  done
+done
 
 sort -u "$tmp_urls" -o "$tmp_urls"
 

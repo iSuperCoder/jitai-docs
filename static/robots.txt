@@ -9,6 +9,8 @@ Disallow: /search
 # Algolia-Crawler-Verif: 576057B2D3ECA7D8
 # Sitemap
 Sitemap: https://jit.pro/sitemap.xml
+# 资讯由服务器独立发布，保留自己的 sitemap，不并入主站构建产物。
+Sitemap: https://jit.pro/zh/news/sitemap.xml
 
 # Allow all other content for SEO
-# This includes documentation, tutorials, and main site pages
+# Current marketing pages; retired documentation and blog routes are no longer generated

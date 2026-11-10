@@ -8,6 +8,6 @@
       "@site/*": ["./*"]
     }
   },
-  "include": ["src/**/*", "docusaurus.config.ts", "sidebars.ts"],
+  "include": ["src/**/*", "docusaurus.config.ts"],
   "exclude": [".docusaurus", "build"]
 }

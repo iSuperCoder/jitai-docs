@@ -1,194 +1,37 @@
-# JitAi Developer Documentation
+# JitAI Official Website
 
-<div align="center">
+This repository maintains the JitAI website using Docusaurus and React. English pages use `/*`; Chinese pages use `/zh/*`.
 
-<img src="https://jit-www.oss-accelerate.aliyuncs.com/logo/logo_title.svg" alt="JitAi Logo" width="400" />
+[中文](README_ZH.md) · [Maintenance notes](WEBSITE_MIGRATION.md) · [News synchronization](scripts/news/README.md) · [Contributing](CONTRIBUTING.md)
 
-**Born for AI, Next-Gen Enterprise-Level AI Application Development Platform**
+## Content and structure
 
-[![GitHub stars](https://img.shields.io/github/stars/jitai-team/jitai-docs?style=social)](https://github.com/jitai-team/jitai-docs/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/jitai-team/jitai-docs?style=social)](https://github.com/jitai-team/jitai-docs/network/members)
-[![GitHub issues](https://img.shields.io/github/issues/jitai-team/jitai-docs)](https://github.com/jitai-team/jitai-docs/issues)
-[![GitHub license](https://img.shields.io/github/license/jitai-team/jitai-docs)](https://github.com/jitai-team/jitai-docs/blob/master/LICENSE)
+Current pages cover the platform, solutions, technical whitepaper, scenarios, partnerships, company information, feature details, downloads, contact, and legal terms. Referral and macOS installation help pages remain, along with redirects for earlier marketing URLs.
 
-[🌐 Online Documentation](https://jit.pro/docs) | [📖 Quick Start](#quick-start) | [🤝 Contributing](#contributing) | [💬 Community](#community)
+As of November 10, 2026, the legacy English and Chinese blogs, developer and extension guides, API reference, tutorials, open-source and app-market documentation, and versioned documentation have been removed. The docs/blog plugins and legacy search page are disabled.
 
-**Language Versions / 语言版本:**
-[🇺🇸 English](README.md) | [🇨🇳 中文](README_ZH.md) | [🤝 Contributing Guide](CONTRIBUTING.md) | [🤝 贡献指南](CONTRIBUTING_ZH.md)
+- `src/pages/`: website routes.
+- `src/components/MarketingSite/`: website layouts, content, and translations.
+- `src/components/LegalDocuments/`: English and Chinese legal content.
+- `static/`: website assets, sitemap, and discovery files.
+- `scripts/build-locales.js`: website build for both locales.
+- `scripts/news/`: independent server-side news generator and listing templates.
+- `tests/news/`: isolated synchronization and publication tests.
 
-</div>
+## Local validation
 
-## 📖 About the Project
-
-JitAi Developer Documentation is a comprehensive technical documentation collection for JitAi platform users and developers. This project is committed to providing clear, accurate, and easy-to-understand technical documentation to help developers quickly get started and master the various features of the JitAi platform.
-
-### 🌟 Key Features
-
-- **📚 Comprehensive Coverage**: Complete development guide from quick start to advanced topics
-- **🚀 Quick Start**: Develop your first AI application in 5 minutes
-- **🎯 Practice-Oriented**: Rich practical tutorials and best practices
-- **🔧 Developer-Friendly**: Detailed API documentation and development toolchain instructions
-- **🌍 Multi-Platform Support**: Support for desktop (Windows/Mac) and server (Docker) versions
-- **📱 Responsive Design**: Perfect adaptation to various devices and screen sizes
-
-### 📋 Documentation Contents
-
-- **Quick Start**: Platform installation, environment configuration, first AI application development
-- **System Overview**: Architecture design, application specifications, element specifications, runtime mechanisms
-- **Development Guide**: BaseApp, JitAi components, platform API detailed instructions
-- **Practical Tutorials**: Complete project development cases such as CRM applications
-- **Advanced Guide**: Local development and debugging, frontend code debugging, server log viewing
-- **API Reference**: Complete reference documentation for frontend API and backend API
-
-## 🚀 Quick Start
-
-### System Requirements
-
-- **Node.js**: >= 18.0.0
-- **Yarn**: >= 1.22.0 (recommended) or npm >= 8.0.0
-
-### Local Development
-
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/jitai-team/jitai-docs.git
-   cd jitai-docs
-   ```
-
-2. **Install Dependencies**
-   ```bash
-   yarn install
-   # or use npm
-   npm install
-   ```
-
-3. **Start Development Server**
-   ```bash
-   yarn start
-   # or use npm
-   npm run start
-   ```
-
-4. **Access Documentation**
-   
-   Open your browser and visit [http://localhost:3000](http://localhost:3000)
-
-### Build and Deploy
+Use the existing Node.js 20+ / pnpm environment. Do not install or change workspace dependencies without authorization.
 
 ```bash
-# Build static files
-yarn build
-
-# Preview build results
-yarn serve
+pnpm start:en
+pnpm typecheck
+DOCUSAURUS_NO_PERSISTENT_CACHE=1 pnpm build
 ```
 
-## 🛠️ Project Structure
+Output is written to `build/` and `build/zh/`. Disabling persistent compilation caches avoids Webpack cache writes to `node_modules`.
 
-```
-jitai-docs/
-├── docs/                    # Documentation content
-│   ├── tutorial/           # Tutorial documentation
-│   │   ├── 00快速上手/     # Quick start guide
-│   │   ├── 01概述/         # System overview
-│   │   ├── 02实例教程/     # Practical cases
-│   │   ├── 03指南/         # Development guide
-│   │   └── 04进阶指南/     # Advanced content
-│   ├── cases/              # Case studies
-│   └── community/          # Community related
-├── blog/                   # Blog posts
-├── src/                    # Source code
-│   ├── components/         # React components
-│   ├── css/               # Style files
-│   └── pages/             # Page components
-├── static/                 # Static assets
-├── docusaurus.config.ts    # Configuration file
-└── sidebars.ts            # Sidebar configuration
-```
+## Publication boundaries
 
-## 🤝 Contributing
+Website framework changes are built locally or in CI, uploaded to a separate server staging directory, and applied with the news-directory protection in `scripts/news/apply-main-site.py`. Scheduled news updates fetch Feed and HTML resources on the server and generate independent runtime data outside the repository, with their own CDN refresh. They do not run Docusaurus or depend on a personal computer being online.
 
-We warmly welcome and appreciate contributions from every developer! Whether you've found documentation errors, want to improve content quality, or hope to add new features, your participation will make this project better.
-
-### 🐛 Report Issues
-
-If you find errors, inaccurate descriptions, or other issues in the documentation:
-
-1. Check the [Issues](https://github.com/jitai-team/jitai-docs/issues) page to confirm the issue hasn't been reported yet
-2. Create a new Issue with detailed description:
-   - Specific location of the issue (page link, section title, etc.)
-   - Detailed description of the issue
-   - Suggested fix (if any)
-   - Related screenshots or error messages
-
-### ✨ Submit Contributions
-
-#### Documentation Content Contributions
-
-1. **Fork this repository** to your GitHub account
-2. **Create a feature branch**: `git checkout -b feature/improve-docs`
-3. **Make changes**:
-   - Fix documentation errors or improve content expression
-   - Add new tutorials or examples
-   - Improve API documentation
-   - Optimize documentation structure and navigation
-4. **Local testing**: Ensure modified documentation builds and displays correctly
-5. **Commit changes**: `git commit -am 'docs: improve quick start guide'`
-6. **Push branch**: `git push origin feature/improve-docs`
-7. **Create Pull Request** with detailed description of your changes
-
-#### Code Contributions
-
-1. **Tech Stack**: Project built with Docusaurus + React + TypeScript
-2. **Code Standards**: Follow existing code style and naming conventions
-3. **Testing**: Ensure all changes are thoroughly tested
-4. **Documentation**: Add corresponding usage instructions for new features
-5. **Docusaurus Features**: Make full use of Docusaurus components and plugin system
-
-### 📋 Contribution Guidelines
-
-- **Commit Message Format**: 
-  ```
-  <type>: <description>
-  
-  Types include:
-  - docs: Documentation updates
-  - feat: New features
-  - fix: Bug fixes
-  - style: Code formatting adjustments
-  - refactor: Code refactoring
-  ```
-
-- **Branch Naming Convention**:
-  - `feature/feature-description` - New feature development
-  - `fix/issue-description` - Bug fixes
-  - `docs/documentation-description` - Documentation updates
-
-### 🎖️ Contributors
-
-Thanks to all developers who have contributed to this project:
-
-<!-- Contributors list can be added here -->
-
-## 💬 Community
-
-Join our developer community to exchange experiences and get help:
-
-- **GitHub Discussions**: [Project Discussion Area](https://github.com/jitai-team/jitai-docs/discussions)
-- **GitHub Issues**: [Issue Reports and Feature Requests](https://github.com/jitai-team/jitai-docs/issues)
-- **Official Website**: [https://jit.pro](https://jit.pro)
-
-## 🙏 Acknowledgments
-
-- Thanks to all developers who contributed code and documentation to this project
-- Thanks to community members for valuable feedback and suggestions
-
----
-
-<div align="center">
-
-**If this project is helpful to you, please give us a ⭐**
-
-Made with ❤️ by [Wuhan Wanyun Technology](https://github.com/jitai-team) Team
-
-</div> 
+The repository publisher and local release skill install the news runtime, initialize the empty page, protect the news directory, and enable the ten-minute timer. The first production deployment completed on 2026-11-10 with source/CDN route checks passing. Configure NEWS_FEED_URL through the local release environment; see scripts/news/README.md for configuration and scripts/news/VALIDATION.md for deployment evidence and remaining checks.

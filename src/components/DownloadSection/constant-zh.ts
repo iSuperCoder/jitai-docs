@@ -1,3 +1,4 @@
+/** 下载页共享文案与真实安装资源；文档下线后帮助入口统一指向联系页。 */
 // 下载页面中文常量配置
 export interface DownloadContent {
     title: string;
@@ -41,14 +42,14 @@ const CONTENT: DownloadContent = {
     title: "下载安装",
     subtitle: "选择适合您系统的安装包，快速开始使用",
     helpText: "遇到安装问题？点击查看更多",
-    helpUrl: "/zh/docs/devguide/installation-activation/download-installation",
+    helpUrl: "/zh/contact",
 
     mobile: {
         title: "下载提示",
         description:
             "您正在通过移动端设备访问，JitAI 平台是PC 和服务器设备上运行的软件，请前往 Windows、MacOS、Linux 服务器等设备上进行下载安装",
-        buttonText: "浏览开发文档",
-        buttonUrl: "/zh/docs/devguide",
+        buttonText: "联系安装支持",
+        buttonUrl: "/zh/contact",
     },
 
     desktop: {

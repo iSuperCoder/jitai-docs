@@ -53,11 +53,6 @@ export const PAGE_METADATA_EN: Record<string, PageMetadata> = {
         description:
             "macOS system security settings guide to help you properly install and run JitAI applications.",
     },
-    blog: {
-        title: "Blog",
-        description:
-            "Explore the latest trends in AI application development, learn practical technical tutorials, and discover the latest features and success stories of the JitAI platform",
-    },
     referral: {
         title: "JitAI Referral Rewards - Invite Friends to Earn App Quotas",
         description:

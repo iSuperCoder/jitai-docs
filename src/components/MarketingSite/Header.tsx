@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useMarketingCopy, LOGO_DARK, LOGO_LIGHT } from './copy';
+import { useMarketingCopy, LOGO_DARK, LOGO_LIGHT, NEWS_PATH } from './copy';
 
+/** 官网导航：active 标识当前营销路由，theme/toggleTheme 由父布局管理；资讯使用独立静态入口。 */
 export default function Header({ active, theme, toggleTheme }: {
   active: string; theme: 'light' | 'dark'; toggleTheme: () => void;
 }) {
@@ -20,6 +21,7 @@ export default function Header({ active, theme, toggleTheme }: {
   const items = [
     ['/', text('首页', 'Home')], ['/solutions', text('解决方案', 'Solutions')],
     ['/whitepaper', text('技术白皮书', 'Whitepaper')], ['/cases', text('场景示例', 'Scenarios')],
+    [NEWS_PATH, text('资讯中心', 'News & Insights')],
     ['/partners', text('渠道合作', 'Partners')], ['/about', text('关于我们', 'About')],
   ];
   const actions = <>
@@ -32,7 +34,8 @@ export default function Header({ active, theme, toggleTheme }: {
         <img className="official-logo" src={theme === 'dark' ? LOGO_DARK : LOGO_LIGHT} alt="JitAI" width="112" height="34" />
       </a>
       <nav className="nav" id="marketing-navigation" aria-label={text('主导航', 'Main navigation')} data-open={open} onClick={() => setOpen(false)}>
-        {items.map(([route, label]) => <a key={route} href={path(route)} aria-current={active === route ? 'page' : undefined}>{label}</a>)}
+        {/* 原生链接使浏览器加载服务器生成的列表，不由 Docusaurus 路由接管。 */}
+        {items.map(([route, label]) => <a key={route} href={route === NEWS_PATH ? NEWS_PATH : path(route)} aria-current={active === route ? 'page' : undefined}>{label}</a>)}
         <div className="nav-cta">{actions}</div>
       </nav>
       <div className="header-actions">

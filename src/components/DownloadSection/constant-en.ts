@@ -1,3 +1,4 @@
+/** 下载页共享文案与真实安装资源；文档下线后帮助入口统一指向联系页。 */
 // Download page English constants configuration
 export interface DownloadContent {
     title: string;
@@ -42,14 +43,14 @@ const CONTENT: DownloadContent = {
     subtitle:
         "Choose the installer that suits your system and get started quickly",
     helpText: "Having installation issues? Click to learn more",
-    helpUrl: "/docs/devguide/installation-activation/download-installation",
+    helpUrl: "/contact",
 
     mobile: {
         title: "Download Tip",
         description:
             "You are visiting from a mobile device. JitAI is software designed to run on PCs and servers. Please use a Windows PC, Mac, or Linux server to download and install it.",
-        buttonText: "View Documentation",
-        buttonUrl: "/docs/devguide",
+        buttonText: "Contact support",
+        buttonUrl: "/contact",
     },
 
     desktop: {

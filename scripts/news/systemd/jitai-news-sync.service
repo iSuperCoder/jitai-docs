@@ -1,0 +1,13 @@
+# 部署模板：将 scripts/news 的内容放到 /opt/jitai-news，配置放在仓库外。
+# 不在安装/启动时构建官网；同一 oneshot 未结束时，timer 不会启动第二个实例。
+[Unit]
+Description=Synchronize JitAI news static content
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+# 发布器自动安装专用解释器与 0600 JSON 配置，运行时注入环境变量；未配置 Feed 不触发抓取。
+ExecStart=/opt/jitai-news-runtime/bin/python /opt/jitai-news/service-entry.py --config /etc/jitai-news.json --profile /root/.aliyun/config.json
+# 资源下载有逐请求超时；不以 systemd 默认的启动时限截断正常的大批内容同步。
+TimeoutStartSec=0

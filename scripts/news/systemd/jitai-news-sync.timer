@@ -1,0 +1,13 @@
+# 部署模板：服务器时区的每小时 00、10、20、30、40、50 分运行。
+# 不补跑停机期间遗漏的轮次；下一个时间点抓取完整 Feed 即可恢复最新内容。
+[Unit]
+Description=Synchronize JitAI news every ten minutes
+
+[Timer]
+OnCalendar=*-*-* *:00/10:00
+AccuracySec=1s
+Persistent=false
+Unit=jitai-news-sync.service
+
+[Install]
+WantedBy=timers.target
