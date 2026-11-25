@@ -671,7 +671,7 @@
 .marketing-site .marketing-hero {
   position: relative;
   overflow: hidden;
-  padding-block: clamp(64px, 11vw, 132px);
+  padding-block: clamp(64px, 7vw, 96px);
   border-bottom: 1px solid var(--border);
 }
 .marketing-site .hero-bg {
@@ -719,24 +719,47 @@
 .marketing-site .hero-inner {
   position: relative;
   z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1.16fr) minmax(0, 1fr);
+  grid-template-areas: "kicker video" "heading video" "lead video" "actions video";
+  column-gap: clamp(36px, 5vw, 72px);
+  align-items: center;
 }
+.marketing-site .hero-kicker { grid-area: kicker; align-self: end; }
+.marketing-site .hero-heading { grid-area: heading; margin-top: 16px; }
+.marketing-site .hero-lead { grid-area: lead; margin-top: 22px; }
+.marketing-site .hero-actions { grid-area: actions; display: grid; grid-template-columns: 1.35fr 1fr 1fr; gap: 12px; margin-top: 28px; }
+/* 三个入口的说明跟随各自按钮，保持下载优先；长英文可换行，避免挤出首屏列宽。 */
+.marketing-site .hero-entry { min-width: 0; display: flex; flex-direction: column; }
+.marketing-site .hero-actions .btn { min-height: 52px; height: 100%; padding: 10px 12px; font-size: .875rem; gap: 8px; }
+.marketing-site .hero-entry p { margin: 8px 0 0; color: var(--text-muted); font-size: .75rem; line-height: 1.6; text-align: center; }
+.marketing-site .hero-actions .btn svg { flex: none; }
+.marketing-site .hero-inner > .home-video { grid-area: video; }
 .marketing-site .marketing-hero h1 {
   max-width: 20ch;
 }
 .marketing-site .marketing-hero .lead {
   max-width: 62ch;
 }
-.marketing-site .hero-note {
-  margin-top: 28px;
-  padding-top: 18px;
-  border-top: 1px solid var(--border);
-  max-width: 62ch;
-  font-size: 0.875rem;
-  color: var(--text-dim);
+@media (max-width: 980px) {
+  .marketing-site .hero-inner {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "kicker" "heading" "lead" "actions" "video";
+  }
+  .marketing-site .hero-inner > .home-video { width: min(100%, 640px); margin-top: 28px; }
+  .marketing-site .hero-lead { max-width: 64ch; }
 }
-.marketing-site .hero-note strong {
-  color: var(--text-muted);
-  font-weight: 600;
+@media (max-width: 580px) {
+  .marketing-site .marketing-hero { padding-block: 36px 48px; }
+  .marketing-site .hero-heading { margin-top: 12px; }
+  .marketing-site .marketing-hero h1 br { display: initial; }
+  .marketing-site .hero-inner > .home-video { margin-top: 24px; }
+  .marketing-site .hero-lead { margin-top: 24px; }
+  .marketing-site .hero-actions { margin-top: 24px; }
+  .marketing-site .hero-actions { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+}
+@media (max-width: 360px) {
+  .marketing-site .hero-heading { font-size: 1.8rem; }
 }
 
 /* ---------- 11. Stat / metric ---------- */
@@ -835,6 +858,12 @@
   color: var(--text);
   white-space: nowrap;
 }
+/* 交付表头的下一步入口直接跟随对应列名；窄屏保持表格横向滚动，不压缩链接触控区域。 */
+.marketing-site .delivery-table { min-width: 1000px; }
+.marketing-site .delivery-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 12px; }
+/* 将读屏专用的新窗口说明定位在链接内部，避免窄屏横向表格把隐藏文字算入整页滚动宽度。 */
+.marketing-site .delivery-heading a { position: relative; display: inline-flex; align-items: center; gap: 2px; min-height: 44px; color: var(--accent); font-size: .8125rem; font-weight: 600; text-decoration: none; }
+.marketing-site .delivery-heading a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .marketing-site table.data tbody tr:last-child td {
   border-bottom: 0;
 }
@@ -1372,9 +1401,6 @@
   .marketing-site .brand-sub {
     display: none;
   }
-  .marketing-site .marketing-hero h1 br {
-    display: none;
-  }
 }
 
 /* ---------- 24. Print ---------- */
@@ -1443,6 +1469,12 @@
   .marketing-site .header-actions { margin-left: auto; }
   .marketing-site .nav { position: absolute; inset: var(--header-h) 0 auto; display: flex; visibility: hidden; opacity: 0; transform: translateY(-8px); pointer-events: none; transition: opacity .2s var(--ease), transform .2s var(--ease), visibility .2s; flex-direction: column; align-items: stretch; gap: 2px; padding: 14px 24px 22px; background: var(--bg-elev); border-bottom: 1px solid var(--border); box-shadow: var(--shadow); max-height: calc(100dvh - var(--header-h)); overflow-y: auto; }
   .marketing-site .nav[data-open="true"] { visibility: visible; opacity: 1; transform: none; pointer-events: auto; }
+  /* 展开面板占满导航条以下视口，短屏在面板内部滚动；不留出可与正文混淆的透底区域。
+     关闭时保留原有动画；展开后移除毛玻璃合成，避免移动端视频层与导航混合。 */
+  .marketing-site .nav { height: calc(100vh - var(--header-h)); height: calc(100dvh - var(--header-h)); padding-bottom: max(22px, env(safe-area-inset-bottom)); overscroll-behavior: contain; }
+  .marketing-site .nav > * { flex-shrink: 0; }
+  /* 锁定 body 会改变 sticky 的滚动参照，展开时固定到视口，避免从已滚动位置打开后面板上移。 */
+  .marketing-site .site-header[data-menu-open="true"] { position: fixed; inset: 0 0 auto; background: var(--bg-elev); backdrop-filter: none; -webkit-backdrop-filter: none; }
   .marketing-site .nav > a { padding: 12px 10px; font-size: 1rem; }
   .marketing-site .nav-cta { display: grid; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
 }
@@ -1494,4 +1526,51 @@
   .marketing-site .marketing-card > .steps > .step + .step { border-left: 0; border-top: 1px solid var(--border); }
   .marketing-site .marketing-card > .steps > .step:last-child { padding-bottom: 0; }
   .marketing-site .g-6 > .card-hover { padding: 20px 12px; }
+}
+/* 首屏视频固定 16:9 画幅；未配置地址时只显示非交互品牌画面，避免误导为可播放。 */
+.marketing-site .home-video { min-width: 0; }
+.marketing-site .home-video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: #fff; color: var(--accent); border-radius: var(--radius); }
+.marketing-site .home-video-frame video, .marketing-site .home-video-preview { display: block; width: 100%; height: 100%; object-fit: contain; }
+/* 静态预览来自原视频首帧，手机无需预载/解码视频即可显示同一画面；播放器保持原生播放能力。 */
+.marketing-site .home-video-preview { position: absolute; inset: 0; pointer-events: none; }
+.marketing-site .home-video[data-preview="true"] video { visibility: hidden; }
+/* 仅对待播放的白底品牌首帧做融合；柔化边缘使背景线条自然衔接。
+   深色主题先反转明度再保留色相。开始播放（包括暂停）或出错后均恢复视频原色和完整画面。 */
+.marketing-site .home-video[data-preview="true"] .home-video-frame { background: transparent; overflow: visible; }
+.marketing-site .home-video-preview { mix-blend-mode: screen; filter: invert(1) hue-rotate(180deg); -webkit-mask-image: radial-gradient(ellipse, #000 45%, transparent 72%); mask-image: radial-gradient(ellipse, #000 45%, transparent 72%); }
+.marketing-site[data-marketing-theme="light"] .home-video-preview { mix-blend-mode: multiply; filter: none; }
+/* 播放入口下移至品牌图案下方，文字明确可播放；原生控件仍在点击后接管。 */
+.marketing-site .home-video-start { position: absolute; left: 50%; top: 76%; transform: translate(-50%, -50%); display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 44px; padding: 10px 16px; white-space: nowrap; border: 1px solid var(--accent-line); border-radius: 999px; background: var(--bg); color: var(--accent); cursor: pointer; font-size: .875rem; }
+.marketing-site .home-video-start:hover { background: var(--surface-2); border-color: var(--accent); }
+.marketing-site .home-video-start:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+.marketing-site .home-video-start:active { background: var(--accent-soft); }
+.marketing-site .home-video-start-icon { margin-left: 2px; }
+.marketing-site .home-video-start-spinner { animation: home-video-spin 1s linear infinite; }
+.marketing-site .home-video-empty, .marketing-site .home-video-loading { position: absolute; inset: 0; display: grid; place-items: center; }
+.marketing-site .home-video-empty { background: repeating-linear-gradient(90deg, transparent 0 63px, rgba(255,255,255,.045) 64px), repeating-linear-gradient(0deg, transparent 0 63px, rgba(255,255,255,.045) 64px); }
+.marketing-site .home-video-brand { color: #e9f1f4; font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 650; letter-spacing: 0; }
+.marketing-site .home-video-loading { pointer-events: none; background: rgba(8, 23, 29, .2); }
+.marketing-site .home-video-loading svg { animation: home-video-spin 1s linear infinite; }
+.marketing-site .home-video-error { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 16px; background: rgba(8, 23, 29, .9); }
+.marketing-site .home-video-error button { display: grid; place-items: center; width: 48px; height: 48px; border: 1px solid rgba(255,255,255,.65); border-radius: 50%; background: transparent; color: #fff; cursor: pointer; }
+.marketing-site .home-video-error a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+@keyframes home-video-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .marketing-site .home-video-loading svg, .marketing-site .home-video-start-spinner { animation: none; } }
+
+/* 入口用途在桌面悬停或聚焦时显示，留出可移入的提示区域；Escape 关闭直到下次进入。
+   手机菜单直接显示说明，避免触屏用户必须先点一次才能理解目的地。 */
+.marketing-site .entry-link { position: relative; }
+.marketing-site .header-actions .entry-link { white-space: nowrap; }
+.marketing-site .entry-hint { position: absolute; z-index: 2; top: 100%; right: 0; width: 248px; padding: 12px 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-elev); color: var(--text-muted); box-shadow: var(--shadow); font-size: .8125rem; font-weight: 400; line-height: 1.6; text-align: left; white-space: normal; visibility: hidden; }
+.marketing-site .entry-link:hover .entry-hint, .marketing-site .entry-link:focus-visible .entry-hint { visibility: visible; }
+.marketing-site .site-header[data-hint-dismissed="true"] .header-actions .entry-hint { visibility: hidden; }
+/* 新增下载入口后，收紧桌面导航内间距；仍沿用既有 1180px 菜单断点。 */
+@media (min-width: 1181px) {
+  .marketing-site .header-inner { gap: 16px; }
+  .marketing-site .nav > a { padding-inline: 8px; }
+  .marketing-site .header-actions .btn { padding-inline: 12px; }
+}
+@media (max-width: 1180px) {
+  .marketing-site .nav-cta .entry-link { flex-direction: column; gap: 4px; padding: 12px; }
+  .marketing-site .nav-cta .entry-hint { position: static; width: auto; padding: 0; border: 0; box-shadow: none; background: transparent; color: inherit; font-size: .75rem; text-align: center; visibility: visible; }
 }

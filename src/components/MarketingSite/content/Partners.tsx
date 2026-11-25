@@ -2,6 +2,7 @@ import React from "react";
 import { useMarketingCopy } from "../copy";
 import ContactSection from "../ContactSection";
 
+/** 渠道合作页复用首页的开发助手、业务智能体与交付方式定义，按当前语言展示场景和链接。 */
 export default function Partners() {
  const { t, path } = useMarketingCopy();
  return <>
@@ -108,10 +109,10 @@ export default function Partners() {
 <div className="marketing-card card-ok reveal">
 <h3 className="h5 mb-16">{t("JitAI 技术：自生长 AI 原生架构")}</h3>
 <ul className="checklist">
-<li><strong>{t("业务系统 AI 原生")}</strong>{t("：系统一比一还原企业真实业务，AI 能看懂、能驱动真实业务")}</li>
-<li><strong>{t("开发过程 AI 原生")}</strong>{t("：AI 全程参与建模、生成、验证、迭代全流程")}</li>
+<li><strong>{t("AI 参与业务运行")}</strong>{t("：业务智能体理解业务数据与规则，按授权调用系统功能处理业务")}</li>
+<li><strong>{t("AI 参与系统开发")}</strong>{t("：AI 开发助手根据需求搭建和修改应用，并结合测试与运行反馈改进")}</li>
 </ul>
-<p className="small mt-16">{t("AI 真正内生进企业业务，支撑经营决策，驱动组织生产力升级。")}</p>
+<p className="small mt-16">{t("AI 开发助手与业务智能体使用同一套业务数据、规则和系统功能。")}</p>
 </div>
 </div>
 <div className="section-head reveal">
@@ -183,13 +184,13 @@ export default function Partners() {
 <div className="marketing-card reveal">
 <h3 className="h5 mb-16">{t("产品体系")}</h3>
 <ul className="bullets">
-<li><strong>{t("组织与 AI 配额管理")}</strong>{t("：管理组织，为个人和 Agent 分别设置 Token 使用限额")}</li>
+<li><strong>{t("组织与 AI 配额管理")}</strong>{t("：管理组织，为个人和智能体分别设置 AI 用量限额")}</li>
 <li><strong>{t("JitAI AI 开发助手")}</strong>{t("：支持对话式建模、生成、校验与迭代")}</li>
 <li><strong>{t("应用部署运维")}</strong>{t("：管理应用部署、版本发布、运行环境与节点")}</li>
 <li><strong>{t("JitNode 运行时底座")}</strong>{t("：AI 原生系统核心，支撑所有业务运行")}</li>
 </ul>
 <div className="tag-row mt-16">
-<span className="tag tag-accent">{t("免费桌面体验版")}</span>
+<span className="tag tag-accent">{t("免费桌面版")}</span>
 <span className="tag">{t("云托管订阅版")}</span>
 <span className="tag">{t("私有化部署版")}</span>
 </div>

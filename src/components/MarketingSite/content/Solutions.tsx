@@ -2,6 +2,8 @@ import React from "react";
 import { useMarketingCopy } from "../copy";
 import ContactSection from "../ContactSection";
 
+/** 保留旧解决方案正文；白皮书暂不公开，不输出架构阅读入口。 */
+/** 展示当前语言的行业方案；AI 开发助手、业务智能体及交付方式沿用首页定义，链接按当前语言生成。 */
 export default function Solutions() {
   const { t, path } = useMarketingCopy();
   return <>
@@ -10,11 +12,10 @@ export default function Solutions() {
 <div className="wrap">
 <p className="kicker reveal">{t("解决方案")}</p>
 <h1 className="h1 mt-16 reveal" style={{"fontSize": "clamp(1.9rem,4.2vw,3rem)", "maxWidth": "100%"}}>{t("面向全行业经营场景落地")}</h1>
-<p className="lead mt-24 reveal" style={{"maxWidth": "70ch"}}>{t("一个业务板块一个专用智能体，")}<b>{t("AI 做不确定性的判断决策，系统功能做确定性事务的执行。")}</b>
+<p className="lead mt-24 reveal" style={{"maxWidth": "70ch"}}>{t("为每个业务板块配置一个业务智能体（负责具体业务的 AI 助手），")}<b>{t("AI 做不确定性的判断决策，系统功能做确定性事务的执行。")}</b>
 </p>
 <div className="btn-row mt-32 reveal">
 <a className="btn btn-primary" href={path("/about#contact")}>{t("预约场景沟通")}</a>
-<a className="btn btn-ghost" href={path("/whitepaper#architecture")}>{t("了解平台架构")}</a>
 </div>
 </div>
 </section>

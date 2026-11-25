@@ -11,6 +11,7 @@ function EmphasizedText({ value }: { value: string }) {
     : <React.Fragment key={index}>{part}</React.Fragment>)}</>;
 }
 
+/** 展示指定特性及咨询入口；白皮书暂不公开，不输出阅读链接。 */
 export default function Feature({ slug }: { slug: string }) {
   const { isZh, text, path } = useMarketingCopy();
   const features = isZh ? featuresZh : featuresEn;
@@ -51,7 +52,7 @@ export default function Feature({ slug }: { slug: string }) {
       <div className="grid g-3">{features.map(item => item.slug === slug
         ? <div key={item.slug} className="marketing-card card-ok reveal" aria-current="page"><h3 className="h5">{item.name}</h3><p className="small mt-8">{item.grid}</p><p className="small mt-8 accent">{text('当前页面', 'Current page')}</p></div>
         : <a key={item.slug} className="marketing-card card-flat feature-card reveal" href={path(`/${item.slug}`)}><h3 className="h5">{item.name}</h3><p className="small mt-8">{item.grid}</p><span className="feature-more">{text('了解详情', 'Explore feature')} <span aria-hidden="true">→</span></span></a>)}</div>
-      <div className="btn-row mt-32 feature-actions"><a className="btn btn-primary" href={path('/whitepaper')}>{text('阅读技术白皮书', 'Read the technical whitepaper')}</a><a className="btn btn-ghost" href={path('/contact')}>{text('预约企业落地沟通', 'Discuss your rollout')}</a></div>
+      <div className="btn-row mt-32 feature-actions"><a className="btn btn-ghost" href={path('/contact')}>{text('预约企业落地沟通', 'Discuss your rollout')}</a></div>
     </div></section>
   </MarketingLayout>;
 }

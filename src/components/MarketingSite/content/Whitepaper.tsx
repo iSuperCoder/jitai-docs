@@ -61,6 +61,7 @@ function ChapterBody({ chapter }: { chapter: Chapter }) {
   </>;
 }
 
+/** 白皮书独立阅读页保留封面 H1、章节目录及稳定锚点，供直接阅读和深链访问。 */
 export default function Whitepaper() {
   const { isZh, text, path } = useMarketingCopy();
   const chapters: Chapter[] = isZh ? chinese : english;

@@ -8,32 +8,26 @@
 
 <url>
   <loc>https://jit.pro/</loc>
-  <lastmod>2025-10-22T01:30:14+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
   <loc>https://jit.pro/download</loc>
-  <lastmod>2025-10-22T01:29:59+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://jit.pro/zh</loc>
-  <lastmod>2025-10-22T01:33:11+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://jit.pro/zh/download</loc>
-  <lastmod>2025-10-22T01:32:56+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url><loc>https://jit.pro/solutions</loc></url>
-  <url><loc>https://jit.pro/whitepaper</loc></url>
   <url><loc>https://jit.pro/cases</loc></url>
   <url><loc>https://jit.pro/partners</loc></url>
   <url><loc>https://jit.pro/about</loc></url>
   <url><loc>https://jit.pro/contact</loc></url>
   <url><loc>https://jit.pro/zh/solutions</loc></url>
-  <url><loc>https://jit.pro/zh/whitepaper</loc></url>
   <url><loc>https://jit.pro/zh/cases</loc></url>
   <url><loc>https://jit.pro/zh/partners</loc></url>
   <url><loc>https://jit.pro/zh/about</loc></url>

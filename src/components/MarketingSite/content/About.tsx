@@ -2,6 +2,7 @@ import React from "react";
 import { useMarketingCopy } from "../copy";
 import ContactSection from "../ContactSection";
 
+/** 展示当前语言的平台介绍；AI 开发助手、业务智能体及交付方式沿用首页定义，链接按当前语言生成。 */
 export default function About() {
   const { t, path } = useMarketingCopy();
   return <>
@@ -10,7 +11,7 @@ export default function About() {
 <div className="wrap">
 <p className="kicker reveal">{t("关于我们")}</p>
 <h1 className="h1 mt-16 reveal" style={{"fontSize": "clamp(1.9rem,4.2vw,3rem)", "maxWidth": "100%"}}>{t("让每一家企业，都拥有自己可控、可进化的 AI 业务大脑")}</h1>
-<p className="lead mt-24 reveal" style={{"maxWidth": "70ch"}}>{t("JitAI 是 AI 原生应用平台。我们做的不是给系统外挂一个 AI， 而是让 AI 成为系统内生的一部分 —— 能看懂业务、能驱动业务、还能持续造系统。")}</p>
+<p className="lead mt-24 reveal" style={{"maxWidth": "70ch"}}>{t("JitAI 是 AI 原生应用平台，让 AI 参与系统开发与业务运行。AI 开发助手负责搭建和修改应用；业务智能体负责在应用中处理具体业务。")}</p>
 <div className="btn-row mt-32 reveal">
 <a className="btn btn-primary" href={path("/download")}>{t("免费下载桌面版")}</a>
 <a className="btn btn-ghost" href="#contact">{t("联系我们")}</a>
@@ -46,20 +47,20 @@ export default function About() {
 <div className="wrap">
 <div className="section-head reveal">
 <p className="kicker">{t("技术理念")}</p>
-<h2 className="h2 mt-16">{t("两个 AI 原生，一套统一底座")}</h2>
+<h2 className="h2 mt-16">{t("AI 参与开发，也参与业务运行")}</h2>
 </div>
 <div className="grid g-3">
 <div className="marketing-card reveal">
-<h3 className="h5 mb-8">{t("业务系统 AI 原生")}</h3>
-<p className="small">{t("业务单元标准化、自描述，AI 可读、可驱动。业务对象、规则、状态对 AI 透明 —— 不是一堆需要猜的源码，而是一套可读的系统。")}</p>
+<h3 className="h5 mb-8">{t("AI 参与业务运行")}</h3>
+<p className="small">{t("业务智能体是负责具体业务的 AI 助手。它能理解应用中的数据和规则，并按授权调用系统功能，例如查询订单、发起审批。")}</p>
 </div>
 <div className="marketing-card reveal">
-<h3 className="h5 mb-8">{t("开发过程 AI 原生")}</h3>
-<p className="small">{t("AI 打通建模、生成、验证、运行反馈闭环。开发不是写孤立代码，而是完整链路；运行反馈实时回流，持续迭代。")}</p>
+<h3 className="h5 mb-8">{t("AI 参与系统开发")}</h3>
+<p className="small">{t("AI 开发助手根据需求搭建和修改应用，再通过测试和运行反馈检查结果、持续改进。")}</p>
 </div>
 <div className="marketing-card card-ok reveal">
 <h3 className="h5 mb-8">{t("开发与运行同源")}</h3>
-<p className="small">{t("同一套系统模型、规范和运行时。AI 不仅在系统里经营业务，还在系统里持续造系统。")}</p>
+<p className="small">{t("AI 开发助手与业务智能体使用同一套业务数据、规则和系统功能。业务运行中的问题可以反馈给开发助手，用于改进应用。")}</p>
 </div>
 </div>
 <div className="marketing-card mt-24 reveal">
@@ -123,12 +124,12 @@ export default function About() {
 <div className="grid g-3">
 <div className="marketing-card card-ok reveal">
 <div className="row gap-8 mb-12"><h3 className="h4">{t("桌面版")}</h3><span className="tag tag-accent">{t("免费")}</span></div>
-<p className="small mb-16">{t("个人 / 小团队试用，搭建第一个业务场景，验证价值后再升级。")}</p>
+<p className="small mb-16">{t("安装到自己的电脑，在本地开发和运行应用，适合个人先搭建一个业务场景。")}</p>
 <a className="btn btn-primary" href={path("/download")}>{t("下载安装")}</a>
 </div>
 <div className="marketing-card reveal">
 <div className="row gap-8 mb-12"><h3 className="h4">{t("云托管订阅版")}</h3><span className="tag">{t("云托管订阅")}</span></div>
-<p className="small mb-16">{t("中小企业采用云托管服务，快速上线、开箱即用，浏览器访问无需自建环境。")}</p>
+<p className="small mb-16">{t("应用运行在专属云环境中，通过浏览器访问；在云控制台购买和管理云环境。")}</p>
 <a className="btn btn-ghost" href="#contact">{t("咨询订阅方案")}</a>
 </div>
 <div className="marketing-card reveal">

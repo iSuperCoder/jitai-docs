@@ -8,9 +8,13 @@ import importlib.util
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 
+
+# 与独立脚本执行相同的模块搜索路径；只在测试装配中配置，不给生产代码加导入回退。
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'scripts/news'))
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location('main_site', ROOT / 'scripts/news/apply-main-site.py')
@@ -101,7 +105,9 @@ class MainSiteBoundaryTests(unittest.TestCase):
                 result = subprocess.run(['bash', str(ROOT / 'refresh_cdn.sh')],
                                         env={**os.environ, 'BUILD_DIR': str(self.stage), 'DRY_RUN': '1',
                                              'REFRESH_SCOPE': scope}, capture_output=True, text=True, check=True)
-                for prefix in ('/blog', '/zh/blog', '/docs', '/zh/docs'):
+                for prefix in ('/blog', '/zh/blog', '/docs', '/zh/docs', '/whitepaper', '/zh/whitepaper',
+                               '/agent-products', '/zh/agent-products', '/low-code-platform', '/zh/low-code-platform',
+                               '/capabilities/active-hub', '/zh/capabilities/active-hub'):
                     self.assertIn('Directory https://jit.pro' + prefix + '/', result.stdout)
                     for suffix in ('', '/', '.html', '/index.html'):
                         self.assertIn('File https://jit.pro' + prefix + suffix + '\n', result.stdout)

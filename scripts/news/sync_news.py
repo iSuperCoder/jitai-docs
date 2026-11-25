@@ -16,7 +16,9 @@ import contextlib
 import datetime as dt
 import fcntl
 import hashlib
+from html import escape
 import hmac
+from http.client import IncompleteRead
 import json
 import mimetypes
 import os
@@ -33,6 +35,8 @@ import xml.etree.ElementTree as ET
 
 from bs4 import BeautifulSoup
 
+from cases_projection import prepare_case_pages, case_page_transaction
+
 HERE = Path(__file__).resolve().parent
 
 
@@ -45,7 +49,7 @@ class CacheError(SyncError):
 
 
 def digest(value: bytes) -> str:
-    """返回内容 SHA-256，用于资源名和版本比较；不依据修改时间推断内容未变化。"""
+    """返回内容 SHA-256，用于资源命名、缓存完整性及候选版本比较。"""
     return hashlib.sha256(value).hexdigest()
 
 
@@ -157,6 +161,9 @@ class Fetcher:
             raise CacheError('本地缓存索引损坏，请检查磁盘并重新建立缓存') from error
         if not isinstance(self.cache, dict): raise CacheError('本地缓存索引类型不合法')
         self.records = {}
+        # 只从已发布 active 的条目记录授权复用；普通下载缓存不能证明文章版本已发布。
+        self.reuse_records = {}
+        self.article_records = {}
         self.total = 0
         self.opener = build_opener(SafeRedirect())
 
@@ -164,13 +171,41 @@ class Fetcher:
         """返回字节与 MIME；支持 ETag/Last-Modified，fresh 强制重新读取 Feed 验证快照一致。
 
         发送条件请求前校验缓存；损坏时完整重取，恢复失败抛 CacheError。
+        未变条目的已发布缓存缺失或损坏时，只接受与发布基线相同的修复字节；不能用普通
+        下载索引中的未发布版本替代它。来源已变则保留线上版本，等待来源推进条目时间后整篇重取。
         304 只有缓存文件存在且哈希正确才可复用。超时、错误状态或资源超限均中止当前版本；
         不把抓取失败解释为文章删除，也不输出带查询参数的来源 URL 或响应体。
         """
         url = clean_url(url)
         if url in self.records and not fresh:
             info = self.records[url]
+            self.article_records[url] = info
             return (self.cache_dir / info['hash']).read_bytes(), info['type']
+        if not fresh and url in self.reuse_records:
+            info = self.reuse_records[url]
+            cached = self.cache_dir / info['hash']
+            # 修改时间相同只免去网络探测，不免去字节完整性验证；缓存授权来自 active，
+            # 而非可能已被未发布候选推进的下载索引。正常共享资源已由上方 records 分支去重。
+            if cached.is_file():
+                body = cached.read_bytes()
+                if digest(body) == info['hash']:
+                    if len(body) > self.config.resource_limit: raise SyncError('单资源大小超限')
+                    self.total += len(body)
+                    if self.total > self.config.total_limit: raise SyncError('单次同步累计资源大小超限')
+                    self.records[url] = self.article_records[url] = info
+                    return body, info['type']
+            try:
+                # 绕过条件缓存完整修复。若直接落入普通下载逻辑，超前索引可能返回 304，
+                # 新 HTML 也可能与仍复用的旧 CSS/图片混合，随后被错误冻结在旧条目时间下。
+                body, _ = self.fetch(url, fresh=True)
+            except (SyncError, OSError, ValueError) as error:
+                raise CacheError('已发布缓存缺失或损坏且完整下载恢复失败，请检查来源和本地磁盘') from error
+            if digest(body) != info['hash']:
+                raise CacheError('恢复字节与已发布版本不一致，保留现有页面；请内容系统推进条目修改时间后重试')
+            # 修复仅恢复原版本；沿用原 MIME 和重定向基址，不能因当前响应元信息变化而
+            # 把相同 HTML 中的相对引用解析到另一个目录。本次下载已计入资源体积，无需再累计。
+            self.records[url] = self.article_records[url] = info
+            return body, info['type']
         previous = self.cache.get(url, {})
         cached_path = self.cache_dir / previous.get('hash', 'missing')
         headers = {'User-Agent': 'JitAI-News-Sync/1.0', 'Accept-Encoding': 'identity'}
@@ -186,7 +221,22 @@ class Fetcher:
         try:
             with self.opener.open(Request(url, headers=headers), timeout=30) as response:
                 if response.status != 200: raise SyncError('来源响应不是完整 200 内容')
-                body = response.read(self.config.resource_limit + 1)
+                # 分块计数并核对声明长度，避免截断响应被当作完整资源缓存和发布。
+                # 仍保留原有内存返回契约及体积上限；仅在全部字节校验成功后写入缓存。
+                declared = response.headers.get('Content-Length')
+                if declared is not None and (not declared.isdigit() or int(declared) > self.config.resource_limit):
+                    raise SyncError('资源声明长度无效或单资源大小超限')
+                chunks, size = [], 0
+                while True:
+                    chunk = response.read(min(65536, self.config.resource_limit + 1 - size))
+                    if not chunk: break
+                    chunks.append(chunk)
+                    size += len(chunk)
+                    if size > self.config.resource_limit: raise SyncError('单资源大小超限')
+                    if self.total + size > self.config.total_limit: raise SyncError('单次同步累计资源大小超限')
+                if declared is not None and size != int(declared):
+                    raise SyncError('资源下载不完整，声明长度与实际内容不符')
+                body = b''.join(chunks)
                 kind = response.headers.get_content_type()
                 info = {'hash': digest(body), 'type': kind, 'etag': response.headers.get('ETag'), 'modified': response.headers.get('Last-Modified'), 'url': clean_url(response.geturl())}
         except HTTPError as error:
@@ -196,7 +246,7 @@ class Fetcher:
             if digest(body) != previous['hash']: raise CacheError('缓存资源校验失败')
             info = previous
             kind = info['type']
-        except (URLError, TimeoutError):
+        except (URLError, TimeoutError, IncompleteRead, ConnectionError):
             raise SyncError('资源请求超时或网络异常，本次不生成新版本') from None
         if len(body) > self.config.resource_limit: raise SyncError('单资源大小超限')
         self.total += len(body)
@@ -204,6 +254,7 @@ class Fetcher:
         (self.cache_dir / info['hash']).write_bytes(body)
         self.cache[url] = info
         self.records[url] = info
+        self.article_records[url] = info
         return body, kind
 
     def save(self):
@@ -275,7 +326,7 @@ def article_path(item: dict) -> str:
 
 
 class Mirror:
-    """将文章及依赖封装成独立静态目录；不对正文二次排版，不引入 iframe 或运行时代理。"""
+    """搬运作者网页与静态依赖；保留交互及来源运行目标，不审查内容或代理后端。"""
 
     def __init__(self, config: Config, fetcher: Fetcher, output: Path, feed: dict):
         """维护本次来源到官网 URL 的映射及共享资源去重；状态仅存在于此次生成过程。"""
@@ -289,50 +340,82 @@ class Mirror:
         if feed.get('home_page_url'): self.source_homes.add(feed['home_page_url'])
 
     def asset(self, reference: str, base: str) -> str:
-        """下载并本地化资源，返回官网绝对路径；存储图片沿用 file 文件名，其余资源按内容哈希命名。
+        """下载并本地化资源，返回官网绝对路径；存储资源沿用安全 file 文件名，其余按内容哈希命名。
 
-        相对资源按来源文件 URL 解析；data 和片段保留，其他非 HTTP 协议拒绝。
-        CSS 递归下载依赖，循环引用中止；本版不打包 JS 模块，遇到模块须由内容站先打包。
+        相对资源按来源文件 URL 解析；片段与非 HTTP 协议由浏览器解释并原样保留。
+        不按图片/视频扩展名白名单筛选；CSS、SVG、静态 HLS 递归下载依赖，循环中止。
+        不审查资源的可执行内容。需要持续请求来源的动态媒体保留来源地址，
+        不能把直播清单冻结为一个貌似完整、实际上不会更新的本地文件。
         """
-        if not reference or reference.startswith(('#', 'data:')): return reference
+        if not reference or reference.startswith('#') or urlsplit(reference).scheme.lower() not in ('', 'http', 'https'):
+            return reference
         url = clean_url(urljoin(base, reference))
         fragment = urlsplit(reference).fragment
         if url in self.assets: return self.assets[url] + ('#' + fragment if fragment else '')
-        if url in self.visiting: raise SyncError('资源存在循环 CSS 依赖，无法确定独立发布包')
+        if url in self.visiting: raise SyncError('资源存在循环依赖，无法确定独立发布包')
+        if len(self.visiting) >= 64: raise SyncError('资源依赖层级超限，无法完整镜像')
         self.visiting.add(url)
         body, kind = self.fetcher.fetch(url)
         # 同域重定向可能移动目录，CSS 相对依赖须相对最终响应地址，而不是旧请求地址。
         resource_base = self.fetcher.records[url].get('url', url)
         suffix = Path(urlsplit(url).path).suffix.lower()
-        if kind == 'text/html': raise SyncError('资源地址返回 HTML，可能是登录页或错误页面')
         if kind == 'text/css' or suffix == '.css':
             body = self.css(body.decode('utf-8-sig'), resource_base).encode()
             suffix = '.css'
         elif suffix in ('.js', '.mjs') or 'javascript' in kind:
-            # 当前来源仅有 JSON-LD。动态脚本携带 API/模块依赖时不假装已完成静态迁移。
-            raise SyncError('来源包含可执行脚本；请提供无脚本或已审查的静态发布资源')
+            # 脚本依赖的相对 import/currentScript 必须基于原地址；不解析、执行或改写任意 JS。
+            self.assets[url] = resource_base
+            self.visiting.remove(url)
+            return resource_base + ('#' + fragment if fragment else '')
+        elif suffix in ('.m3u8', '.m3u') or kind in ('application/vnd.apple.mpegurl', 'application/x-mpegurl', 'audio/mpegurl', 'audio/x-mpegurl') or body.startswith(b'#EXTM3U'):
+            playlist = body.decode('utf-8-sig')
+            if ('#EXT-X-ENDLIST' not in playlist and '#EXT-X-STREAM-INF:' not in playlist and '#EXT-X-I-FRAME-STREAM-INF:' not in playlist) or any(
+                token in playlist for token in ('{$', '#EXT-X-DEFINE:', '#EXT-X-CONTENT-STEERING:', '#EXT-X-PART:', '#EXT-X-PRELOAD-HINT:', '#EXT-X-RENDITION-REPORT:')):
+                self.assets[url] = resource_base
+                self.visiting.remove(url)
+                return resource_base
+            body = self.hls(playlist, resource_base).encode()
+            suffix = '.m3u8'
+        elif suffix == '.mpd' or kind == 'application/dash+xml' or re.match(rb'\s*(?:<\?xml[^>]*>\s*)?<MPD\b', body[:512]):
+            # DASH 时间线和动态分片由浏览器播放器从来源加载，保留原依赖基址。
+            self.assets[url] = resource_base
+            self.visiting.remove(url)
+            return resource_base
         elif kind == 'image/svg+xml' or suffix == '.svg':
-            # SVG 本身可含脚本和外部依赖；只接受自包含静态图形，不默许漏镜像的网络依赖。
+            # SVG 的样式、图像及外部片段与 CSS 共用资源图；仅替换依赖，不改变图形内容。
             try: svg_root = ET.fromstring(body)
             except ET.ParseError: raise SyncError('SVG 资源格式不合法') from None
+            changed = False
             for element in svg_root.iter():
-                if element.tag.split('}')[-1].lower() in ('script', 'foreignobject'):
-                    raise SyncError('SVG 包含可执行或嵌入内容')
-                for key, value in element.attrib.items():
-                    if key.lower().startswith('on') or (key.split('}')[-1] == 'href' and not value.startswith(('#', 'data:'))):
-                        raise SyncError('SVG 含脚本或外部引用，请内容站导出自包含图形')
+                tag = element.tag.split('}')[-1].lower()
+                if tag == 'style' and element.text:
+                    rewritten = self.css(element.text, resource_base)
+                    changed |= rewritten != element.text
+                    element.text = rewritten
+                for key, value in list(element.attrib.items()):
+                    attribute = key.split('}')[-1].lower()
+                    rewritten = value
+                    if attribute == 'href':
+                        # a 是跳转链接，不是加载依赖；其余 href（image/use 等）需递归搬运。
+                        if tag == 'a':
+                            if not value.startswith('#'): rewritten = urljoin(resource_base, value)
+                        else: rewritten = self.asset(value, resource_base)
+                    elif attribute == 'style' or 'url(' in value.lower():
+                        rewritten = self.css(value, resource_base)
+                    changed |= rewritten != value
+                    element.set(key, rewritten)
+            if changed: body = ET.tostring(svg_root, encoding='utf-8')
             suffix = '.svg'
         elif not re.fullmatch(r'\.[a-z0-9]{1,8}', suffix):
             suffix = mimetypes.guess_extension(kind) or '.bin'
         name = digest(body) + suffix
-        # 内容 App 的正文图片使用 /api/whwy/<appId>/storages/...?...file=<hash>.<ext>。
-        # 保留 file 文件名，不把 preview 当扩展名；拒绝路径穿越及同批不同资源重名，避免互相覆盖。
+        # storage 路径也是通用资源入口，不能以 image MIME 拒绝视频；保留已有安全文件名协议。
+        # 无后缀标识使用 MIME 推导后的哈希名，避免 Nginx 将无后缀视频当作 HTML。
         if re.match(r'^/api/whwy/[^/]+/storages/', urlsplit(url).path):
             names = parse_qs(urlsplit(url).query).get('file', [])
-            if len(names) != 1 or not re.fullmatch(r'[A-Za-z0-9_-]+\.[A-Za-z0-9]{1,8}', names[0]):
-                raise SyncError('存储图片 file 参数必须是安全的单个文件名')
-            if not kind.startswith('image/'): raise SyncError('存储图片响应类型不合法')
-            name = names[0]
+            if len(names) != 1 or not re.fullmatch(r'[A-Za-z0-9_-]+(?:\.[A-Za-z0-9]{1,8})?', names[0]):
+                raise SyncError('存储资源 file 参数必须是安全的单个文件名')
+            if '.' in names[0]: name = names[0]
         destination = self.output / 'assets' / name
         destination.parent.mkdir(parents=True, exist_ok=True)
         if destination.exists() and destination.read_bytes() != body:
@@ -344,27 +427,102 @@ class Mirror:
         return mapped + ('#' + fragment if fragment else '')
 
     def css(self, text: str, base: str) -> str:
-        """改写普通 CSS url() 和 @import 依赖；保留其余样式，拒绝无法安全解析的 URL 转义。
+        """按 CSS token 改写 url、@import 和 image-set 图片，保持其他样式及字符串逐字不变。
 
-        采用受限静态内容契约：资源 URL 中禁止 CSS 反斜杠转义；带引号的数据 URL 可保留。
-        非标准/复杂 CSS 资源表达式要求内容端预先打包，避免静默漏下载后线上缺图。
+        base 为最终来源地址；注释和普通字符串不当作依赖。用括号栈识别 image-set 中的
+        字符串候选，type() 等子函数中的字符串不是 URL。暂不解析 CSS 转义标识符和 URL，
+        遇到时明确拒绝而非漏传；下载、依赖循环或不完整语法通过 SyncError 中止候选。
         """
-        pattern = re.compile(r'/\*.*?\*/|url\(\s*(?:"([^"\\]*(?:\\.[^"\\]*)*)"|\'([^\'\\]*(?:\\.[^\'\\]*)*)\'|([^)]*))\s*\)|@import\s+(["\'])(.*?)\4', re.I | re.S)
-        def replace(match):
-            """仅处理已识别的资源 token；注释原样返回，不把注释中的 url 当作依赖。"""
-            if match.group(0).startswith('/*'): return match.group(0)
-            value = next((match.group(index) for index in (1, 2, 3, 5) if match.group(index) is not None), '').strip()
-            if '\\' in value: raise SyncError('CSS 资源 URL 使用了不支持的转义，请内容站预先打包')
-            mapped = self.asset(value, base)
-            return '@import "' + mapped + '"' if match.group(5) is not None else 'url("' + mapped + '")'
-        return pattern.sub(replace, text)
+        tokens = re.compile(r'/\*.*?\*/|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|'
+                            r'@import\b|[-\w]+\(|[()]|\s+|.', re.I | re.S)
+        parts = list(tokens.finditer(text))
+        output, stack, importing = [], [], False
+        index = 0
+        while index < len(parts):
+            token = parts[index].group()
+            lower = token.lower()
+            if token == '\\':
+                raise SyncError('CSS 转义标识符尚不能可靠识别资源，请内容站预先展开')
+            if token.startswith('/*') or token.isspace():
+                output.append(token)
+            elif token.startswith(('"', "'")):
+                if importing or (stack and stack[-1] in ('image-set', '-webkit-image-set')):
+                    reference = token[1:-1]
+                    if '\\' in reference: raise SyncError('CSS 资源 URL 使用了不支持的转义，请内容站预先打包')
+                    mapped = self.asset(reference, base)
+                    # data URL 与内部片段不搬运，保持原始引号和编码；生成的路径不含引号。
+                    output.append(token if mapped == reference else '"' + mapped + '"')
+                    importing = False
+                else:
+                    output.append(token)
+            elif lower == '@import':
+                importing = True
+                output.append(token)
+            elif lower == 'url(':
+                end = index + 1
+                while end < len(parts) and parts[end].group() != ')': end += 1
+                if end == len(parts): raise SyncError('CSS url() 未闭合')
+                raw = ''.join(p.group() for p in parts[index + 1:end]).strip()
+                reference = raw
+                if raw.startswith(('"', "'")):
+                    if len(raw) < 2 or raw[-1] != raw[0]: raise SyncError('CSS URL 引号未闭合')
+                    reference = raw[1:-1]
+                elif re.search(r'[\s\(\)\'\"]', raw):
+                    raise SyncError('CSS URL 语法无法完整解析')
+                if '\\' in reference: raise SyncError('CSS 资源 URL 使用了不支持的转义，请内容站预先打包')
+                mapped = self.asset(reference, base)
+                output.append(text[parts[index].start():parts[end].end()] if mapped == reference else 'url("' + mapped + '")')
+                importing = False
+                index = end
+            elif token.endswith('('):
+                if importing: raise SyncError('CSS @import 资源语法无法完整解析')
+                stack.append(lower[:-1])
+                output.append(token)
+            elif token == ')':
+                if not stack: raise SyncError('CSS 函数括号不匹配')
+                stack.pop()
+                output.append(token)
+            else:
+                if importing: raise SyncError('CSS @import 缺少资源地址')
+                output.append(token)
+            index += 1
+        if stack or importing: raise SyncError('CSS 资源表达式未闭合')
+        return ''.join(output)
+
+    def hls(self, text: str, base: str) -> str:
+        """镜像有限、完整的 HLS 点播清单，返回所有 URI 指向官网的 UTF-8 文本。
+
+        普通分片行及 URI 属性（密钥、初始化片段、备用音轨）共用 asset 下载，
+        保留 byte-range 等播放参数。asset 已将直播和动态协议保留为来源 URL；
+        此方法只搬运静态清单，不对页面是否允许使用动态媒体做准入判断。
+        """
+        lines = text.splitlines()
+        if not lines or lines[0].strip() != '#EXTM3U': raise SyncError('HLS 清单格式不合法')
+        output = []
+        for line in lines:
+            stripped = line.strip()
+            if stripped and not stripped.startswith('#'):
+                output.append(self.asset(stripped, base))
+            elif stripped.startswith('#EXT'):
+                def replace_uri(match):
+                    """只改写属性名为 URI 的引用，保留密钥算法、码率、分片范围等播放语义。"""
+                    return match.group(1) + '"' + self.asset(match.group(2), base) + '"'
+                rewritten = re.sub(r'([:,]URI=)"([^"\r\n]+)"', replace_uri, line)
+                # URI 按 HLS 协议为 quoted-string；不认识的写法不能原样漏出。
+                if len(re.findall(r'[:,]URI=', line)) != len(re.findall(r'[:,]URI="[^"\r\n]+"', line)):
+                    raise SyncError('HLS URI 属性语法不合法')
+                output.append(rewritten)
+            else:
+                output.append(line)
+        return '\n'.join(output) + ('\n' if text.endswith('\n') else '')
 
     def html_page(self, item: dict) -> tuple[bytes, str]:
         """发布内容 App 的完整详情，仅调整 SEO、编码及搬运资源必需的 URL。
 
         不注入官网样式、导航、标签或正文布局；标题、结构、类名、样式值和链接功能由 App 决定。
-        本版支持内容站现有的静态 HTML/CSS/图片/JSON-LD、媒体与内联样式；遇到 iframe、
-        JS 模块、表单或事件处理器则中止，而不是生成外观相似但交互损坏的页面。
+        内容由配置的来源站负责，脚本、事件、数据块、表单和嵌入内容原样保留，不做标签或协议黑名单。
+        脚本及嵌入/提交目标保持来源绝对地址，避免把动态依赖误迁移到官网静态目录。
+        下载失败抛 SyncError；只对可解析 JSON-LD 做 SEO 改写，不执行来源脚本。
         """
         source = clean_url(item['url'])
         body, kind = self.fetcher.fetch(source)
@@ -372,19 +530,30 @@ class Mirror:
         resource_base = self.fetcher.records[source].get('url', source)
         if kind not in ('text/html', 'application/xhtml+xml'): raise SyncError('文章响应不是 HTML')
         soup = BeautifulSoup(body.decode('utf-8-sig'), 'html.parser')
-        if not soup.html or not soup.head or not soup.body or not soup.select_one('article'):
-            raise SyncError('来源缺少完整文章结构，不能把登录页或错误页发布到官网')
+        # HTML 可使用 main/div 等任意结构；片段也补齐序列化需要的容器，不限定正文标签。
+        if not soup.html:
+            root = soup.new_tag('html')
+            for child in list(soup.contents): root.append(child.extract())
+            soup.append(root)
+        if not soup.head: soup.html.insert(0, soup.new_tag('head'))
+        if not soup.body:
+            body_node = soup.new_tag('body')
+            for child in list(soup.html.contents):
+                if child is not soup.head: body_node.append(child.extract())
+            soup.html.append(body_node)
+        base_node = soup.find('base', href=True)
+        if base_node:
+            resource_base = urljoin(resource_base, base_node['href'])
+            base_node['href'] = resource_base
         canonical = self.pages[source]
-        if soup.select('base, iframe, object, embed, form'):
-            raise SyncError('来源包含不支持的运行时/嵌入元素，请提供可独立发布的静态 HTML')
         for node in soup.find_all(True):
-            if any(key.lower().startswith('on') for key in node.attrs):
-                raise SyncError('来源包含内联事件脚本，需要先明确静态发布契约')
             if node.name == 'script':
-                if node.get('type', '').lower() != 'application/ld+json' or node.get('src'):
-                    raise SyncError('来源包含可执行脚本，需要先明确静态发布契约')
+                if node.get('src'):
+                    node['src'] = urljoin(resource_base, node['src'])
+                    continue
+                if node.get('type', '').lower() != 'application/ld+json': continue
                 try: structured = json.loads(node.string or '')
-                except ValueError: raise SyncError('文章 JSON-LD 无效') from None
+                except ValueError: continue
                 def rewrite(value):
                     """递归改写 JSON-LD 中 URL 字符串，保留正文、作者和来源发布时间等业务内容。"""
                     if isinstance(value, dict): return {key: rewrite(child) for key, child in value.items()}
@@ -434,17 +603,44 @@ class Mirror:
                 node.string = json.dumps(structured, ensure_ascii=False).replace('<', chr(92) + 'u003c')
             if node.name == 'style': node.string = self.css(node.get_text(), resource_base)
             if node.get('style'): node['style'] = self.css(node['style'], resource_base)
-            for attribute in ('src', 'poster'):
+            # 动态嵌入页和表单不能作为图片下载；只适配明确的 URL 属性，保留作者的其他属性与代码。
+            for attribute in ('action', 'formaction'):
+                if node.has_attr(attribute): node[attribute] = urljoin(resource_base, node[attribute] or resource_base)
+            if node.name == 'form' and not node.has_attr('action'): node['action'] = resource_base
+            if node.name in ('iframe', 'object', 'embed'):
+                for attribute in ('src', 'data'):
+                    if node.get(attribute): node[attribute] = urljoin(resource_base, node[attribute])
+            # 延迟图片使用 data-src/data-srcset 保存尚未启用的依赖；先在发布时镜像，
+            # 浏览器仍由作者脚本决定何时赋给 src，不能为搬运而提前启用首屏大图请求。
+            # 其他元素的任意 data 属性保留原义，不推断自定义组件或脚本字符串的语义。
+            resource_attributes = ('src', 'poster', 'data-src') if node.name in ('img', 'source') else ('src', 'poster')
+            for attribute in resource_attributes:
+                if node.name in ('iframe', 'object', 'embed'): continue
                 if node.get(attribute): node[attribute] = self.asset(node[attribute], resource_base)
-            if node.get('srcset'):
-                # 浏览器 srcset 的 data URL 含逗号，此版明确拒绝而不是错误拆分。
-                if 'data:' in node['srcset']: raise SyncError('srcset data URL 尚不支持，请使用独立图片资源')
+            for attribute in (('srcset', 'data-srcset') if node.name in ('img', 'source') else ('srcset',)):
+                if not node.get(attribute): continue
+                # 按浏览器候选解析顺序先取非空白 URL，再取描述符；URL 内逗号属于 data 内容，
+                # 仅末尾逗号或描述符后的逗号分隔候选，不按逗号粗切或限制 data URL。
                 parts = []
-                for candidate in node['srcset'].split(','):
-                    value = candidate.strip().split()
-                    if not value: continue
-                    parts.append(' '.join([self.asset(value[0], resource_base), *value[1:]]))
-                node['srcset'] = ', '.join(parts)
+                remaining = node[attribute]
+                while remaining.strip(' \t\n\r\f,'):
+                    remaining = remaining.lstrip(' \t\n\r\f,')
+                    match = re.match(r'\S+', remaining)
+                    reference = match.group()
+                    remaining = remaining[match.end():]
+                    descriptors = ''
+                    if reference.endswith(','):
+                        reference = reference.rstrip(',')
+                    else:
+                        depth, end = 0, 0
+                        for end, char in enumerate(remaining):
+                            if char == '(': depth += 1
+                            elif char == ')': depth -= 1
+                            elif char == ',' and depth == 0: break
+                        else: end = len(remaining)
+                        descriptors, remaining = remaining[:end].strip(), remaining[end + 1:]
+                    parts.append(self.asset(reference, resource_base) + (' ' + descriptors if descriptors else ''))
+                node[attribute] = ', '.join(parts)
             if node.name == 'link' and node.get('href'):
                 rel = set(node.get('rel', []))
                 if rel & {'stylesheet', 'icon', 'preload', 'apple-touch-icon'}:
@@ -463,19 +659,27 @@ class Mirror:
                     node.attrs.pop('integrity', None)
                 elif rel & {'alternate', 'canonical'}: node.decompose(); continue
             if node.name == 'meta':
-                name = (node.get('name') or node.get('property') or '').lower()
+                name = (node.get('name') or node.get('property') or '').strip().lower()
+                http_equiv = node.get('http-equiv', '').strip().lower()
                 # 输出始终重新编码为 UTF-8，旧编码声明不能继续影响浏览器解码。
-                if node.has_attr('charset') or node.get('http-equiv', '').lower() == 'content-type':
+                if node.has_attr('charset') or http_equiv == 'content-type':
                     node.decompose(); continue
-                if name in ('robots', 'googlebot', 'bingbot'): node.decompose(); continue
-                if node.get('http-equiv', '').lower() == 'refresh': raise SyncError('文章不能是跳转页')
+                # 来源资源有意不收录，但官网副本必须独立允许索引。爬虫专用声明会覆盖通用
+                # index，因此连同专用机器人及旧模板中的 X-Robots-Tag meta 一并重新声明。
+                # 这里只适配索引元信息，不按正文词语过滤，也不改作者脚本、事件或嵌入内容。
+                if (name in ('robots', 'slurp', 'yandex', 'sogou')
+                        or re.fullmatch(r'[\w-]*(?:bot|spider)(?:-[\w-]+)?', name)
+                        or http_equiv in ('x-robots-tag', 'robots')):
+                    node.decompose(); continue
+                if node.get('http-equiv', '').lower() == 'refresh' and node.get('content'):
+                    node['content'] = re.sub(r'(?i)(url\s*=\s*)([\'\"]?)(.*?)\2\s*$',
+                        lambda match: match.group(1) + match.group(2) + urljoin(resource_base, match.group(3)) + match.group(2), node['content'])
                 if name in ('og:url', 'twitter:url'): node['content'] = canonical
                 if name in ('og:image', 'twitter:image') and node.get('content'):
                     mapped = self.asset(node['content'], resource_base)
                     node['content'] = self.config.site + mapped if mapped.startswith('/') else mapped
             if node.name == 'a' and node.get('href') and not node['href'].startswith('#'):
                 href = node['href']
-                if urlsplit(href.strip()).scheme.lower() in ('javascript', 'data'): raise SyncError('文章链接含不可发布协议')
                 target = urljoin(resource_base, href)
                 if target.split('#')[0] in self.pages:
                     node['href'] = self.pages[target.split('#')[0]] + ('#' + target.split('#', 1)[1] if '#' in target else '')
@@ -483,7 +687,17 @@ class Mirror:
                     # 非迁移文章仍按 App 原本的目标导航，不能因其属于内容站就删除 href。
                     # 相对地址转为绝对地址只是保持搬迁前的指向，不决定 App 页面内容或交互。
                     node['href'] = target
-                elif urlsplit(target).scheme not in ('mailto', 'tel'): raise SyncError('文章链接使用不支持协议')
+            if base_node:
+                # 原 base 必须保留给作者脚本；本地镜像路径显式绑定官网，避免被 base 指回来源。
+                for attribute in (*resource_attributes, 'href'):
+                    value = node.get(attribute, '')
+                    if isinstance(value, str) and value.startswith(self.config.public): node[attribute] = self.config.site + value
+                if node.name == 'link' and node.get('href') == item['id'] + '.css':
+                    node['href'] = canonical + node['href']
+                for attribute in (('srcset', 'data-srcset') if node.name in ('img', 'source') else ('srcset',)):
+                    if node.get(attribute): node[attribute] = node[attribute].replace(self.config.public, self.config.site + self.config.public)
+                if node.get('style'): node['style'] = node['style'].replace(self.config.public, self.config.site + self.config.public)
+                if node.name == 'style' and node.string: node.string = node.string.replace(self.config.public, self.config.site + self.config.public)
         # 静态服务器未必附带 charset；声明放在 head 起始处，确保位于浏览器前 1024 字节探测范围。
         soup.head.insert(0, soup.new_tag('meta', charset='utf-8'))
         meta = soup.new_tag('meta', attrs={'name': 'robots', 'content': 'index,follow,max-image-preview:large'})
@@ -509,17 +723,55 @@ def render_list(feed: dict, output: Path, config: Config, mirror: Mirror) -> lis
         if item.get('image'): public_item['image'] = config.site + mirror.asset(item['image'], item['url'])
         public_items.append(public_item)
     public_items.sort(key=lambda item: item.get('date_published', ''), reverse=True)
+    render_public_list(public_items, output, config)
+    return public_items
+
+
+def render_public_list(public_items: list[dict], output: Path, config: Config) -> None:
+    """以已本地化的公开文章字段渲染列表模板与 UI 资源，不读取 Feed、不修改文章正文。
+
+    正常同步和官网安装共用此渲染入口；安装时传入已发布 feed-snapshot，保持原条目和顺序。
+    output 必须已存在；模板或文件写入失败向调用方抛出，不切换线上版本。
+    """
     template = (HERE / 'templates' / 'index.html').read_text()
     soup = BeautifulSoup(template, 'html.parser')
-    cards = soup.find(id='cards')
+    def article(item: dict, feature=False) -> str:
+        """渲染来源条目的列表卡片；文字转义且不截断，推荐首图提前加载，其余延迟加载。
+
+        仅消费公开列表字段；不读取正文，不根据标签限制文章。结构与浏览器增强模板一致，
+        使首屏在脚本运行前就有完整封面和稳定布局；空图继续展示品牌占位。
+        """
+        title = escape(item['title'])
+        image = item.get('image')
+        words = next((values for values in (item.get('tags'), item.get('_keywords'),
+                     re.split(r'[,，;；]', str(item.get('_seo_keywords') or ''))) if isinstance(values, list) and values), [])
+        tags = ''.join(f'<button type="button" class="topic-chip" data-topic="{escape(word, quote=True)}" aria-label="筛选主题：{escape(word, quote=True)}">{escape(word)}</button>'
+                       for word in dict.fromkeys(word.strip() for word in words if isinstance(word, str) and word.strip()))
+        stamp = item.get('date_published') or ''
+        date = f'<time datetime="{escape(stamp, quote=True)}">{escape(stamp[:10].replace("-", "."))}</time>' if stamp else ''
+        reading = item.get('_reading_time_minutes', 0)
+        if isinstance(reading, (int, float)) and reading > 0: date += f'<span>· {reading:g} 分钟阅读</span>'
+        picture = (f'<img class="cover-image" src="{escape(image, quote=True)}" alt="{escape(item.get("image_alt") or "", quote=True)}" loading="{"eager" if feature else "lazy"}"'
+                   + (' fetchpriority="high"' if feature else '') + '>') if image else ''
+        heading = 'h2' if feature else 'h3'
+        return (f'<article class="{"feature" if feature else "card"}" data-id="{escape(item["id"], quote=True)}">'
+                f'<div class="cover one {"has-image" if image else ""}"><div class="art" aria-hidden="true"><span></span><span></span><span></span></div>'
+                f'<div class="cover-top" aria-hidden="true"><b>JitAI</b><span>{escape(item.get("_section") or "INSIGHTS")}</span></div>'
+                f'<p class="cover-heading" aria-hidden="true">{escape(item.get("_seo_title") or item["title"])}</p>{picture}<div class="cover-keywords">{tags}</div></div>'
+                f'<div class="{"feature-body" if feature else "card-body"}"><span class="kicker">{escape("发现好内容" if feature else item.get("_section") or "JitAI 文章")}</span>'
+                f'<{heading}><a href="{escape(item["url"], quote=True)}" target="_blank" rel="noopener noreferrer" class="article-link stretched" aria-label="{title}（在新标签页打开）">{title}</a></{heading}>'
+                f'<p class="summary">{escape(item.get("summary") or "")}</p>'
+                + ('' if feature else f'<div class="inline-topics">{tags}</div>')
+                + f'<div class="meta">{date}</div>' + ('<span class="read-link" aria-hidden="true">阅读全文 ↗</span>' if feature else '') + '</div></article>')
+
     for item in public_items:
-        card = soup.new_tag('article', attrs={'class': 'card'})
-        content = soup.new_tag('div', attrs={'class': 'card-body'})
-        heading = soup.new_tag('h3')
-        link = soup.new_tag('a', attrs={'href': item['url'], 'target': '_blank', 'rel': 'noopener noreferrer', 'class': 'article-link stretched'})
-        link.string = item['title']; heading.append(link); content.append(heading)
-        paragraph = soup.new_tag('p', attrs={'class': 'summary'}); paragraph.string = item.get('summary', ''); content.append(paragraph)
-        card.append(content); cards.append(card)
+        soup.find(id='cards').append(BeautifulSoup(article(item), 'html.parser'))
+    if public_items:
+        # 首屏固定展示最新文章，与客户端初次渲染一致；之后仍轮播全部文章。
+        soup.find(id='feature-carousel').attrs.pop('hidden', None)
+        soup.find(id='feature-slot').append(BeautifulSoup(article(public_items[0], True), 'html.parser'))
+        soup.find(id='slide-counter').string = f'1 / {len(public_items)}'
+        if len(public_items) < 2: soup.find(id='rotation-controls')['hidden'] = ''
     soup.find(id='feed-snapshot').string = encoded({'items': public_items}).decode().replace('<', chr(92) + 'u003c')
     soup.find(id='result-count').string = f'共 {len(public_items)} 篇文章'
     # 空状态由服务器输出完整 HTML，禁用 JS 时也能看到；搜索无结果是另一个独立状态。
@@ -529,7 +781,47 @@ def render_list(feed: dict, output: Path, config: Config, mirror: Mirror) -> lis
             node['hidden'] = ''
     soup.head.append(soup.new_tag('link', attrs={'rel': 'canonical', 'href': config.site + config.public}))
     soup.head.append(soup.new_tag('meta', attrs={'name': 'robots', 'content': 'index,follow,max-image-preview:large'}))
-    soup.head.append(soup.new_tag('meta', attrs={'name': 'description', 'content': 'JitAI 资讯中心：案例文章、新闻动态与 AI 业务实践洞察。'}))
+    description = 'JitAI 资讯中心：AI 原生系统客户案例、智能体集成方法与业务实践，了解从业务需求到系统落地的过程。'
+    canonical = config.site + config.public
+    soup.head.append(soup.new_tag('meta', attrs={'name': 'description', 'content': description}))
+    # 列表分享信息由官网拥有；优先使用已发布的栅格封面，不将 SVG 强行声明为大图卡。
+    share_image = next((item['image'] for item in public_items if item.get('image') and
+                       urlsplit(item['image']).path.lower().endswith(('.jpg', '.jpeg', '.png', '.webp'))), None)
+    for key, value in {'og:type': 'website', 'og:title': soup.title.text, 'og:description': description,
+                       'og:url': canonical, 'og:site_name': 'JitAI', 'og:locale': 'zh_CN'}.items():
+        soup.head.append(soup.new_tag('meta', attrs={'property': key, 'content': value}))
+    for key, value in {'twitter:card': 'summary_large_image' if share_image else 'summary',
+                       'twitter:title': soup.title.text, 'twitter:description': description}.items():
+        soup.head.append(soup.new_tag('meta', attrs={'name': key, 'content': value}))
+    if share_image:
+        soup.head.append(soup.new_tag('meta', attrs={'property': 'og:image', 'content': share_image}))
+        soup.head.append(soup.new_tag('meta', attrs={'name': 'twitter:image', 'content': share_image}))
+    # CollectionPage 只描述页面真实展示的文章集合，不把列表误标成 Article 或虚构评分。
+    structured = {'@context': 'https://schema.org', '@type': 'CollectionPage', '@id': canonical,
+                  'url': canonical, 'name': soup.title.text, 'description': description, 'inLanguage': 'zh-CN',
+                  'mainEntity': {'@type': 'ItemList', 'numberOfItems': len(public_items), 'itemListElement':
+                      [{'@type': 'ListItem', 'position': index + 1, 'name': item['title'], 'url': item['url']}
+                       for index, item in enumerate(public_items)]}}
+    node = soup.new_tag('script', attrs={'type': 'application/ld+json'})
+    node.string = encoded(structured).decode().replace('<', chr(92) + 'u003c')
+    soup.head.append(node)
+    # sitemap 与公开列表共用同一快照；只使用来源有效修改时间，不把本次导出时刻伪装成更新。
+    # 无时区日期时间仅输出其明确的日历日期；时间倒置或非法时省略可选 lastmod，不拒绝内容。
+    namespace = 'http://www.sitemaps.org/schemas/sitemap/0.9'
+    ET.register_namespace('', namespace)
+    root = ET.Element(f'{{{namespace}}}urlset')
+    for item in [{'url': canonical}, *sorted(public_items, key=lambda value: value['url'])]:
+        node = ET.SubElement(root, f'{{{namespace}}}url')
+        ET.SubElement(node, f'{{{namespace}}}loc').text = item['url']
+        try:
+            modified = dt.datetime.fromisoformat(item.get('date_modified', '').replace('Z', '+00:00'))
+            published = dt.datetime.fromisoformat(item.get('date_published', '').replace('Z', '+00:00')) if item.get('date_published') else None
+            if published and (modified < published if bool(modified.tzinfo) == bool(published.tzinfo) else modified.date() < published.date()):
+                continue
+            ET.SubElement(node, f'{{{namespace}}}lastmod').text = modified.isoformat() if modified.tzinfo else modified.date().isoformat()
+        except (ValueError, TypeError, AttributeError):
+            pass
+    (output / 'sitemap.xml').write_bytes(ET.tostring(root, encoding='utf-8', xml_declaration=True))
     for node in soup.find_all('a', href=True):
         if node['href'].startswith('https://jit.pro'): node['href'] = config.site + node['href'][len('https://jit.pro'):]
     for name in ('interactions.js', 'refinements.css', 'logo.svg', 'logo-dark.svg'):
@@ -543,47 +835,117 @@ def render_list(feed: dict, output: Path, config: Config, mirror: Mirror) -> lis
         if name == 'logo.svg': soup.html['data-logo-light'] = config.public + 'ui/' + hashed
         if name == 'logo-dark.svg': soup.html['data-logo-dark'] = config.public + 'ui/' + hashed
     (output / 'index.html').write_text(str(soup))
-    return public_items
+
+
+def refresh_published_list(config: Config, active: dict) -> dict:
+    """安装时用当前模板重建已发布列表，返回候选报告；无变化返回原版本且不写 active。
+
+    调用方须持 sync.lock，并通过 publish 完成版本切换、共享发布锁与 CDN 刷新。
+    不访问内容来源，保留文章、资源和公开快照，按快照重建 sitemap；摘要不符或部署边界变化则拒绝升级。
+    """
+    previous = config.work / 'releases' / active['version']
+    if active['site'] != config.site or active['public'] != config.public:
+        raise SyncError('已发布资讯与当前域名配置不匹配，请重新 build')
+    actual = {str(p.relative_to(previous)): digest(p.read_bytes()) for p in previous.rglob('*') if p.is_file()}
+    if actual != active.get('files'):
+        raise SyncError('已发布资讯文件校验失败，禁止升级模板')
+    snapshot = BeautifulSoup((previous / 'index.html').read_text(), 'html.parser').find(id='feed-snapshot')
+    if snapshot is None: raise SyncError('已发布资讯缺少公开快照，禁止升级模板')
+    data = json.loads(snapshot.text)
+    if not isinstance(data, dict) or not isinstance(data.get('items'), list):
+        raise SyncError('已发布资讯快照格式不正确')
+    with tempfile.TemporaryDirectory(prefix='template-', dir=config.work) as directory:
+        output = Path(directory)
+        # 复制完整可信版本，绝不就地修改；旧 UI 哈希资源也保留，避免缓存中的旧页缺少依赖。
+        shutil.copytree(previous, output, dirs_exist_ok=True)
+        render_public_list(data['items'], output, config)
+        files = {str(p.relative_to(output)): digest(p.read_bytes()) for p in output.rglob('*') if p.is_file()}
+        if files == actual: return {**active, 'changed': False}
+        version = digest(encoded({'files': files, 'site': config.site, 'public': config.public}))
+        release = config.work / 'releases' / version
+        report = {**active, 'version': version, 'base_version': active['version'], 'changed': True,
+                  'deleted_urls': [], 'removed_count': 0, 'release': str(release), 'files': files}
+        if release.exists():
+            # 候选重试必须核对真实字节，不能把磁盘中的损坏文件重新标记为可信版本。
+            existing = {str(p.relative_to(release)): digest(p.read_bytes()) for p in release.rglob('*') if p.is_file()}
+            if existing != files: raise SyncError('已有模板候选文件校验失败')
+        else:
+            output.chmod(0o755)
+            for path in output.rglob('*'): path.chmod(0o755 if path.is_dir() else 0o644)
+            os.replace(output, release)
+        atomic_json(config.work / 'candidates' / (version + '.json'), report)
+        return report
 
 
 def collect(config: Config, check_only=False, empty=False) -> dict:
     """抓取完整快照及资源，按真实内容和模板摘要判断变化；build 只生成候选，不发布。
 
-    检查会重新验证所有 HTML/CSS/图片，即使 Feed 不变也能发现原 URL 被覆盖的资源。
+    有合法 date_modified（包括 seo.updatedAt 映射）的条目，以已发布版本记录的修改时间作为契约，
+    未变条目只读取并校验本地缓存，不请求文章或依赖。缺时间则按原路径检查；未变条目缓存
+    缺失或损坏只允许恢复已发布字节，来源已变则抛 CacheError，避免把新旧依赖拼成旧时间版本。
+    内容端必须在正文或任一依赖变化时推进条目时间；候选抓取成功不等于可以跳过下次检查。
     两次完整 Feed 校验用于避免生成过程混入不同文章集合；来源若无事务版本，不能保证
-    所有资源是同一瞬时快照，但下次检查仍会检测后续资源变化。
+    所有资源是同一瞬时快照；后续依赖变化需内容端推进条目时间，才会在下次检查时读取。
     empty 仅供首次来源不可用时生成空候选；不发送网络请求，调用方必须保证尚无已发布版本。
     """
     fetcher = Fetcher(config)
     feed = {'items': []} if empty else validate_feed(fetcher.fetch(config.feed_url, fresh=True)[0], config)
+    active = load_json(config.work / 'active.json', {})
+    article_sources = {}
     config.work.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix='stage-', dir=config.work) as directory:
         output = Path(directory)
         mirror = Mirror(config, fetcher, output, feed)
-        urls = []
+        urls, jobs = [], []
         for item in feed['items']:
-            body, url = mirror.html_page(item)
+            # 每篇独立遍历资源图，但下载会话共享去重；记录必须包含深层 CSS/SVG/HLS 依赖，
+            # 不能只记 HTML 中直接出现的 URL，否则下次会漏掉资源版本或重复下载。
+            stamp = item.get('date_modified')
+            try:
+                parsed = dt.datetime.fromisoformat(stamp.replace('Z', '+00:00')) if isinstance(stamp, str) else None
+                # 内容 App 的现有 Feed 使用无时区 ISO 时间；这里只比较版本是否相等，
+                # 不做跨时区先后判断，因此保留来源时间语义，不擅自当成本机时间转换。
+                stamp = parsed.isoformat() if parsed is not None and 'T' in stamp else None
+            except ValueError:
+                stamp = None
+            previous = active.get('article_sources', {}).get(item['id'], {})
+            reusable = previous.get('sources', {}) if stamp and previous.get('stamp') == stamp and previous.get('url') == item['url'] else {}
+            jobs.append((item, stamp, reusable))
+        # 先检查变化篇的依赖，再读取未变化篇缓存，防止共享 URL 的旧缓存先进入会话去重表，
+        # 导致更新篇也错误沿用旧视频/样式。共享 URL 全局代表同一资源，本次最多下载一次。
+        for item, stamp, reusable in sorted(jobs, key=lambda job: bool(job[2])):
+            fetcher.reuse_records = reusable
+            fetcher.article_records = {}
+            mirror = Mirror(config, fetcher, output, feed)
+            try:
+                body, url = mirror.html_page(item)
+            except CacheError:
+                raise
+            except SyncError as error:
+                # 使用不含来源查询参数的 Feed ID 定位文章；保留原错误类型及下载失败原因。
+                raise SyncError('文章 ' + item['id'] + ' 同步失败：' + str(error)) from error
             target = output / article_path(item)
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(body)
             urls.append(url)
             if item.get('image'): mirror.asset(item['image'], item['url'])
+            article_sources[item['id']] = {'url': item['url'], 'stamp': stamp, 'sources': dict(fetcher.article_records)}
         second = feed if empty else validate_feed(fetcher.fetch(config.feed_url, fresh=True)[0], config)
         if semantic_feed(feed) != semantic_feed(second): raise SyncError('同步期间 Feed 改变，保留旧版本并等待下一次任务')
         source_hashes = {url: info['hash'] for url, info in fetcher.records.items() if url != config.feed_url}
         template_hashes = {path.name: digest(path.read_bytes()) for path in (HERE / 'templates').iterdir() if path.is_file()}
-        active = load_json(config.work / 'active.json', {})
         # 快照会继承已发布的内容哈希资源，指纹也必须包含这组文件。否则 A→B→A 会复用
         # 首次 A 的目录而丢失 B 的资源，缓存中的 B 页面随即缺图；相同资源集合不会反复触发发布。
         retained = {name: value for name, value in active.get('files', {}).items() if name.startswith(('assets/', 'ui/'))}
         retained.update({str(path.relative_to(output)): digest(path.read_bytes()) for path in (output / 'assets').glob('*') if path.is_file()})
         retained.update({'ui/' + template_hashes[name] + Path(name).suffix: template_hashes[name]
                          for name in ('interactions.js', 'refinements.css', 'logo.svg', 'logo-dark.svg')})
-        version = digest(encoded({'feed': semantic_feed(feed), 'resources': source_hashes, 'templates': template_hashes, 'retained': retained, 'engine': digest(Path(__file__).read_bytes()), 'site': config.site, 'public': config.public}))
+        engine = digest(Path(__file__).read_bytes() + Path(__file__).with_name('cases_projection.py').read_bytes())
+        version = digest(encoded({'feed': semantic_feed(feed), 'resources': source_hashes, 'templates': template_hashes, 'retained': retained, 'engine': engine, 'site': config.site, 'public': config.public}))
         fetcher.save()
         changed = active.get('version') != version
         deleted = sorted(set(active.get('urls', [])) - set(urls))
-        report = {'version': version, 'changed': changed, 'count': len(urls), 'removed_count': len(deleted), 'urls': sorted(urls), 'deleted_urls': deleted, 'site': config.site, 'public': config.public, 'base_version': active.get('version')}
+        report = {'version': version, 'changed': changed, 'count': len(urls), 'removed_count': len(deleted), 'urls': sorted(urls), 'deleted_urls': deleted, 'site': config.site, 'public': config.public, 'base_version': active.get('version'), 'article_sources': article_sources}
         if check_only or not changed: return report
         release = config.work / 'releases' / version
         if release.exists():
@@ -607,12 +969,6 @@ def collect(config: Config, check_only=False, empty=False) -> dict:
                             destination.parent.mkdir(parents=True, exist_ok=True)
                             shutil.copy2(old_file, destination)
             render_list(feed, output, config, mirror)
-            namespace = 'http://www.sitemaps.org/schemas/sitemap/0.9'
-            ET.register_namespace('', namespace)
-            root = ET.Element(f'{{{namespace}}}urlset')
-            for url in [config.site + config.public, *sorted(urls)]:
-                node = ET.SubElement(root, f'{{{namespace}}}url'); ET.SubElement(node, f'{{{namespace}}}loc').text = url
-            (output / 'sitemap.xml').write_bytes(ET.tostring(root, encoding='utf-8', xml_declaration=True))
             # TemporaryDirectory 默认 0700，不能直接交给 Nginx。只放开公开静态快照，
             # 缓存、配置和状态仍按部署账号权限保存；工作目录祖先的可遍历权限由部署时配置。
             output.chmod(0o755)
@@ -632,7 +988,8 @@ def collect_available(config: Config) -> dict:
 
     严格 check/collect 仍报告错误以便排查；此入口只降级为正常页面，不将失败认作下线。
     未配置返回 skipped 摘要，无文件或网络副作用；调用方不得据此发布或重试 CDN。
-    配置/HTTP 失败只写运营日志，fallback 摘要不嵌入网页；缓存损坏等磁盘错误仍向上报告。
+    配置/HTTP 失败写运营日志，fallback 摘要不嵌入网页；CLI 据此非零退出，让定时器报告失败。
+    缓存损坏等磁盘错误仍向上报告，不能当作正常未更新。
     """
     if not config.feed_url:
         return {'skipped': True, 'reason': 'feed_not_configured', 'changed': False}
@@ -649,12 +1006,14 @@ def collect_available(config: Config) -> dict:
         return {**collect(config, empty=True), 'fallback': True}
 
 
-def refresh_cdn(urls: list[str], env) -> None:
+def refresh_cdn(urls: list[str], env, pending_path: Path | None = None) -> None:
     """可选阿里云 CDN 刷新；直接以环境凭证签名，不调用旧 CLI profile，不写密钥到文件/日志。
 
     none 模式跳过；aliyun 模式要求环境 AK，支持 STS token。每批至多 100 个 File URL，
     所有新增、修改及已删除地址都包含在待刷新集；空队列不要求凭证、不请求网络。
-    仅接受非空字符串任务 ID；传输/API/响应格式失败均抛 SyncError，由发布层保留 pending。
+    仅接受非空字符串任务 ID；传输/API/响应格式失败均抛 SyncError。
+    pending_path 指定持久化队列时，每批受理后立即写入剩余 URL；失败只重试未确认批次，
+    不重复消耗已成功批次的额度。调用方须持同步/发布锁，防止覆盖其他发布的新队列。
     """
     mode = env.get('NEWS_CDN_MODE', 'none')
     if mode == 'none': return
@@ -677,10 +1036,12 @@ def refresh_cdn(urls: list[str], env) -> None:
                 raise SyncError('CDN 未返回有效刷新任务 ID')
         except (HTTPError, URLError, TimeoutError, ValueError):
             raise SyncError('CDN 刷新请求失败；凭证与响应体不写入日志，下次任务重试') from None
+        if pending_path is not None:
+            atomic_json(pending_path, urls[start + 100:])
 
 
 def publish(config: Config, version: str, env) -> dict:
-    """显式发布已校验候选，只替换 NEWS_LIVE_LINK 的符号链接；不触碰主站文件或 nginx。
+    """显式发布已校验候选，切换资讯链接并更新主站案例页的两个专属静态槽；不改 nginx。
 
     必须与全站发布共享 NEWS_RELEASE_LOCK，且全站 rsync 排除资讯目录后才能启用。
     文件切换后先写 active 状态并保存 pending CDN；刷新失败不重新构建，也不丢失删除 URL。
@@ -704,26 +1065,54 @@ def publish(config: Config, version: str, env) -> dict:
         # build/publish 分开执行；中间有别的版本生效时，必须重建基线，禁止陈旧候选覆盖新内容。
         if previous.get('version') not in (report.get('base_version'), report['version']):
             raise SyncError('候选基线已过期，请重新检查并生成候选')
+        # 安装器明确提供主站根；独立同步器未接主站时保留旧契约，不推断可写祖先目录。
+        # 页面投影基于待发布候选，先准备并校验全部字节；任何失败都不能切换资讯版本。
+        case_changes = []
+        if env.get('NEWS_MAIN_SITE_DIR'):
+            site_root = Path(env['NEWS_MAIN_SITE_DIR']).absolute()
+            if site_root / config.public.strip('/') != live:
+                raise SyncError('案例投影主站根与资讯入口不一致')
+            case_changes = prepare_case_pages(site_root, release, config.site)
         # 全部公开文章和旧地址并集，包含下线文件的缓存；.html/index.html 变体同时刷新。
         pending = set(load_json(config.work / 'pending-cdn.json', []))
-        pending.update(previous.get('urls', [])); pending.update(report['urls'])
+        # HTML 同样按内容差异刷新；Feed 只有一篇更新时，不重复刷新其他未变文章。
+        old_files, new_files = previous.get('files', {}), report['files']
+        for url in set(previous.get('urls', [])) | set(report['urls']):
+            relative = url.removeprefix(config.site + config.public) + 'index.html'
+            if old_files.get(relative) != new_files.get(relative): pending.add(url)
         # HTML 同目录 CSS 与 file 命名图片不再都是内容寻址路径；刷新新增/修改/删除资源，
         # 否则正文更新后浏览器/CDN 仍可能加载旧样式或旧图片。UI 哈希文件同样按差异处理。
-        old_files, new_files = previous.get('files', {}), report['files']
         for name in set(old_files) | set(new_files):
             if name.endswith('.html') or old_files.get(name) == new_files.get(name): continue
             if name in old_files: pending.add(previous['site'] + previous['public'] + name)
             if name in new_files: pending.add(config.site + config.public + name)
         pending.update([config.site + config.public, config.site + config.public.rstrip('/'), config.site + config.public + 'index.html', config.site + config.public + 'sitemap.xml'])
+        for path, _, _ in case_changes:
+            route = '/' + path.relative_to(site_root).as_posix().removesuffix('.html')
+            pending.update(config.site + route + suffix for suffix in ('', '.html', '/', '/index.html'))
         for url in list(pending):
             if url.endswith('/'): pending.update([url + 'index.html', url.rstrip('/')])
         atomic_json(config.work / 'pending-cdn.json', sorted(pending))
         temporary = live.with_name(live.name + '.next-' + uuid.uuid4().hex)
-        temporary.symlink_to(release)
-        os.replace(temporary, live)
-        report['previous_version'] = previous.get('version')
-        atomic_json(config.work / 'active.json', report)
-        refresh_cdn(sorted(pending), env)
+        previous_target = os.readlink(live) if live.is_symlink() else None
+        with case_page_transaction(case_changes):
+            try:
+                temporary.symlink_to(release)
+                os.replace(temporary, live)
+                report['previous_version'] = previous.get('version')
+                atomic_json(config.work / 'active.json', report)
+            except BaseException:
+                # 状态提交失败恢复资讯入口；外层事务同时恢复案例页，不留下新列表配旧状态。
+                temporary.unlink(missing_ok=True)
+                if previous_target is None:
+                    live.unlink(missing_ok=True)
+                else:
+                    temporary.symlink_to(previous_target)
+                    os.replace(temporary, live)
+                raise
+            finally:
+                temporary.unlink(missing_ok=True)
+        refresh_cdn(sorted(pending), env, config.work / 'pending-cdn.json')
         if env.get('NEWS_CDN_MODE', 'none') == 'aliyun': atomic_json(config.work / 'pending-cdn.json', [])
     return {'published': version, 'cdn': env.get('NEWS_CDN_MODE', 'none')}
 
@@ -743,6 +1132,7 @@ def main() -> int:
     """CLI 入口；未配置 Feed 时常规命令正常跳过，且不初始化目录、锁或网络。
 
     配置后 check/build 无线上写入，publish 必须显式提供版本，输出只含摘要不含凭证。
+    build 因来源错误回退旧版时返回 1；页面保留与本次任务成功是两个独立状态。
     bootstrap 是发布安装专用命令，显式初始化空页或恢复入口，不受定时 Feed 停用语义限制。
     """
     parser = argparse.ArgumentParser(description=__doc__)
@@ -758,31 +1148,33 @@ def main() -> int:
         prepare_work_directory(config)
         with file_lock(config.work / 'sync.lock'):
             if args.command == 'bootstrap':
-                # 仅官网发布安装阶段显式调用，不属于定时抓取。未配置 Feed 也先放置可访问空页，
-                # 既有文章绝不能被空页覆盖；链接丢失时用已校验的 active 候选恢复。
+                # 仅官网发布安装阶段调用：已有内容从可信公开快照升级模板，不依赖 Feed 可用性。
+                # 没有已发布版本才初始化空页；链接丢失时仍通过正常发布流程恢复。
                 if not os.environ.get('NEWS_LIVE_LINK'): raise SyncError('bootstrap 需要 NEWS_LIVE_LINK')
                 active = load_json(config.work / 'active.json', {})
                 live = Path(os.environ['NEWS_LIVE_LINK'])
-                if active and live.is_symlink() and live.resolve() == config.work / 'releases' / active['version']:
+                report = refresh_published_list(config, active) if active else collect(config, empty=True)
+                if not report['changed'] and live.is_symlink() and live.resolve() == config.work / 'releases' / report['version']:
                     # 上次安装可能已经切换空页，但 CDN 失败；重新发布时需完成遗留刷新。
                     # none 模式保留队列，常规定时入口在 Feed 未配置时仍完全跳过。
                     pending = load_json(config.work / 'pending-cdn.json', [])
-                    refresh_cdn(pending, os.environ)
+                    refresh_cdn(pending, os.environ, config.work / 'pending-cdn.json')
                     if os.environ.get('NEWS_CDN_MODE') == 'aliyun': atomic_json(config.work / 'pending-cdn.json', [])
                     print(json.dumps({'initialized': False}))
                 else:
-                    report = active or collect(config, empty=True)
                     print(json.dumps(publish(config, report['version'], os.environ)))
             elif args.command in ('check', 'build'):
                 report = collect(config, check_only=True) if args.command == 'check' else collect_available(config)
                 print(json.dumps({**{key: report[key] for key in ('version', 'changed', 'count', 'removed_count')},
                                   'fallback': report.get('fallback', False)}, ensure_ascii=False))
+                # 回退只保证旧页面可用，不代表本次抓取成功；调度器须看见非零状态并在下一轮重试。
+                if report.get('fallback'): return 1
             elif args.command == 'publish':
                 if not args.version: raise SyncError('publish 需要 --version')
                 print(json.dumps(publish(config, args.version, os.environ)))
             else:
                 pending = load_json(config.work / 'pending-cdn.json', [])
-                refresh_cdn(pending, os.environ)
+                refresh_cdn(pending, os.environ, config.work / 'pending-cdn.json')
                 if os.environ.get('NEWS_CDN_MODE') == 'aliyun': atomic_json(config.work / 'pending-cdn.json', [])
                 print(json.dumps({'pending': len(load_json(config.work / 'pending-cdn.json', []))}))
         return 0

@@ -14,6 +14,7 @@ import shlex
 import subprocess
 import sys
 import uuid
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -63,12 +64,15 @@ def publish(env, apply=False):
     remote(['env', *[key + '=' + value for key, value in remote_env.items()], 'python3',
             stage + '/news/install-news.py', '--stage', stage, '--apply'], json.dumps(settings))
     if env.get('SKIP_VERIFY') != '1':
-        remote(['python3', stage + '/news/verify-site.py', '--domain', domain, '--origin'])
+        remote(['python3', stage + '/news/verify-site.py', '--domain', domain, '--origin', '--seo'])
     if env.get('SKIP_CDN') != '1':
+        # 缓存规则作为官网发布配置管理；默认 HTML 一分钟、同名资源五分钟、哈希资源一年。
+        # 配置脚本保留原规则并回读确认，策略变化的旧缓存进入既有持久队列，不另开刷新通道。
+        remote(['python3', stage + '/news/cache_policy.py', '--domain', urlsplit(domain).netloc, '--apply'])
         remote(['env', 'BUILD_DIR=' + site, 'DOMAIN=' + domain,
                 'REFRESH_SCOPE=' + env.get('REFRESH_SCOPE', 'targeted'), 'bash', cdn_script])
         if env.get('SKIP_VERIFY') != '1':
-            remote(['python3', stage + '/news/verify-site.py', '--domain', domain])
+            remote(['python3', stage + '/news/verify-site.py', '--domain', domain, '--seo', '--cache'])
     remote(['rm', '-rf', '--', stage])
     print('官网发布完成；资讯同步由服务器每十分钟触发。')
     return 0

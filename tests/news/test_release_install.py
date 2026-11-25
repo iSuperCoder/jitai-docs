@@ -270,6 +270,24 @@ class ReleaseInstallTests(unittest.TestCase):
             run.assert_not_called()
         self.assertFalse(Path(self.env['NEWS_CONFIG_FILE']).exists())
 
+    def test_repeat_install_applies_new_navigation_without_fetching_feed(self):
+        """沿真实 installer → service-entry → bootstrap 子进程升级旧导航；无 Feed 也必须生效。"""
+        template = self.stage / 'news/templates/index.html'
+        current = template.read_text()
+        template.write_text(current.replace('案例方案', '场景示例').replace('在线体验', '旧体验入口'))
+        self.install()
+        listing = self.site / 'zh/news/index.html'
+        self.assertIn('场景示例', listing.read_text())
+        previous = listing.parent.resolve()
+        template.write_text(current)
+        self.install()
+        self.assertIn('案例方案', listing.read_text())
+        self.assertIn('在线体验', listing.read_text())
+        self.assertNotIn('场景示例', listing.read_text())
+        self.assertNotEqual(listing.parent.resolve(), previous)
+        self.assertIn('场景示例', (previous / 'index.html').read_text())
+        self.assertEqual(json.loads(Path(self.env['NEWS_CONFIG_FILE']).read_text())['NEWS_FEED_URL'], '')
+
     def test_bootstrap_failure_does_not_publish_main_site_or_enable_timer(self):
         """资讯初始化失败不能把新导航上线；保留原主站，且不启用尚未准备好的 timer。"""
         def fail_bootstrap(args, **kwargs):
@@ -414,6 +432,10 @@ class PublishedRouteTests(unittest.TestCase):
                      '/download': 'Apple installer', '/zh/download': 'Apple 芯片', '/contact': 'contact',
                      '/zh/contact': 'zhcontactus', '/zh/news/': '资讯中心',
                      '/zh/news/sitemap.xml': '<urlset></urlset>'}
+        # 菜单来源独立定义；普通内容包含“资讯中心”不能替代真正页头的一致性校验。
+        header = '<header><a href="/zh/">首页</a><a href="/zh/cases">案例方案</a><a href="/zh/news/">资讯中心</a></header>'
+        for path in ('/zh/', '/zh/news/'):
+            resources[path] = header + resources[path]
         self.fixture.resources.update({path: (body.encode(), 'text/html') for path, body in resources.items()})
 
     def test_current_routes_and_retired_404_pass(self):
@@ -426,10 +448,30 @@ class PublishedRouteTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, '退役路由'):
             verifier.verify(self.fixture.source)
 
+    def test_cached_whitepaper_alias_is_rejected(self):
+        """白皮书静态别名仍返回正文时发布验收必须失败，即使导航已隐藏且主路由是 404。"""
+        self.fixture.resources['/zh/whitepaper.html'] = (b'cached whitepaper', 'text/html')
+        with self.assertRaisesRegex(ValueError, '退役路由'):
+            verifier.verify(self.fixture.source)
+
     def test_news_missing_or_wrong_page_fails(self):
         """资讯入口 200 但返回别的内容也必须失败，避免主站回退页掩盖初始化缺失。"""
         self.fixture.resources['/zh/news/'] = (b'wrong home page', 'text/html')
         with self.assertRaisesRegex(ValueError, '内容'):
+            verifier.verify(self.fixture.source)
+
+    def test_old_news_navigation_is_rejected_even_when_route_works(self):
+        """复现上次验收盲区：资讯返回 200 且标题正确，但旧菜单必须让发布检查失败。"""
+        body, kind = self.fixture.resources['/zh/news/']
+        self.fixture.resources['/zh/news/'] = (body.replace('案例方案'.encode(), '场景示例'.encode()), kind)
+        with self.assertRaisesRegex(ValueError, '顶部菜单'):
+            verifier.verify(self.fixture.source)
+
+    def test_changed_news_link_is_rejected_with_same_label(self):
+        """文案正确但跳转目标错误时单独拒绝，避免只检验可见文字而漏掉旧路由。"""
+        body, kind = self.fixture.resources['/zh/news/']
+        self.fixture.resources['/zh/news/'] = (body.replace(b'/zh/cases', b'/zh/solutions'), kind)
+        with self.assertRaisesRegex(ValueError, '顶部菜单'):
             verifier.verify(self.fixture.source)
 
 

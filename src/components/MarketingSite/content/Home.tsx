@@ -1,9 +1,68 @@
-import React from "react";
-import { useMarketingCopy } from "../copy";
+import React, { useRef, useState } from "react";
+import { CONSOLE_URL, DEMO_URL, useMarketingCopy } from "../copy";
 import ContactSection from "../ContactSection";
+import { ArrowUpRight, Download, LoaderCircle, Play, RotateCw } from 'lucide-react';
 import featuresZh from './features-zh.json';
 import featuresEn from './features-en.json';
 
+// 点击后读取 CDN MP4；预览是同一视频提取的 960×540 首帧，避免手机预载策略导致空白。
+const HOME_VIDEO_URL = 'https://assets.jit.pro/videos/JitAI.mp4';
+const HOME_VIDEO_PREVIEW = '/img/home-video-preview.webp';
+
+/** 首屏显示从视频提取的静态首帧，以预览样式融入主题；点击后恢复原色并由原生控件接管。
+ * 加载、播放及失败状态局限于此组件；失败可重新加载或打开源视频，不自动播放。
+ */
+function HomeVideo() {
+  const { text } = useMarketingCopy();
+  const videoUrl = HOME_VIDEO_URL;
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('ready');
+  const [started, setStarted] = useState(false);
+
+  /** 在用户点击中启动播放以兼容移动端策略；失败进入可重试状态，画幅始终保持不变。 */
+  const startPlayback = async () => {
+    const video = videoRef.current;
+    if (!video) return;
+    setStarted(true);
+    setStatus('loading');
+    try { await video.play(); }
+    catch { setStatus('error'); }
+  };
+
+  return <div className="home-video" data-preview={!started && status !== 'error'} role="group" aria-label={text('视频', 'Video')}>
+    <div className="home-video-frame">
+      {videoUrl ? <>
+        {/* 不指定 MIME，交由浏览器结合 CDN 的 Content-Type 选择解码器；原生控件负责播放与拖动。 */}
+        <video ref={videoRef} src={videoUrl} controls={started} playsInline preload="none"
+          aria-label={text('JitAI 视频', 'JitAI video')}
+          onLoadedData={() => setStatus('ready')}
+          onCanPlay={() => setStatus('ready')}
+          onWaiting={() => setStatus('loading')}
+          onPlaying={() => setStatus('ready')}
+          onError={() => setStatus('error')}>
+          <a href={videoUrl}>{text('打开视频文件', 'Open video file')}</a>
+        </video>
+        {/* 使用普通图像跨浏览器呈现首帧；播放后移除，柔化/调色不会影响视频正文或原生控制条。 */}
+        {!started && status !== 'error' && <img className="home-video-preview" src={HOME_VIDEO_PREVIEW} alt="" aria-hidden="true" width="960" height="540" />}
+        {!started && status !== 'error' && <button className="home-video-start" type="button" onClick={startPlayback} aria-label={text('播放视频', 'Play video')} aria-busy={status === 'loading'}>
+          {status === 'loading' ? <LoaderCircle className="home-video-start-spinner" size={22} aria-hidden="true" /> : <Play className="home-video-start-icon" size={20} fill="currentColor" aria-hidden="true" />}
+          <span>{text('观看产品介绍', 'Watch product overview')}</span>
+        </button>}
+        {started && status === 'loading' && <div className="home-video-loading" role="status" aria-label={text('视频加载中', 'Loading video')}><LoaderCircle size={28} aria-hidden="true" /></div>}
+        {status === 'error' && <div className="home-video-error" role="alert">
+          <button type="button" title={text('重新加载视频', 'Reload video')} aria-label={text('重新加载视频', 'Reload video')} onClick={() => { setStarted(false); setStatus('ready'); videoRef.current?.load(); }}><RotateCw size={20} aria-hidden="true" /></button>
+          <a href={videoUrl} target="_blank" rel="noopener noreferrer">{text('打开视频', 'Open video')}</a>
+        </div>}
+      </> : <div className="home-video-empty" role="img" aria-label={text('视频画面预留位置', 'Reserved video area')}>
+        <span className="home-video-brand" aria-hidden="true">JitAI</span>
+      </div>}
+    </div>
+  </div>;
+}
+
+/** 首页按当前语言展示产品内容；首屏入口按下载、体验、云控制台排序，说明常驻供首次访问者选择。
+ * 视频负责自己的播放状态，入口保持站内下载与外部环境的导航契约；白皮书暂不公开。
+ */
 export default function Home() {
   const { t, text, path, brand, isZh } = useMarketingCopy();
   const features = isZh ? featuresZh : featuresEn;
@@ -45,45 +104,25 @@ export default function Home() {
 </div>
 <div className="hero-veil" aria-hidden="true"></div>
 <div className="wrap hero-inner">
-<p className="kicker reveal">{brand.productTitle}</p>
-<h1 className="h1 mt-16 reveal">{text("构建 AI 原生系统，", "Build AI-Native Systems,")}<br />{text("释放 AI 无限潜能", "Unleash the Full Potential of AI")}</h1>
-<p className="lead mt-24 reveal">{text("JitAI，轻松构建", "JitAI makes it easy to build ")}<b className="mark">{text("AI 原生", "AI-native")}</b>{text("的业务系统，让 AI 看懂您的业务全貌，最大化释放 AI 生产力，用 AI 智力驱动企业业务运转。", " business systems, gives AI the full picture of your business, maximizes AI productivity, and applies AI intelligence to business operations.")}</p>
-<div className="btn-row mt-32 reveal">
-<a className="btn btn-primary btn-lg" href={path("/download")}>
-<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" strokeLinecap="round" strokeLinejoin="round"></path>
-</svg>{t("免费体验桌面版")}</a>
-<a className="btn btn-ghost btn-lg" href={path("/about#contact")}>{t("预约企业落地沟通")}</a>
+<p className="kicker reveal hero-kicker">{brand.productTitle}</p>
+<h1 className="h1 reveal hero-heading">{text("构建 AI 原生系统，", "Build AI-Native Systems,")}<br />{text("释放 AI 无限潜能", "Unleash the Full Potential of AI")}</h1>
+<p className="lead reveal hero-lead">{text('让 AI 看懂业务全貌，参与系统开发与业务运行。', 'Give AI the full business context to help build systems and run operations.')}</p>
+<div className="hero-actions reveal">
+  {/* 说明直接放在对应按钮下方；读屏通过 describedby 关联，触屏无需依赖悬停。 */}
+  <div className="hero-entry">
+    <a className="btn btn-primary" href={path('/download')} aria-describedby="desktop-entry-description"><Download aria-hidden="true" />{text('免费下载桌面版', 'Free desktop download')}</a>
+    <p id="desktop-entry-description">{text('本地开发与运行', 'Build and run locally')}</p>
+  </div>
+  <div className="hero-entry">
+    <a className="btn btn-ghost" href={DEMO_URL} target="_blank" rel="noopener noreferrer" aria-describedby="demo-entry-description">{text('在线体验', 'Try online')}<ArrowUpRight aria-hidden="true" /><span className="sr-only">{text('（在新窗口打开）', ' (opens in a new window)')}</span></a>
+    <p id="demo-entry-description">{text('免安装 · 公共演示', 'No install · Shared demo')}</p>
+  </div>
+  <div className="hero-entry">
+    <a className="btn btn-ghost" href={CONSOLE_URL} target="_blank" rel="noopener noreferrer" aria-describedby="cloud-entry-description">{text('云控制台', 'Cloud console')}<ArrowUpRight aria-hidden="true" /><span className="sr-only">{text('（在新窗口打开）', ' (opens in a new window)')}</span></a>
+    <p id="cloud-entry-description">{text('购买与管理专属云环境', 'Buy and manage a dedicated cloud environment')}</p>
+  </div>
 </div>
-<p className="hero-note reveal">{t("与外挂式桌面 AI 智能体不同，JitAI 的业务 AI 和开发 AI 都内生在业务系统之中。")}</p>
-</div>
-</section>
-
-<section className="section section-alt zero-barrier-section">
-<div className="wrap">
-<div className="section-head reveal">
-<p className="kicker">{text("零门槛开发", "Development without a technical barrier")}</p>
-<h2 className="h2 mt-16">{text("自动化构建，无需专业 IT 知识技能基础", "Build automatically without a professional IT background")}</h2>
-<p className="lead mt-16">{text("业务人员描述业务，AI 生成系统功能，即时生效使用。", "Business users describe their work; AI generates system capabilities that can be used after validation.")}<br />{text("不用懂 Agent 开发、不用会写代码，", "No agent development or coding background is needed. ")}<strong>{text("非 IT 专业人员也能开发专业的 AI 原生系统", "People outside IT can build professional AI-native systems")}</strong>{text("。", ".")}</p>
-</div>
-<div className="grid g-3 mt-32 reveal">
-<div className="marketing-card"><div className="row gap-12 mb-12"><span className="num-badge">01</span><h3 className="h5">{text("描述业务", "Describe the business")}</h3></div>
-<div className="code"><span className="c-com">{text("// 业务人员输入", "// Business user input")}</span><br />{text("“帮我建一个销售订单审批流，金额超过 5 万自动升级总经理审批。”", '"Create a sales order approval flow. Orders above 50,000 require general manager approval."')}</div>
-<p className="small mt-8">{text("说人话即可，不写代码、不画流程图。", "Describe the need in business terms, without code or a flowchart.")}</p></div>
-<div className="marketing-card"><div className="row gap-12 mb-12"><span className="num-badge">02</span><h3 className="h5">{text("生成元素", "Generate elements")}</h3></div>
-<div className="code"><span className="c-com">{text("// AI 生成规范化元素", "// AI-generated standardized elements")}</span><br />✓ <span className="c-key">models.SalesOrder</span> {text("销售订单", "Sales order")}<br />✓ <span className="c-key">services.Approval</span> {text("审批流", "Approval flow")}<br />✓ <span className="c-key">pages.ApprovalDesk</span> {text("审批台", "Approval desk")}<br />✓ <span className="c-key">agents.OrderHelper</span> {text("订单助手", "Order assistant")}</div>
-<p className="small mt-8">{text("产出的不是代码片段，是可运行的专业系统构件。", "The output is runnable system components, not isolated code snippets.")}</p></div>
-<div className="marketing-card card-ok"><div className="row gap-12 mb-12"><span className="num-badge">03</span><h3 className="h5">{text("即时生效", "Take effect")}</h3></div>
-<div className="code"><span className="c-com">{text("// 六项校验通过", "// Six checks passed")}</span><br /><span className="c-str">{text("● 审批台已上线", "● Approval desk is live")}</span><br />{text("规则：金额 > 5 万 → 总经理", "Rule: amount > 50,000 → general manager")}<br />{text("全链路审计已开启", "End-to-end audit enabled")}</div>
-<p className="small mt-8">{text("校验通过后即可生效，无需等待传统上线排期。", "Changes take effect after validation without a traditional release schedule.")}</p></div>
-</div>
-<div className="table-wrap mt-32 reveal"><table className="data"><thead><tr><th>{text("系统构建", "Building the system")}</th><th>{text("过去", "Before")}</th><th className="col-us">{text("用 JitAI", "With JitAI")}</th></tr></thead><tbody>
-<tr><td>{text("谁来建", "Who builds it")}</td><td>{text("业务提需求 → 产品翻译 → 研发实现", "Business requests → product interpretation → engineering")}</td><td className="col-us yes">{text("业务人员自己建", "Business users build it themselves")}</td></tr>
-<tr><td>{text("怎么建", "How")}</td><td>{text("写代码、拖控件、配流程", "Write code, drag controls, configure flows")}</td><td className="col-us">{text("用业务语言对话描述", "Describe it in business language")}</td></tr>
-<tr><td>{text("需要什么背景", "Required background")}</td><td>{text("会编程、懂数据库设计", "Programming and database design")}</td><td className="col-us">{text("懂业务就够了", "Business knowledge is enough to start")}</td></tr>
-<tr><td>{text("多久见效", "Time to value")}</td><td>{text("排期开发到上线，以月计", "Planned development and release can take months")}</td><td className="col-us">{text("校验通过后生效", "Available after validation")}</td></tr>
-</tbody></table></div>
-<p className="quote-line mt-32 reveal">{text("懂业务的人，终于可以自己造系统。", "The people who know the business can now build its systems.")}<br />{text("系统构建权，第一次从 IT 部门回到业务一线。", "System creation moves closer to the people doing the work.")}</p>
+<HomeVideo />
 </div>
 </section>
 
@@ -101,8 +140,8 @@ export default function Home() {
 </div>
 <ul className="bullets">
 <li><strong>{t("AI 看得见界面与数据，看不懂业务")}</strong></li>
-<li>{t("进场的是通用智能体而非专用智能体，缺乏业务上下文")}</li>
-<li>{t("旧系统不是 AI 原生、没有业务孪生，业务对象与状态规则对 AI 不可见")}</li>
+<li>{t("通用 AI 不了解企业的客户、订单、流程和规则，难以直接处理业务")}</li>
+<li>{t("旧系统中的业务数据、关联关系和处理规则，没有完整提供给 AI")}</li>
 <li>{t("没有角色权限与审批边界的硬约束，给得出建议，执行不了业务")}</li>
 </ul>
 <p className="small mt-16 accent">{t("结果：只能做辅助问答，无法自主驱动真实业务。")}</p>
@@ -130,8 +169,8 @@ export default function Home() {
 <div className="wrap">
 <div className="section-head center reveal">
 <p className="kicker">{t("JitAI 技术")}</p>
-<h2 className="h2 mt-16">{t("AI 开发与 AI 运行，共生一体")}</h2>
-<p className="lead mt-16">{t("开发和运行共用同一套 AI 原生架构。")}</p>
+<h2 className="h2 mt-16">{t("AI 参与开发，也参与业务运行")}</h2>
+<p className="lead mt-16">{t("AI 开发助手负责搭建和修改应用；业务智能体负责在应用中处理业务。两者使用同一套业务数据、规则和系统功能。")}</p>
 </div>
 <div className="grid g-2">
 <div className="marketing-card card-ok reveal">
@@ -141,11 +180,11 @@ export default function Home() {
 <path d="m2 17 10 5 10-5M2 12l10 5 10-5" strokeLinejoin="round"></path>
 </svg>
 </div>
-<h3 className="h3">{t("业务系统 AI 原生")}</h3>
+<h3 className="h3">{t("AI 参与业务运行")}</h3>
 <ul className="checklist mt-16">
-<li>{t("按元素化规范一比一还原现实业务")}</li>
-<li>{t("模块自描述，可被 AI 感知与驱动")}</li>
-<li>{t("专用智能体内嵌系统，在规则约束下自动执行业务动作")}</li>
+<li>{t("把客户、订单、审批等业务内容组织成标准的系统构件，称为“元素”")}</li>
+<li>{t("每个元素说明自己的用途、数据和可执行操作，便于 AI 理解和调用")}</li>
+<li>{t("业务智能体是负责具体业务的 AI 助手，按授权调用系统功能完成任务")}</li>
 <li><strong>{t("让 AI 第一次看见了业务系统内部的全貌，解锁了 AI 运行系统的智力")}</strong></li>
 </ul>
 </div>
@@ -155,10 +194,10 @@ export default function Home() {
 <path d="m16 18 6-6-6-6M8 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round"></path>
 </svg>
 </div>
-<h3 className="h3">{t("开发过程 AI 原生")}</h3>
+<h3 className="h3">{t("AI 参与系统开发")}</h3>
 <ul className="checklist mt-16">
 <li>{t("开发与运行共用同一套元素模型和运行时")}</li>
-<li>{t("AI 可读取定义、代码、测试结果与线上运行反馈")}</li>
+<li>{t("AI 开发助手根据需求生成或修改应用，并结合测试结果与运行反馈继续改进")}</li>
 <li>{t("运行反馈持续回流，AI 越调越准")}</li>
 <li><strong>{t("让 AI 第一次同时看见系统开发与系统运行过程，解锁了 AI 开发系统的智力")}</strong></li>
 </ul>
@@ -166,6 +205,12 @@ export default function Home() {
 </div>
 <p className="quote-line mt-32 reveal">
 <strong>{t("AI 原生的本质：让 AI 能看见、能使用。")}</strong><br />{t("企业 AI 原生化，就是把企业的一切构建成 AI 能看见和能使用的 知识、规则、数据、工具、系统功能。")}</p>
+<div className="flowline mt-24 reveal">
+<span className="node">{t("开发侧生成元素")}</span><span className="arrow">{"→"}</span>
+<span className="node">{t("运行侧加载执行")}</span><span className="arrow">{"→"}</span>
+<span className="node hi">{t("运行回执回流")}</span><span className="arrow">{"→"}</span>
+<span className="node">{t("迭代优化")}</span>
+</div>
 </div>
 </section>
 
@@ -216,7 +261,7 @@ export default function Home() {
 </svg>
 </div>
 <h3 className="h5">{t("组织与 AI 配额管理")}</h3>
-<p className="small mt-8">{t("统一管理组织，为个人和 Agent 分别设置 Token 使用限额，控制 AI 用量与成本。")}</p>
+<p className="small mt-8">{t("统一管理组织，为个人和智能体分别设置 AI 用量限额，控制使用成本。")}</p>
 </div>
 </div>
 <div className="section-head mt-40 reveal">
@@ -229,15 +274,17 @@ export default function Home() {
 <div className="section-head mt-40 reveal">
 <p className="kicker">{t("交付形态")}</p>
 <h2 className="h2 mt-16">{t("三种交付形态")}</h2>
+<p className="lead mt-16">{text("选应用在哪里运行：自己的电脑、专属云环境，或企业自有服务器。在线体验用于试用公共演示，不属于独立的交付版本；云控制台用于购买和管理专属云环境。", "Choose where your apps run: your computer, a dedicated cloud environment, or your own servers. Try online opens a shared demo; it is not a separate edition. The cloud console is where you purchase and manage dedicated cloud environments.")}</p>
 </div>
 <div className="table-wrap reveal">
-<table className="data">
+<table className="data delivery-table">
 <thead>
 <tr>
 <th>{t("对比维度")}</th>
-<th>{t("免费桌面体验版")}</th>
-<th className="col-us">{t("云托管订阅版")}</th>
-<th>{t("私有化部署版")}</th>
+{/* 三个表头分别连接各自交付方式的下一步，避免表格下方重复且脱离列语境的操作。 */}
+<th><span className="delivery-heading">{t("免费桌面版")}<a href={path('/download')}>{text('下载桌面版', 'Download')}<ArrowUpRight size={14} aria-hidden="true" /></a></span></th>
+<th className="col-us"><span className="delivery-heading">{t("云托管订阅版")}<a href={CONSOLE_URL} target="_blank" rel="noopener noreferrer">{text('云控制台', 'Cloud console')}<ArrowUpRight size={14} aria-hidden="true" /><span className="sr-only">{text('（在新窗口打开）', ' (opens in a new window)')}</span></a></span></th>
+<th><span className="delivery-heading">{t("私有化部署版")}<a href={path('/contact')}>{text('咨询私有化', 'Contact us')}<ArrowUpRight size={14} aria-hidden="true" /></a></span></th>
 </tr>
 </thead>
 <tbody>
@@ -274,10 +321,34 @@ export default function Home() {
 </tbody>
 </table>
 </div>
-<div className="btn-row mt-32 reveal">
-<a className="btn btn-primary" href={path("/download")}>{t("下载桌面版")}</a>
-<a className="btn btn-ghost" href={path("/about#contact")}>{t("咨询订阅与私有化方案")}</a>
 </div>
+</section>
+
+<section className="section zero-barrier-section">
+<div className="wrap">
+<div className="section-head reveal">
+<p className="kicker">{text("零门槛开发", "Development without a technical barrier")}</p>
+<h2 className="h2 mt-16">{text("自动化构建，无需专业 IT 知识技能基础", "Build automatically without a professional IT background")}</h2>
+<p className="lead mt-16">{text("业务人员描述业务，AI 生成系统功能，即时生效使用。", "Business users describe their work; AI generates system capabilities that can be used after validation.")}<br />{text("不用懂智能体开发、不用会写代码，", "No agent development or coding background is needed. ")}<strong>{text("非 IT 专业人员也能开发专业的 AI 原生系统", "People outside IT can build professional AI-native systems")}</strong>{text("。", ".")}</p>
+</div>
+<div className="grid g-3 mt-32 reveal">
+<div className="marketing-card"><div className="row gap-12 mb-12"><span className="num-badge">01</span><h3 className="h5">{text("描述业务", "Describe the business")}</h3></div>
+<div className="code"><span className="c-com">{text("// 业务人员输入", "// Business user input")}</span><br />{text("“帮我建一个销售订单审批流，金额超过 5 万自动升级总经理审批。”", '"Create a sales order approval flow. Orders above 50,000 require general manager approval."')}</div>
+<p className="small mt-8">{text("说人话即可，不写代码、不画流程图。", "Describe the need in business terms, without code or a flowchart.")}</p></div>
+<div className="marketing-card"><div className="row gap-12 mb-12"><span className="num-badge">02</span><h3 className="h5">{text("生成元素", "Generate elements")}</h3></div>
+<div className="code"><span className="c-com">{text("// AI 生成规范化元素", "// AI-generated standardized elements")}</span><br />✓ <span className="c-key">models.SalesOrder</span> {text("销售订单", "Sales order")}<br />✓ <span className="c-key">services.Approval</span> {text("审批流", "Approval flow")}<br />✓ <span className="c-key">pages.ApprovalDesk</span> {text("审批台", "Approval desk")}<br />✓ <span className="c-key">agents.OrderHelper</span> {text("订单助手", "Order assistant")}</div>
+<p className="small mt-8">{text("产出的不是代码片段，是可运行的专业系统构件。", "The output is runnable system components, not isolated code snippets.")}</p></div>
+<div className="marketing-card card-ok"><div className="row gap-12 mb-12"><span className="num-badge">03</span><h3 className="h5">{text("即时生效", "Take effect")}</h3></div>
+<div className="code"><span className="c-com">{text("// 六项校验通过", "// Six checks passed")}</span><br /><span className="c-str">{text("● 审批台已上线", "● Approval desk is live")}</span><br />{text("规则：金额 > 5 万 → 总经理", "Rule: amount > 50,000 → general manager")}<br />{text("全链路审计已开启", "End-to-end audit enabled")}</div>
+<p className="small mt-8">{text("校验通过后即可生效，无需等待传统上线排期。", "Changes take effect after validation without a traditional release schedule.")}</p></div>
+</div>
+<div className="table-wrap mt-32 reveal"><table className="data"><thead><tr><th>{text("系统构建", "Building the system")}</th><th>{text("过去", "Before")}</th><th className="col-us">{text("用 JitAI", "With JitAI")}</th></tr></thead><tbody>
+<tr><td>{text("谁来建", "Who builds it")}</td><td>{text("业务提需求 → 产品翻译 → 研发实现", "Business requests → product interpretation → engineering")}</td><td className="col-us yes">{text("业务人员自己建", "Business users build it themselves")}</td></tr>
+<tr><td>{text("怎么建", "How")}</td><td>{text("写代码、拖控件、配流程", "Write code, drag controls, configure flows")}</td><td className="col-us">{text("用业务语言对话描述", "Describe it in business language")}</td></tr>
+<tr><td>{text("需要什么背景", "Required background")}</td><td>{text("会编程、懂数据库设计", "Programming and database design")}</td><td className="col-us">{text("懂业务就够了", "Business knowledge is enough to start")}</td></tr>
+<tr><td>{text("多久见效", "Time to value")}</td><td>{text("排期开发到上线，以月计", "Planned development and release can take months")}</td><td className="col-us">{text("校验通过后生效", "Available after validation")}</td></tr>
+</tbody></table></div>
+<p className="quote-line mt-32 reveal">{text("懂业务的人，终于可以自己造系统。", "The people who know the business can now build its systems.")}<br />{text("系统构建权，第一次从 IT 部门回到业务一线。", "System creation moves closer to the people doing the work.")}</p>
 </div>
 </section>
 
@@ -349,46 +420,9 @@ export default function Home() {
 <p className="small mt-8">{t("运行、智能体、人工三重反馈回流，越用越适配。")}</p>
 </div>
 </div>
-<div className="section-head mt-40 reveal">
-<p className="kicker">{t("适用场景")}</p>
-<h2 className="h2 mt-16">{t("面向全行业经营场景落地")}</h2>
-</div>
-<div className="grid g-6">
-<a className="marketing-card card-hover center reveal" href={path("/solutions#sales")}><h3 className="h5">{t("销售智能经营")}</h3></a>
-<a className="marketing-card card-hover center reveal" href={path("/solutions#purchase")}><h3 className="h5">{t("采购成本管控")}</h3></a>
-<a className="marketing-card card-hover center reveal" href={path("/solutions#inventory")}><h3 className="h5">{t("库存智能周转")}</h3></a>
-<a className="marketing-card card-hover center reveal" href={path("/solutions#production")}><h3 className="h5">{t("生产流程优化")}</h3></a>
-<a className="marketing-card card-hover center reveal" href={path("/solutions#finance")}><h3 className="h5">{t("财务智能复盘")}</h3></a>
-<a className="marketing-card card-hover center reveal" href={path("/solutions#risk")}><h3 className="h5">{t("企业综合风控")}</h3></a>
-</div>
-<div className="center mt-32">
-<a className="btn btn-ghost btn-lg reveal" href={path("/solutions")}>{t("查看完整解决方案")}</a>
-</div>
 </div>
 </section>
 
-<section className="section">
-<div className="wrap wrap-narrow">
-<div className="section-head center reveal">
-<p className="kicker">{t("技术能力")}</p>
-<h2 className="h2 mt-16">{t("元素化抽象模型，统一开发与运行")}</h2>
-<p className="lead mt-16">{t("传统数字化是")}<b>{t("人适配系统")}</b>{t("；AI 原生数字化是")}<b>{t("系统孪生业务、AI 驱动系统")}</b>{"。"}</p>
-</div>
-<div className="flowline mt-24 reveal">
-<span className="node">{t("开发侧生成元素")}</span>
-<span className="arrow">{"→"}</span>
-<span className="node">{t("运行侧加载执行")}</span>
-<span className="arrow">{"→"}</span>
-<span className="node hi">{t("运行回执回流")}</span>
-<span className="arrow">{"→"}</span>
-<span className="node">{t("迭代优化")}</span>
-</div>
-<div className="btn-row mt-32 reveal" style={{"justifyContent": "center"}}>
-<a className="btn btn-primary" href={path("/whitepaper")}>{t("阅读技术白皮书")}</a>
-<a className="btn btn-ghost" href={path("/cases")}>{t("查看场景示例")}</a>
-</div>
-</div>
-</section>
 <section className="section section-alt"><div className="wrap"><div className="section-head reveal"><p className="kicker">{t("渠道合作")}</p><h2 className="h2 mt-16">{t("携手服务商伙伴，探索企业 AI 原生落地")}</h2><p className="lead mt-16">{t("面向软件服务商、系统集成商与行业咨询团队，围绕客户需求共同探讨产品推广、方案共建与项目合作。")}</p></div><div className="grid g-3 mb-32"><div className="marketing-card reveal"><h3 className="h4">{t("产品交流")}</h3><p className="small mt-16">{t("了解平台能力与适用场景。")}</p></div><div className="marketing-card reveal"><h3 className="h4">{t("方案共建")}</h3><p className="small mt-16">{t("结合行业经验与客户需求，探索落地路径。")}</p></div><div className="marketing-card reveal"><h3 className="h4">{t("合作洽谈")}</h3><p className="small mt-16">{t("沟通双方能力、项目分工与合作方式。")}</p></div></div><a className="btn btn-primary btn-lg" href={path("/partners")}>{t("了解合作方向")}</a></div></section>
 
 <section className="cta-band" id="cta">

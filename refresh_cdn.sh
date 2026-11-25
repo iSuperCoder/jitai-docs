@@ -148,9 +148,18 @@ case "$REFRESH_SCOPE" in
     ;;
 esac
 
-# 已退役的博客和文档不再出现在文件扫描里，必须显式清理缓存；入口别名也需刷新，目录刷新仅覆盖后代。
+# 退役内容及临时下线白皮书不再出现在文件扫描里，必须清理缓存；入口别名也需刷新。
 # 所有模式都执行，避免发布模式不同导致旧文章继续对外可见。
-for retired in /blog /zh/blog /docs /zh/docs; do
+for retired in /blog /zh/blog /docs /zh/docs \
+  /whitepaper /zh/whitepaper /agent-products /zh/agent-products /low-code-platform /zh/low-code-platform \
+  /capabilities/enterprise-architecture /zh/capabilities/enterprise-architecture \
+  /capabilities/agent-business /zh/capabilities/agent-business \
+  /capabilities/full-customization /zh/capabilities/full-customization \
+  /capabilities/dual-mode /zh/capabilities/dual-mode \
+  /capabilities/active-hub /zh/capabilities/active-hub \
+  /capabilities/conversational-dev /zh/capabilities/conversational-dev \
+  /capabilities/devops-unified /zh/capabilities/devops-unified \
+  /capabilities/private-deployment /zh/capabilities/private-deployment; do
   add_directory "$retired/"
   for suffix in '' / .html /index.html; do
     add_file "$retired$suffix"
@@ -160,17 +169,18 @@ done
 sort -u "$tmp_urls" -o "$tmp_urls"
 
 object_count="$(wc -l < "$tmp_urls" | tr -d ' ')"
-echo "Refreshing $object_count CDN objects from $BUILD_DIR (scope: $REFRESH_SCOPE)"
+echo "Scanning $object_count CDN route candidates from $BUILD_DIR (scope: $REFRESH_SCOPE); actual refresh uses file differences and quota"
 
 if [[ "$DRY_RUN" == "1" ]]; then
   awk -F '\t' '{print $1 " " $2}' "$tmp_urls"
   exit 0
 fi
 
-while IFS=$'\t' read -r object_type url; do
-  echo "Refreshing [$object_type] $url"
-  aliyun cdn RefreshObjectCaches \
-    --ObjectPath "$url" \
-    --ObjectType "$object_type" \
-    --RegionId "$REGION_ID"
-done < "$tmp_urls"
+# URL 枚举仍由本脚本维护；摘要差异、持久化队列和批量受理交给安装包内的 Python 实现。
+# 本地仓库与服务器安装位置分别解析，绝不回退到逐条刷新，以免再次耗尽目录配额。
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+helper="$SCRIPT_DIR/scripts/news/refresh-main-cdn.py"
+if [[ ! -f "$helper" ]]; then helper="/opt/jitai-news/refresh-main-cdn.py"; fi
+"${NEWS_PYTHON:-python3}" "$helper" --objects "$tmp_urls" --build "$BUILD_DIR" \
+  --domain "$DOMAIN" --news-path "$NEWS_PUBLIC_PATH" \
+  --state "${MAIN_CDN_STATE_FILE:-/data/jitai-main-cdn-state/state.json}"

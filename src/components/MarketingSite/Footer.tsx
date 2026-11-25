@@ -1,15 +1,15 @@
 import React from 'react';
 import { useMarketingCopy, CONTACT_EMAIL, FORUM_URL, LOGO_DARK, LOGO_LIGHT, NEWS_PATH } from './copy';
 
-/** 官网页脚：theme 决定 Logo；资讯与论坛使用固定入口，其余营销链接按当前语言生成。 */
+/** 官网页脚：theme 决定 Logo；平台说明与首页统一解释 AI 参与开发和业务运行；白皮书暂不公开，资讯与论坛使用固定入口，其余链接按当前语言生成。 */
 export default function Footer({ theme }: { theme: 'light' | 'dark' }) {
   const { text, path } = useMarketingCopy();
   const groups = [
     { title: text('产品与技术', 'Product & technology'), links: [
-      ['/whitepaper', text('技术白皮书', 'Technical whitepaper')], ['/solutions', text('解决方案', 'Solutions')], ['/download', text('桌面端与服务器下载', 'Desktop & server downloads')],
+      ['/download', text('桌面端与服务器下载', 'Desktop & server downloads')],
     ] },
     { title: text('合作与场景', 'Partnerships & scenarios'), links: [
-      ['/partners', text('渠道伙伴合作', 'Partner with JitAI')], ['/cases', text('场景示例', 'Scenario examples')], ['/contact', text('商务交流', 'Talk to our team')],
+      ['/partners', text('渠道伙伴合作', 'Partner with JitAI')], ['/cases', text('案例方案', 'Cases & solutions')], ['/contact', text('商务交流', 'Talk to our team')],
       [NEWS_PATH, text('资讯中心', 'News & Insights')],
     ] },
     { title: text('关于', 'About'), links: [
@@ -20,8 +20,8 @@ export default function Footer({ theme }: { theme: 'light' | 'dark' }) {
     <div className="footer-top">
       <div className="footer-brand">
         <a className="brand" href={path('/')}><img className="official-logo" src={theme === 'dark' ? LOGO_DARK : LOGO_LIGHT} alt="JitAI" width="112" height="34" /></a>
-        <p>{text('AI 原生应用平台。让企业拥有可自生长的 AI 经营大脑。', 'An AI-native application platform. Give enterprises a business AI brain that continually evolves.')}</p>
-        <div className="tag-row mt-16"><span className="tag">{text('业务系统 AI 原生', 'AI-native systems')}</span><span className="tag">{text('开发过程 AI 原生', 'AI-native development')}</span></div>
+        <p>{text('AI 原生应用平台，让 AI 参与系统开发与业务运行。', 'An AI-native application platform where AI helps build systems and run business operations.')}</p>
+        <div className="tag-row mt-16"><span className="tag">{text('AI 参与业务运行', 'AI in business operations')}</span><span className="tag">{text('AI 参与系统开发', 'AI in system development')}</span></div>
       </div>
       {groups.map(group => <div className="footer-col" key={group.title}><h2 className="h5">{group.title}</h2><ul>{group.links.map(([url, label]) => <li key={url}><a href={url === NEWS_PATH ? NEWS_PATH : url.startsWith('/') ? path(url) : url}>{label}</a></li>)}</ul></div>)}
     </div>

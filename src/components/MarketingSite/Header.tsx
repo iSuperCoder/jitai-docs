@@ -1,16 +1,45 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useMarketingCopy, LOGO_DARK, LOGO_LIGHT, NEWS_PATH } from './copy';
+import { useMarketingCopy, CONSOLE_URL, DEMO_URL, LOGO_DARK, LOGO_LIGHT, NEWS_PATH } from './copy';
 
-/** 官网导航：active 标识当前营销路由，theme/toggleTheme 由父布局管理；资讯使用独立静态入口。 */
+/** 官网导航按下载、体验、云控制台排序；active 标识当前页，theme 与 toggleTheme 由页面管理。
+ * 下载沿用站内本地化地址，外部入口新开窗口；用途说明支持悬停、聚焦和 Escape 关闭。
+ * 移动菜单覆盖正文视口；打开期间锁定滚动和正文交互，关闭/卸载时恢复原状态。
+ */
 export default function Header({ active, theme, toggleTheme }: {
   active: string; theme: 'light' | 'dark'; toggleTheme: () => void;
 }) {
   const { text, path } = useMarketingCopy();
   const [open, setOpen] = useState(false);
+  const [hintDismissed, setHintDismissed] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
   useEffect(() => {
+    if (!open) return;
+    // 只锁住当前页面背景，导航自身仍可滚动；保留原值，避免关闭菜单后覆盖页面已有约束。
+    const scrolling = [document.documentElement, document.body];
+    const scrollPosition = { left: window.scrollX, top: window.scrollY };
+    const previousOverflow = scrolling.map(node => node.style.overflow);
+    const content = Array.from(menuButton.current?.closest('.marketing-site')?.querySelectorAll<HTMLElement>('main, footer') || []);
+    const previousInert = content.map(node => node.inert);
+    scrolling.forEach(node => { node.style.overflow = 'hidden'; });
+    content.forEach(node => { node.inert = true; });
+    return () => {
+      scrolling.forEach((node, index) => { node.style.overflow = previousOverflow[index]; });
+      content.forEach((node, index) => { node.inert = previousInert[index]; });
+      // 部分移动浏览器锁住根滚动容器会重置偏移；关闭时还原阅读位置，不触发平滑滚动。
+      window.scrollTo({ ...scrollPosition, behavior: 'instant' });
+    };
+  }, [open]);
+  useEffect(() => {
+    /** Escape 关闭菜单；展开时 Tab 在可见导航控件之间循环，不落入被遮挡的正文或跳转链接。 */
     const close = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && open) { setOpen(false); menuButton.current?.focus(); }
+      if (event.key === 'Escape') setHintDismissed(true);
+      if (event.key === 'Escape' && open) { setOpen(false); menuButton.current?.focus({ preventScroll: true }); }
+      if (event.key === 'Tab' && open) {
+        const links = Array.from(menuButton.current?.closest('header')?.querySelectorAll<HTMLElement>('a[href], button') || []).filter(node => node.getClientRects().length > 0);
+        const first = links[0], last = links[links.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      }
     };
     const media = window.matchMedia('(min-width: 1181px)');
     const resize = () => { if (media.matches) setOpen(false); };
@@ -19,16 +48,23 @@ export default function Header({ active, theme, toggleTheme }: {
     return () => { document.removeEventListener('keydown', close); media.removeEventListener('change', resize); };
   }, [open]);
   const items = [
-    ['/', text('首页', 'Home')], ['/solutions', text('解决方案', 'Solutions')],
-    ['/whitepaper', text('技术白皮书', 'Whitepaper')], ['/cases', text('场景示例', 'Scenarios')],
+    ['/', text('首页', 'Home')], ['/cases', text('案例方案', 'Cases & Solutions')],
     [NEWS_PATH, text('资讯中心', 'News & Insights')],
     ['/partners', text('渠道合作', 'Partners')], ['/about', text('关于我们', 'About')],
   ];
-  const actions = <>
-    <a className="btn btn-ghost btn-sm" href={path('/download')}>{text('免费下载', 'Download')}</a>
-    <a className="btn btn-primary btn-sm" href={path('/contact')}>{text('联系交流', 'Contact us')}</a>
-  </>;
-  return <header className="site-header">
+  // 两处导航共用顺序与文案；说明作为链接内容可被读屏读取，手机端直接展示。
+  const actions = [
+    { href: path('/download'), label: text('免费下载桌面版', 'Free desktop download'), hint: text('安装到电脑，在本地开发和运行应用。', 'Install on your computer to build and run apps locally.'), primary: true },
+    { href: DEMO_URL, label: text('在线体验', 'Try online'), hint: text('无需安装，在公共演示环境中体验功能。', 'Explore features in a shared demo, without installing.'), primary: false },
+    { href: CONSOLE_URL, label: text('云控制台', 'Cloud console'), hint: text('购买和管理专属云环境，用于应用部署与运行。', 'Purchase and manage a dedicated cloud environment to deploy and run apps.'), primary: false },
+  ].map(({ href, label, hint, primary }) => <a key={href}
+    className={`btn btn-${primary ? 'primary' : 'ghost'} btn-sm entry-link`}
+    href={href} target={primary ? undefined : '_blank'} rel={primary ? undefined : 'noopener noreferrer'}
+    onMouseEnter={() => setHintDismissed(false)} onFocus={() => setHintDismissed(false)}>
+    <span>{label}</span><span className="entry-hint">{hint}</span>
+    {!primary && <span className="sr-only">{text('（在新窗口打开）', ' (opens in a new window)')}</span>}
+  </a>);
+  return <header className="site-header" data-hint-dismissed={hintDismissed} data-menu-open={open}>
     <div className="wrap header-inner">
       <a className="brand" href={path('/')} aria-label={text('JitAI 首页', 'JitAI home')}>
         <img className="official-logo" src={theme === 'dark' ? LOGO_DARK : LOGO_LIGHT} alt="JitAI" width="112" height="34" />

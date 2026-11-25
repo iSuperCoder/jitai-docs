@@ -14,6 +14,8 @@ import re
 import subprocess
 import sys
 
+from cases_projection import prepare_case_pages, case_page_transaction
+
 
 def apply_main_site(env, apply=False):
     """校验环境并在共享锁内同步主站，返回 rsync 退出码；配置冲突时抛出 ValueError。
@@ -54,6 +56,9 @@ def apply_main_site(env, apply=False):
         if any(not (stage / parent).is_dir() for parent in ancestors):
             raise ValueError('主站静态包必须保留资讯入口的上级目录')
 
+        # 在任何站点写入前校验案例槽与当前资讯快照；预览、首次安装尚未 bootstrap 时不投影。
+        # 正式安装先 bootstrap 后 apply，因此这里不需要读取配置密钥或内容 Feed。
+        projection = prepare_case_pages(stage, site / relative, env.get('NEWS_SITE_ORIGIN', 'https://jit.pro')) if apply else []
         # P 只保护接收端资讯入口与后代，H 阻止发送端写入；上级目录由上面的校验确保
         # 保留，不能排除整个 /zh/，否则主站旧页面也删不掉。禁止改变这些语义的额外参数。
         prefix = '/' + relative.as_posix()
@@ -67,7 +72,12 @@ def apply_main_site(env, apply=False):
             command.append('--dry-run')
         command += [str(stage) + '/', str(site) + '/']
         # 不接受额外 rsync 参数；锁的句柄覆盖整个同步过程，异常退出由 with 自动释放。
-        return subprocess.run(command, check=False).returncode
+        result = subprocess.run(command, check=False).returncode
+        if result == 0 and apply:
+            changes = [(site / path.relative_to(stage), before, after) for path, before, after in projection]
+            with case_page_transaction(changes):
+                pass
+        return result
 
 
 def main():

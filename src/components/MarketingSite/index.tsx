@@ -6,8 +6,11 @@ import { useMarketingCopy, LOGO_DARK } from './copy';
 import './styles.css';
 import useMarketingTheme from './useMarketingTheme';
 
-export default function MarketingLayout({ route, title, description, children }: {
-  route: string; title: string; description: string; children: React.ReactNode;
+/** 营销页面共享外壳；route 是不含语言前缀的站内路径，image 可覆盖默认品牌分享图。
+ * SEO 随当前语言静态输出，组件卸载时清理动效观察器和偏好监听。
+ */
+export default function MarketingLayout({ route, title, description, image = LOGO_DARK, children }: {
+  route: string; title: string; description: string; image?: string; children: React.ReactNode;
 }) {
   const { isZh, text, path } = useMarketingCopy();
   const { theme, toggleTheme } = useMarketingTheme();
@@ -68,13 +71,20 @@ export default function MarketingLayout({ route, title, description, children }:
       <meta name="description" content={description} />
       <meta property="og:title" content={pageTitle} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content={LOGO_DARK} />
+      <meta property="og:image" content={image} />
       <meta property="og:url" content={`https://jit.pro${path(route)}`} />
       <meta name="twitter:title" content={pageTitle} />
       <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={image} />
+      <meta property="og:locale" content={isZh ? 'zh_CN' : 'en_US'} />
+      <meta property="og:locale:alternate" content={isZh ? 'en_US' : 'zh_CN'} />
       <meta name="theme-color" content={theme === 'dark' ? '#0a0d13' : '#f4f5f7'} />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <link rel="canonical" href={`https://jit.pro${path(route)}`} />
+      {/* 双语分别构建时，默认 alternate 会误用当前 baseUrl；在拥有路由的外壳明确真实地址。 */}
+      <link rel="alternate" hrefLang="en" href={`https://jit.pro${route}`} />
+      <link rel="alternate" hrefLang="zh" href={`https://jit.pro/zh${route === '/' ? '/' : route}`} />
+      <link rel="alternate" hrefLang="x-default" href={`https://jit.pro${route}`} />
     </Head>
     <a className="marketing-skip-link" href="#marketing-main">{text('跳转到主要内容', 'Skip to main content')}</a>
     <Header active={route} theme={theme} toggleTheme={toggleTheme} />

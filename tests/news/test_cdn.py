@@ -69,7 +69,7 @@ class CdnTests(unittest.TestCase):
         self.assertEqual([url for batch in batches for url in batch], urls)
 
     def test_partial_batch_failure_is_reported(self):
-        """第一批成功、第二批失败不能假报全部刷新成功；调用方可保留整份 pending 重试。"""
+        """无持久化路径的直接调用仍报告第二批失败，不能假报全部刷新成功。"""
         transport = RecordingTransport(fail_at=2)
         with patch.object(sync, 'build_opener', return_value=transport):
             with self.assertRaisesRegex(sync.SyncError, 'CDN 刷新请求失败'):
@@ -182,23 +182,22 @@ class CdnTests(unittest.TestCase):
         self.assertEqual(path.read_bytes(), before)
         self.assertEqual(transport.requests, [])
 
-    def test_failed_retry_keeps_entire_queue_until_all_batches_succeed(self):
-        """第二批失败后整份 201 条队列保持不变；下次重复提交安全，全部受理后才清空。"""
+    def test_failed_retry_keeps_only_batches_not_yet_acknowledged(self):
+        """第二批失败时第一批 100 条已持久化确认；下轮只发送剩余 101 条，避免重复消耗额度。"""
         fixture = self.fixture()
         pending = [f'https://official.example/zh/news/articles/deleted-{i}/' for i in range(201)]
         path = fixture.config.work / 'pending-cdn.json'
         sync.atomic_json(path, pending)
-        before = path.read_bytes()
         failing = RecordingTransport(fail_at=2)
         code, errors = self.retry(fixture, failing)
         self.assertEqual(code, 1)
         self.assertIn('CDN 刷新请求失败', errors)
         self.assertEqual(len(failing.requests), 2)
-        self.assertEqual(path.read_bytes(), before)
+        self.assertEqual(sync.load_json(path), pending[100:])
         successful = RecordingTransport()
         self.assertEqual(self.retry(fixture, successful)[0], 0)
         sent = [url for r in successful.requests for url in parse_qs(r.data.decode())['ObjectPath'][0].splitlines()]
-        self.assertEqual(sent, pending)
+        self.assertEqual(sent, pending[100:])
         self.assertEqual(sync.load_json(path), [])
 
     def test_invalid_api_response_preserves_pending_and_fails_cli(self):
@@ -270,7 +269,9 @@ class CdnTests(unittest.TestCase):
                     'https://official.example/zh/news/assets/cover.svg',
                     'https://official.example/zh/news/articles/one/one.css',
                     'https://official.example/zh/news/articles/two/two.css'}
-        for slug in ('one', 'two', 'three'):
+        # one 的 HTML 字节未变，只有其固定 URL CSS/图片变更；按增量契约只刷新资源。
+        # two 下线和 three 新增才需要刷新详情地址及其别名。
+        for slug in ('two', 'three'):
             expected.update('https://official.example/zh/news/articles/' + slug + suffix
                             for suffix in ('', '/', '/index.html'))
         self.assertEqual(set(sent), expected)

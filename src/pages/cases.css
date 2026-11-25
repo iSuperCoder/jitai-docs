@@ -1,0 +1,85 @@
+/* 案例方案强调阅读次序与业务叙事，沿用营销页语义色和排版边界。 */
+.marketing-site .case-intro { background: var(--bg-elev); border-bottom: 1px solid var(--border); padding: 52px 0 44px; }
+.marketing-site .case-intro h1 { font-size: clamp(2.25rem, 4vw, 3.5rem); line-height: 1.2; margin: 12px 0 16px; }
+.marketing-site .case-intro p:not(.kicker) { max-width: 52ch; color: var(--text-muted); font-size: 1rem; }
+.marketing-site .case-directory-link { display: inline-block; margin-top: 16px; color: var(--accent); }
+.marketing-site .case-library { padding-block: 52px 64px; }
+.marketing-site .case-section-heading { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid var(--border-strong); padding-bottom: 16px; margin-bottom: 24px; font-size: .8125rem; font-weight: 600; color: var(--text-muted); }
+.marketing-site .case-feature { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); min-height: 0; background: var(--bg-elev); border: 1px solid var(--border); }
+.marketing-site .case-visual { position: relative; width: 100%; aspect-ratio: 16 / 9; min-height: 0; align-self: start; display: flex; align-items: flex-end; padding: 28px; overflow: hidden; background: #24424b; color: #eef5f5; }
+.marketing-site .case-visual::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 79px, rgba(255,255,255,.09) 80px), repeating-linear-gradient(0deg, transparent 0 79px, rgba(255,255,255,.09) 80px); }
+/* 封面在所有断点保持 16:9，不跟随右侧长文案拉高；非标准图片居中完整显示。 */
+.marketing-site .case-visual img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center; background: var(--bg-elev); }
+/* 有图时取消占位图的网格和品牌叠字，避免遮住封面中的信息。 */
+.marketing-site .case-visual:has(img:not([hidden]))::before,
+.marketing-site .case-visual:has(img:not([hidden])) > span { display: none; }
+.marketing-site .case-visual span { position: relative; font-size: .8125rem; font-weight: 700; }
+/* 收紧文字侧间距，使常规案例与 16:9 图片协调；长文案仍自然增高，不反向拉伸图片。 */
+.marketing-site .case-feature-content { min-width: 0; display: flex; flex-direction: column; padding: clamp(20px, 2vw, 32px); }
+.marketing-site .case-index { color: var(--accent); font-size: .8125rem; font-family: var(--font-mono); }
+.marketing-site .case-feature h2 { font-size: clamp(1.5rem, 2vw, 2rem); line-height: 1.4; margin: 16px 0; overflow-wrap: anywhere; }
+.marketing-site .case-feature-content > p:not(.case-index) { color: var(--text-muted); line-height: 1.8; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
+.marketing-site .case-feature a, .marketing-site .case-row a { color: inherit; text-decoration: none; }
+.marketing-site .case-feature a:hover, .marketing-site .case-row a:hover { color: var(--accent); }
+.marketing-site .case-meta { display: flex; justify-content: space-between; gap: 16px; margin-top: auto; padding-top: 16px; font-size: .8125rem; color: var(--text-muted); }
+.marketing-site .case-meta span { color: var(--accent); }
+/* 控制区独立于卡片链接，保证翻页后键盘焦点稳定；窄屏可换行，按钮保留触摸目标。 */
+.marketing-site .case-carousel-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 16px; color: var(--text-muted); font-size: .8125rem; }
+.marketing-site .case-carousel-controls p { margin: 0; }
+.marketing-site .case-carousel-actions { display: flex; align-items: center; gap: 8px; }
+.marketing-site .case-carousel-actions button { min-width: 44px; min-height: 44px; padding: 8px 12px; border: 1px solid var(--border-strong); border-radius: 4px; background: var(--bg-elev); color: var(--text); font: inherit; cursor: pointer; }
+.marketing-site .case-carousel-actions button:hover { color: var(--accent); border-color: var(--accent); }
+.marketing-site .case-carousel-actions button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.marketing-site .case-carousel-actions .case-index { min-width: 44px; text-align: center; }
+.marketing-site .case-more-heading { margin-top: 64px; }
+/* 保留原来单列、分隔线式列表，仅在序号与正文之间加入小封面，不使用大卡片背景或外框。 */
+.marketing-site .case-row { position: relative; display: grid; grid-template-columns: 36px 160px minmax(0, 1fr) 110px 24px; gap: 20px; align-items: start; border-bottom: 1px solid var(--border); padding: 28px 0; }
+.marketing-site .case-row .case-visual { padding: 12px; }
+.marketing-site .case-row .case-visual span { font-size: .625rem; }
+.marketing-site .case-row-content { min-width: 0; }
+.marketing-site .case-row h3 { margin: 0; font-size: 1.25rem; line-height: 1.5; overflow-wrap: anywhere; }
+.marketing-site .case-row-content > p { color: var(--text-muted); margin: 8px 0 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.marketing-site .case-row time { color: var(--text-muted); font-size: .8125rem; padding-top: 5px; }
+.marketing-site .case-row-arrow { color: var(--accent); }
+/* 标题链接覆盖整行，小封面和箭头也能打开案例，键盘仍只有一个链接停靠点。 */
+.marketing-site .case-row h3 a::after { content: ''; position: absolute; inset: 0; }
+.marketing-site .case-row:has(a:focus-visible) { outline: 2px solid var(--accent); outline-offset: 3px; }
+.marketing-site .case-row:hover h3 a { color: var(--accent); }
+/* 桌面外框由 16:9 图片确定高度，文字列不反向撑高；内容仍通过摘要与标题链接阅读。
+   窄屏改为上下排列，解除尺寸隔离，让文字自然增长，图片盒始终无额外上下留白。 */
+@media (min-width: 1101px) {
+  .marketing-site .case-feature:has(.case-visual img:not([hidden])) .case-feature-content { contain: size; padding: 24px; }
+  .marketing-site .case-feature:has(.case-visual img:not([hidden])) h2 { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .marketing-site .case-feature:has(.case-visual img:not([hidden])) .case-feature-content > p:not(.case-index) { -webkit-line-clamp: 3; }
+}
+@media (max-width: 1100px) { .marketing-site .case-feature { grid-template-columns: minmax(0, 1fr); } }
+/* 空列表与网络失败共用简洁的文字区域；失败时才出现说明和重试操作。 */
+.marketing-site .case-loading .case-feature-content { gap: 24px; }
+.marketing-site .case-placeholder-line { display: block; width: 75%; height: 20px; background: var(--border); border-radius: 4px; }
+.marketing-site .case-loading .case-carousel-controls { min-height: 44px; }
+.marketing-site .case-loading .case-carousel-controls .case-placeholder-line { width: 120px; }
+.marketing-site .case-standby { padding: 0; }
+.marketing-site .case-standby-content { min-width: 0; }
+.marketing-site .case-standby-content h2 { margin: 0 0 12px; font-size: clamp(1.75rem, 2.7vw, 2.375rem); line-height: 1.35; }
+.marketing-site .case-standby-content > p:not(.kicker) { max-width: 48ch; color: var(--text-muted); line-height: 1.8; }
+.marketing-site .case-standby-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 16px 28px; margin-top: 14px; }
+.marketing-site .case-standby-actions a, .marketing-site .case-standby-actions button { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--accent); font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
+.marketing-site .case-standby-actions a:hover, .marketing-site .case-standby-actions button:hover { text-decoration: underline; text-underline-offset: 4px; }
+/* 中等宽度把日期放正文下方；手机缩小封面并省略装饰序号，始终保持左图右文的列表。 */
+@media (max-width: 1000px) {
+  .marketing-site .case-row { grid-template-columns: 28px 120px minmax(0, 1fr) 20px; gap: 12px; }
+  .marketing-site .case-row time { grid-column: 3; padding-top: 0; }
+  .marketing-site .case-row-arrow { grid-column: 4; grid-row: 1; }
+}
+@media (max-width: 760px) {
+  .marketing-site .case-intro { padding: 40px 0; }
+  .marketing-site .case-feature { grid-template-columns: 1fr; }
+  .marketing-site .case-visual { aspect-ratio: 16 / 9; min-height: 0; }
+  .marketing-site .case-row { grid-template-columns: 80px minmax(0, 1fr) 16px; gap: 8px 12px; padding: 24px 0; }
+  .marketing-site .case-row > .case-index { display: none; }
+  .marketing-site .case-row .case-visual { padding: 8px; }
+  .marketing-site .case-row h3 { font-size: 1rem; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .marketing-site .case-row-content > p { font-size: .875rem; }
+  .marketing-site .case-row time { grid-column: 2; }
+  .marketing-site .case-row-arrow { grid-column: 3; }
+}

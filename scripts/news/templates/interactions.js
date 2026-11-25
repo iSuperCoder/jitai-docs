@@ -20,9 +20,9 @@
   let visible = false;
   let timer;
   const order = [...items];
-  // Fisher–Yates 洗牌，一轮内不重复；不根据标题长度或发布时间偏置展示机会。
-  for (let i = order.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+  // 保持静态首屏的首篇不变，消除脚本启动时换图和标题跳动；其余文章仍随机轮播。
+  for (let i = order.length - 1; i > 1; i--) {
+    const j = 1 + Math.floor(Math.random() * i);
     [order[i], order[j]] = [order[j], order[i]];
   }
   search.value = params.get('q') || '';
@@ -53,22 +53,24 @@
     return words(item).map(word => `<button type="button" class="topic-chip" data-topic="${escape(word)}" aria-label="筛选主题：${escape(word)}">${escape(word)}</button>`).join('');
   }
 
-  /** 使用稳定 ID 确定无图封面；有图片时使用构建阶段本地化的官网地址。 */
-  function cover(item) {
+  /** 用稳定 ID 确定无图封面，返回卡片 HTML；item 使用已发布地址。
+   * feature 表示首屏推荐，图片优先加载；普通列表仍延迟加载，不改变图片内容。
+   */
+  function cover(item, feature = false) {
     let hash = 0;
     for (const ch of item.id) hash = (hash * 31 + ch.codePointAt(0)) >>> 0;
-    return `<div class="cover ${['one','two','three','four'][hash % 4]} ${item.image ? 'has-image' : ''}"><div class="art" aria-hidden="true"><span></span><span></span><span></span></div><div class="cover-top" aria-hidden="true"><b>JitAI</b><span>${escape(item._section || 'INSIGHTS')}</span></div><p class="cover-heading" aria-hidden="true">${escape(item._seo_title || item.title)}</p>${item.image ? `<img class="cover-image" src="${escape(item.image)}" alt="${escape(item.image_alt || '')}" loading="lazy">` : ''}<div class="cover-keywords">${tags(item)}</div></div>`;
+    return `<div class="cover ${['one','two','three','four'][hash % 4]} ${item.image ? 'has-image' : ''}"><div class="art" aria-hidden="true"><span></span><span></span><span></span></div><div class="cover-top" aria-hidden="true"><b>JitAI</b><span>${escape(item._section || 'INSIGHTS')}</span></div><p class="cover-heading" aria-hidden="true">${escape(item._seo_title || item.title)}</p>${item.image ? `<img class="cover-image" src="${escape(item.image)}" alt="${escape(item.image_alt || '')}" loading="${feature ? 'eager' : 'lazy'}"${feature ? ' fetchpriority="high"' : ''}>` : ''}<div class="cover-keywords">${tags(item)}</div></div>`;
   }
 
   /** 日期仅展示来源日历日期，避免无时区输入造成相对时间错误；阅读时长缺失则隐藏。 */
   function meta(item) {
-    return `<span>${escape((item.date_published || '').slice(0,10).replaceAll('-','.'))}</span>${Number(item._reading_time_minutes) > 0 ? `<span>· ${Number(item._reading_time_minutes)} 分钟阅读</span>` : ''}`;
+    return `${item.date_published ? `<time datetime="${escape(item.date_published)}">${escape(item.date_published.slice(0,10).replaceAll('-','.'))}</time>` : ''}${Number(item._reading_time_minutes) > 0 ? `<span>· ${Number(item._reading_time_minutes)} 分钟阅读</span>` : ''}`;
   }
 
   /** 文章标题链接扩展到整卡，目标是构建写入的官网 URL；按钮作为独立兄弟节点。 */
   function article(item, feature = false) {
     const heading = feature ? 'h2' : 'h3';
-    return `<article class="${feature ? 'feature' : 'card'}" data-id="${escape(item.id)}">${cover(item)}<div class="${feature ? 'feature-body' : 'card-body'}"><span class="kicker">${escape(feature ? '发现好内容' : item._section || 'JitAI 文章')}</span><${heading}><a class="article-link stretched" href="${escape(item.url)}" target="_blank" rel="noopener noreferrer" title="${escape(item.title)}" aria-label="${escape(item.title)}（在新标签页打开）">${escape(item.title)}</a></${heading}><p class="summary">${escape(item.summary || '')}</p>${feature ? '' : `<div class="inline-topics">${tags(item)}</div>`}<div class="meta">${meta(item)}</div>${feature ? '<span class="read-link" aria-hidden="true">阅读全文 ↗</span>' : ''}</div></article>`;
+    return `<article class="${feature ? 'feature' : 'card'}" data-id="${escape(item.id)}">${cover(item, feature)}<div class="${feature ? 'feature-body' : 'card-body'}"><span class="kicker">${escape(feature ? '发现好内容' : item._section || 'JitAI 文章')}</span><${heading}><a class="article-link stretched" href="${escape(item.url)}" target="_blank" rel="noopener noreferrer" title="${escape(item.title)}" aria-label="${escape(item.title)}（在新标签页打开）">${escape(item.title)}</a></${heading}><p class="summary">${escape(item.summary || '')}</p>${feature ? '' : `<div class="inline-topics">${tags(item)}</div>`}<div class="meta">${meta(item)}</div>${feature ? '<span class="read-link" aria-hidden="true">阅读全文 ↗</span>' : ''}</div></article>`;
   }
 
   /** 绑定新渲染封面的图片回退；错误只影响单图，不清空列表。 */
@@ -145,14 +147,36 @@
       : '<path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/>';
   }
 
-  /** 同步移动菜单显示、可访问名称与图标；关闭后是否归还焦点由具体触发方式决定。 */
+  // 保存本次展开前的背景状态；独立资讯与主站导航均在关闭/离开页面时恢复滚动和交互。
+  let restoreMenuBackground = null;
+  /** 同步移动菜单、可访问名称与背景锁定；open 为展开状态，重复调用不覆盖原先保存的状态。 */
   function setMenu(open) {
+    if (open && !restoreMenuBackground) {
+      const scrolling = [document.documentElement, document.body];
+      const scrollPosition = { left: window.scrollX, top: window.scrollY };
+      const previousOverflow = scrolling.map(node => node.style.overflow);
+      const content = Array.from(document.querySelectorAll('main, footer'));
+      const previousInert = content.map(node => node.inert);
+      scrolling.forEach(node => { node.style.overflow = 'hidden'; });
+      content.forEach(node => { node.inert = true; });
+      restoreMenuBackground = () => {
+        scrolling.forEach((node, index) => { node.style.overflow = previousOverflow[index]; });
+        content.forEach((node, index) => { node.inert = previousInert[index]; });
+        // 手机锁定根滚动容器可能重置偏移，关闭后必须回到展开之前的阅读位置。
+        window.scrollTo({ ...scrollPosition, behavior: 'instant' });
+      };
+    } else if (!open && restoreMenuBackground) {
+      restoreMenuBackground();
+      restoreMenuBackground = null;
+    }
+    document.querySelector('.site-header').dataset.menuOpen = String(open);
     document.getElementById('site-nav').classList.toggle('is-open', open);
     const button = document.getElementById('menu');
     button.setAttribute('aria-expanded', String(open));
     button.setAttribute('aria-label', open ? '关闭导航' : '展开导航');
     button.querySelector('path').setAttribute('d', open ? 'M6 6l12 12M18 6L6 18' : 'M4 7h16M4 12h16M4 17h16');
   }
+  window.addEventListener('pagehide', () => setMenu(false));
   document.getElementById('main').addEventListener('click', event => {
     const tag = event.target.closest('[data-topic]');
     const button = event.target.closest('[data-category]');
@@ -188,10 +212,24 @@
   document.getElementById('theme').addEventListener('click', () => { root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark'; theme(); try { localStorage.setItem('jitai-marketing-theme', root.dataset.theme); } catch { /* 可选偏好。 */ } });
   document.getElementById('menu').addEventListener('click', () => setMenu(document.getElementById('menu').getAttribute('aria-expanded') !== 'true'));
   document.getElementById('site-nav').addEventListener('click', () => setMenu(false));
+  // 导航用途提示与主站一致：重新悬停或聚焦时恢复，Escape 关闭；不改变链接导航。
+  const siteHeader = document.querySelector('.site-header');
+  siteHeader.querySelectorAll('.entry-link').forEach(link => {
+    link.addEventListener('mouseenter', () => { siteHeader.dataset.hintDismissed = 'false'; });
+    link.addEventListener('focus', () => { siteHeader.dataset.hintDismissed = 'false'; });
+  });
   document.addEventListener('keydown', event => {
+    // 整屏导航期间 Tab 只在导航控件间循环，避免焦点落到背景或页面外的跳转入口。
+    if (event.key === 'Tab' && siteHeader.dataset.menuOpen === 'true') {
+      const links = Array.from(siteHeader.querySelectorAll('a[href], button')).filter(node => node.getClientRects().length > 0);
+      const first = links[0], last = links[links.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    }
+    if (event.key === 'Escape') siteHeader.dataset.hintDismissed = 'true';
     if (event.key === 'Escape' && document.getElementById('menu').getAttribute('aria-expanded') === 'true') {
       setMenu(false);
-      document.getElementById('menu').focus();
+      document.getElementById('menu').focus({ preventScroll: true });
     }
   });
   // 与营销页使用同一断点，跨到桌面后清理移动菜单状态，防止缩回手机时意外展开。

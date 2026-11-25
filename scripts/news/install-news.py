@@ -82,7 +82,7 @@ def install_locked(stage, settings, env, apply=False):
     config.update(NEWS_SITE_ORIGIN=env.get('CDN_DOMAIN', 'https://jit.pro'), NEWS_PUBLIC_PATH='/zh/news/',
                   NEWS_WORK_DIR=env.get('NEWS_WORK_DIR', config.get('NEWS_WORK_DIR', '/data/jitai-news-data')),
                   NEWS_RELEASE_LOCK=env.get('NEWS_RELEASE_LOCK', '/data/locks/jitai-site-release.lock'),
-                  NEWS_LIVE_LINK=str(site / 'zh/news'), NEWS_ENABLE_PUBLISH='1',
+                  NEWS_LIVE_LINK=str(site / 'zh/news'), NEWS_MAIN_SITE_DIR=str(site), NEWS_ENABLE_PUBLISH='1',
                   NEWS_PYTHON=str(runtime / 'bin/python'))
     # 上传区、程序、数据、配置和锁都不得放到站点中，否则下一次主站 --delete 会清除它们。
     for path in (stage, target, runtime, config_path, units, cdn_script, Path(config['NEWS_WORK_DIR']), Path(config['NEWS_RELEASE_LOCK'])):

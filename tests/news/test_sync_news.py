@@ -10,6 +10,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -18,6 +19,9 @@ import unittest
 from unittest.mock import patch
 
 from bs4 import BeautifulSoup
+
+# 与独立脚本执行相同的模块搜索路径；只在测试装配中配置，不给生产代码加导入回退。
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'scripts/news'))
 
 MODULE_PATH = Path(__file__).resolve().parents[2] / 'scripts/news/sync_news.py'
 spec = importlib.util.spec_from_file_location('sync_news', MODULE_PATH)
@@ -38,6 +42,12 @@ class NewsSyncTests(unittest.TestCase):
         self.etags = {}
         self.redirects = {}
         self.requests = []
+        # 仅下载完整性用例指定 Content-Length；可独立模拟声明长度大于实际发送字节的断流。
+        self.response_lengths = {}
+        # 来源可通过 HTTP 声明禁止收录；该声明不属于镜像资源内容，不能传递给官网。
+        self.response_headers = {}
+        response_headers = self.response_headers
+        response_lengths = self.response_lengths
         etags, redirects, requests = self.etags, self.redirects, self.requests
 
         class Handler(BaseHTTPRequestHandler):
@@ -57,6 +67,10 @@ class NewsSyncTests(unittest.TestCase):
                 body, content_type = resources[self.path]
                 self.send_response(200)
                 self.send_header('Content-Type', content_type)
+                for name, value in response_headers.get(self.path, {}).items():
+                    self.send_header(name, value)
+                if self.path in response_lengths:
+                    self.send_header('Content-Length', str(response_lengths[self.path]))
                 if self.path in etags:
                     self.send_header('ETag', etags[self.path])
                 self.end_headers()
@@ -113,6 +127,17 @@ class NewsSyncTests(unittest.TestCase):
         self.assertNotIn('设计预览', listing.get_text())
         self.assertNotIn(self.source, listing.select_one('#feed-snapshot').text)
 
+    def test_news_snapshot_keeps_case_tags_and_published_article_url(self):
+        """案例页消费资讯页快照；含“案例”的标签与官网详情 URL 必须同时保留。"""
+        self.feed['items'][0]['tags'] = ['制造案例', '生产']
+        self.save_feed()
+        report = self.build_publish()
+        listing = BeautifulSoup((Path(report['release']) / 'index.html').read_text(), 'html.parser')
+        items = json.loads(listing.find(id='feed-snapshot').text)['items']
+        self.assertEqual(items[0]['tags'], ['制造案例', '生产'])
+        self.assertEqual(items[0]['url'], 'https://official.example/zh/news/articles/one/')
+        self.assertNotIn(self.source, json.dumps(items))
+
     def test_generation_timestamp_and_feed_order_do_not_trigger_build(self):
         """生成时刻变化及清单重排不改变文章内容；相对已发布版本应跳过候选生成。"""
         previous = self.build_publish()
@@ -122,6 +147,67 @@ class NewsSyncTests(unittest.TestCase):
         self.assertFalse(current['changed'])
         self.assertEqual(current['version'], previous['version'])
         self.assertNotIn('release', current)
+
+    def publish_old_navigation(self, empty=False):
+        """用隔离的旧导航模板发布真实快照；不篡改文件清单，使后续升级只改变模板这一前提。"""
+        old = self.root / 'old-program'
+        shutil.copytree(sync.HERE / 'templates', old / 'templates')
+        template = old / 'templates/index.html'
+        template.write_text(template.read_text().replace('案例方案', '场景示例').replace('在线体验', '旧体验入口'))
+        with patch.object(sync, 'HERE', old):
+            report = sync.collect(self.config, empty=empty)
+            sync.publish(self.config, report['version'], self.env)
+        return report
+
+    def test_bootstrap_updates_navigation_with_unavailable_feed_and_preserves_articles(self):
+        """重现发布漏更新：Feed 返回 HTML 时，安装仍升级导航且逐字节保留详情、资源和公开快照。"""
+        previous = self.publish_old_navigation()
+        release = Path(previous['release'])
+        before = {str(p.relative_to(release)): p.read_bytes() for p in release.rglob('*') if p.is_file()}
+        snapshot = BeautifulSoup(before['index.html'], 'html.parser').find(id='feed-snapshot').text
+        self.resources['/feed.json'] = (b'<html>unavailable</html>', 'text/html')
+        self.requests.clear()
+        with patch.dict(os.environ, self.env, clear=True), patch.object(sys, 'argv', ['sync_news.py', 'bootstrap']):
+            self.assertEqual(sync.main(), 0)
+        page = BeautifulSoup((self.root / 'live/index.html').read_text(), 'html.parser')
+        self.assertEqual([a.text for a in page.select('#site-nav > a')],
+                         ['首页', '案例方案', '资讯中心', '渠道合作', '关于我们'])
+        self.assertIn('在线体验', page.select_one('.header-actions').text)
+        self.assertEqual(page.find(id='feed-snapshot').text, snapshot)
+        for name, body in before.items():
+            if name != 'index.html': self.assertEqual((self.root / 'live' / name).read_bytes(), body)
+        self.assertEqual(self.requests, [])
+        active = sync.load_json(self.config.work / 'active.json')
+        self.assertEqual(active['urls'], previous['urls'])
+        self.assertEqual(active['count'], 2)
+        self.assertEqual(active['deleted_urls'], [])
+        self.assertIn('https://official.example/zh/news/', sync.load_json(self.config.work / 'pending-cdn.json'))
+        # 无变化重复安装必须复用版本，防止每次发布生成新版本或重写内容状态。
+        state = (self.config.work / 'active.json').read_bytes()
+        with patch.dict(os.environ, self.env, clear=True), patch.object(sys, 'argv', ['sync_news.py', 'bootstrap']):
+            self.assertEqual(sync.main(), 0)
+        self.assertEqual((self.config.work / 'active.json').read_bytes(), state)
+
+    def test_bootstrap_updates_empty_navigation_without_feed(self):
+        """空资讯且未配置来源时也必须更新官网导航；常规定时停用语义不因此改变。"""
+        self.publish_old_navigation(empty=True)
+        with patch.dict(os.environ, {**self.env, 'NEWS_FEED_URL': ''}, clear=True), patch.object(sys, 'argv', ['sync_news.py', 'bootstrap']):
+            self.assertEqual(sync.main(), 0)
+        page = BeautifulSoup((self.root / 'live/index.html').read_text(), 'html.parser')
+        self.assertIn('案例方案', page.select_one('#site-nav').text)
+        self.assertNotIn('场景示例', page.select_one('#site-nav').text)
+        self.assertFalse(page.find(id='empty-library').has_attr('hidden'))
+        self.assertEqual(json.loads(page.find(id='feed-snapshot').text), {'items': []})
+
+    def test_bootstrap_rejects_corrupt_published_content_before_template_upgrade(self):
+        """文件校验失败必须停止升级，不能给损坏正文重新签发哈希清单或切换线上入口。"""
+        previous = self.publish_old_navigation()
+        active = (self.config.work / 'active.json').read_bytes()
+        (Path(previous['release']) / 'articles/one/index.html').write_text('corrupted')
+        with patch.dict(os.environ, self.env, clear=True), patch.object(sys, 'argv', ['sync_news.py', 'bootstrap']):
+            self.assertEqual(sync.main(), 1)
+        self.assertEqual((self.config.work / 'active.json').read_bytes(), active)
+        self.assertEqual((self.root / 'live').resolve(), Path(previous['release']))
 
     def test_only_feed_address_is_required_for_source_configuration(self):
         """仅给 Feed 与隔离测试数据目录即可生成；不配置文章/资源域名，官网默认 jit.pro。"""
@@ -351,6 +437,36 @@ class NewsSyncTests(unittest.TestCase):
         self.assertEqual(article['publisher']['url'], 'https://official.example')
         self.assertEqual(data[1]['itemListElement'][1]['item'], canonical)
 
+    def test_source_crawler_directives_do_not_restrict_official_copy(self):
+        """各爬虫声明单独出现也必须被移除，普通元信息和正文中的 noindex 原文保留。"""
+        original, kind = self.resources['/one.html']
+        original = original.replace(b'<meta name="robots" content="noindex,nofollow">', b'')
+        declarations = ('name=" googlebot-news "', 'name="googlebot-image"',
+                        'name="Baiduspider"', 'name="Slurp"', 'name="YandexBot"',
+                        'http-equiv=" X-Robots-Tag "', 'name=" robots "')
+        for declaration in declarations:
+            with self.subTest(declaration=declaration):
+                extra = ('<meta ' + declaration + ' content="noindex,nofollow,noimageindex">'
+                         '<meta name="description" content="noindex 是来源发布策略">')
+                source = original.replace(b'</head>', extra.encode() + b'</head>')
+                self.resources['/one.html'] = (source, kind)
+                report = sync.collect(self.config)
+                soup = BeautifulSoup((Path(report['release']) / 'articles/one/index.html').read_text(), 'html.parser')
+                self.assertEqual([n['content'] for n in soup.select('meta[content]') if n['content'] == 'noindex,nofollow,noimageindex'], [])
+                self.assertEqual(soup.select_one('meta[name="robots"]')['content'], 'index,follow,max-image-preview:large')
+                self.assertEqual(soup.select_one('meta[name="description"]')['content'], 'noindex 是来源发布策略')
+                self.assertEqual(self.resources['/one.html'][0], source)
+
+    def test_source_http_noindex_allows_sync_without_copying_headers(self):
+        """真实 HTTP 源返回 noindex 仍能发布；源声明保留，官网产物仅使用官网的索引声明。"""
+        self.response_headers['/one.html'] = {'X-Robots-Tag': 'noindex, nofollow, noarchive'}
+        report = self.build_publish()
+        body = (Path(report['release']) / 'articles/one/index.html').read_text()
+        self.assertNotIn('noarchive', body)
+        self.assertNotIn('noindex', body)
+        self.assertIn('index,follow,max-image-preview:large', body)
+        self.assertEqual(self.response_headers['/one.html']['X-Robots-Tag'], 'noindex, nofollow, noarchive')
+
     def test_source_url_change_keeps_official_slug_url(self):
         """应用原文地址改变但 id 不变：抓取新地址，官网路径保持稳定且列表不泄露源地址。"""
         first = self.build_publish()
@@ -420,11 +536,13 @@ class NewsSyncTests(unittest.TestCase):
                 self.feed = {**original, **change}; self.save_feed()
                 with self.assertRaises(sync.SyncError): sync.collect(self.config)
 
-    def test_active_script_is_rejected(self):
-        """来源正文不能将运行时脚本带进官网同源；明确失败而非静默删除造成交互缺损。"""
+    def test_active_script_is_preserved(self):
+        """作者脚本属于页面内容；同步后保留其字节，不再以旧的静态内容约束拒绝整批更新。"""
         body, kind = self.resources['/one.html']
         self.resources['/one.html'] = (body.replace(b'</body>', b'<script>alert(1)</script></body>'), kind)
-        with self.assertRaisesRegex(sync.SyncError, '可执行脚本'): sync.collect(self.config)
+        report = sync.collect(self.config)
+        page = BeautifulSoup((Path(report['release']) / 'articles/one/index.html').read_text(), 'html.parser')
+        self.assertEqual(page.find('script').string, 'alert(1)')
 
     def test_publish_refuses_real_directory_and_modified_candidate(self):
         """显式发布也不得覆盖已有实体官网目录，或发布生成后被修改的候选。"""

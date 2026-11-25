@@ -100,6 +100,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             {
                 // 旧中英文文档、历史版本与博客已下线；资讯由服务器独立数据目录承载。
                 docs: false,
+                // 白皮书临时下线：保留源码，但不生成双语页面、客户端路由及旧跳转入口。
+                // 保持插件默认的测试/私有文件排除规则，恢复时同时恢复导航并更新 CDN 退役清单。
+                pages: {
+                    exclude: ['**/_*.{js,jsx,ts,tsx,md,mdx}', '**/_*/**', '**/*.test.{js,jsx,ts,tsx}', '**/__tests__/**',
+                        '**/whitepaper.tsx', '**/agent-products.tsx', '**/low-code-platform.tsx', '**/capabilities/*.tsx'],
+                },
                 blog: false,
                 theme: {
                     customCss: [
@@ -200,21 +206,11 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     activeBaseRegex: "^/$",
                 },
                 {
-                    label: "Agent Products",
-                    to: "/agent-products",
-                    position: "left",
-                },
-                {
                     label: "Industry Agents",
                     to: "/industry-agents",
                     position: "left",
                 },
                 // 主题布局仍用于 404 等页面，只保留当前有效入口。
-                {
-                    label: "Whitepaper",
-                    to: "/whitepaper",
-                    position: "left",
-                },
                 {
                     label: "Forum",
                     href: "https://forum.jit.pro",
@@ -254,7 +250,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 {
                     title: "Technology",
                     items: [
-                        { label: "Whitepaper", to: "/whitepaper" },
                         { label: "Solutions", to: "/solutions" },
                     ],
                 },

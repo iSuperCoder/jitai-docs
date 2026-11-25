@@ -49,6 +49,11 @@
   .site-header .header-actions { margin-left: auto; }
   .site-header .nav { position: absolute; inset: 64px 0 auto; visibility: hidden; opacity: 0; pointer-events: none; transform: translateY(-8px); flex-direction: column; align-items: stretch; gap: 2px; padding: 14px 24px 22px; background: var(--paper); border-bottom: 1px solid var(--header-border); box-shadow: var(--header-shadow); max-height: calc(100dvh - 64px); overflow-y: auto; }
   .site-header .nav.is-open { visibility: visible; opacity: 1; pointer-events: auto; transform: none; }
+  /* 与主站统一为整屏不透底的移动导航；短屏内部滚动，隔离背景滚动和视频合成层。 */
+  .site-header .nav { height: calc(100vh - 64px); height: calc(100dvh - 64px); padding-bottom: max(22px, env(safe-area-inset-bottom)); overscroll-behavior: contain; }
+  .site-header .nav > * { flex-shrink: 0; }
+  /* body 锁定会改变 sticky 参照；菜单打开期间固定到视口，正文已滚动时也必须从顶端展开。 */
+  .site-header[data-menu-open="true"] { position: fixed; inset: 0 0 auto; background: var(--paper); backdrop-filter: none; -webkit-backdrop-filter: none; }
   .site-header .nav > a { padding: 12px 10px; font-size: 16px; }
   .site-header .nav-cta { display: grid; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--header-border); }
   .site-header .nav-cta .button { width: 100%; }
@@ -81,3 +86,50 @@
 .feature .cover-keywords,.card-grid:not(.list-view) .cover-keywords{position:relative;inset:auto;display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0;margin-top:auto}
 .cover-keywords .topic-chip{max-width:100%}
 @media(max-width:580px){.feature .cover,.card-grid:not(.list-view) .cover{padding:24px;min-height:260px;gap:20px}}
+
+/* 有图时，图片盒统一 16:9；悬浮标签不参与高度计算，图片比例不随标签换行改变。
+   推荐区不随旁边长文案拉高图片；列表也使用同一比例。非 16:9 图片以主题底色补边，
+   contain 保持完整画面与原比例；无图或加载失败时仍沿用上方的品牌占位布局。 */
+.feature .cover.has-image,.card-grid .cover.has-image{width:100%;min-height:0;padding:0;gap:0;aspect-ratio:auto;align-self:center;background:var(--surface)}
+.cover.has-image .cover-image{position:relative;inset:auto;display:block;width:100%;height:auto;aspect-ratio:16/9;flex:none;object-fit:contain;object-position:center;background:var(--surface)}
+.cover.has-image::before,.cover.has-image::after,.cover.has-image .art{display:none}
+/* 标签贴近封面底部悬浮；半透明底与轻微模糊保证复杂图片上的可读性。
+   不支持 backdrop-filter 的浏览器仍有半透明底色；列表继续在正文显示主题标签。 */
+.feature .has-image .cover-keywords,.card-grid:not(.list-view) .has-image .cover-keywords{position:absolute;inset:auto 16px 16px;margin:0;padding:0;gap:6px;background:transparent}
+.has-image .cover-keywords .topic-chip{background:rgba(16,32,48,.66);color:#fff;border-color:rgba(255,255,255,.32);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.has-image .cover-keywords .topic-chip:hover{background:rgba(16,32,48,.82);border-color:rgba(255,255,255,.65)}
+.list-view .cover.has-image{align-self:start}
+
+/* 推荐卡片外框高度由图片的 16:9 高度决定，文字侧不再贡献旧的固定最小高度。
+   桌面使用 size containment 避免长文案把图片列撑出白边；摘要/标题沿用卡片截行。
+   1100px 以下改上下排列并恢复文字自然高度，不在窄列内强塞文字或裁掉操作入口。 */
+.feature:has(.has-image){grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)}
+.feature .cover.has-image{align-self:start}
+.feature:has(.has-image) .feature-body{contain:size;min-height:0;padding:20px 24px}
+.feature:has(.has-image) h2{height:auto;font-size:22px;line-height:1.4;-webkit-line-clamp:2;margin:12px 0}
+.feature:has(.has-image) .summary{height:auto;-webkit-line-clamp:2}
+.feature:has(.has-image) .meta{margin-top:12px}
+.feature:has(.has-image) .read-link{padding-top:16px}
+@media(max-width:1100px){
+  .feature:has(.has-image){grid-template-columns:minmax(0,1fr)}
+  .feature:has(.has-image) .feature-body{contain:none;padding:24px}
+  .feature:has(.has-image) h2{-webkit-line-clamp:3}
+}
+
+/* 入口用途在桌面悬停或聚焦时显示，留出可移入的提示区域；Escape 关闭直到下次进入。
+   手机菜单直接显示说明，避免触屏用户必须先点一次才能理解目的地。 */
+.site-header .entry-link { position: relative; }
+.site-header .header-actions .entry-link { white-space: nowrap; }
+.site-header .entry-hint { position: absolute; z-index: 2; top: 100%; right: 0; width: 248px; padding: 12px 16px; border: 1px solid var(--header-border); border-radius: 6px; background: var(--paper); color: var(--header-muted); box-shadow: var(--header-shadow); font-size: .8125rem; font-weight: 400; line-height: 1.6; text-align: left; white-space: normal; visibility: hidden; }
+.site-header .entry-link:hover .entry-hint, .site-header .entry-link:focus-visible .entry-hint { visibility: visible; }
+.site-header[data-hint-dismissed="true"] .header-actions .entry-hint { visibility: hidden; }
+/* 新增下载入口后，收紧桌面导航内间距；仍沿用既有 1180px 菜单断点。 */
+@media (min-width: 1181px) {
+  .site-header .header-inner { gap: 16px; }
+  .site-header .nav > a { padding-inline: 8px; }
+  .site-header .header-actions .button { padding-inline: 12px; }
+}
+@media (max-width: 1180px) {
+  .site-header .nav-cta .entry-link { flex-direction: column; gap: 4px; padding: 12px; }
+  .site-header .nav-cta .entry-hint { position: static; width: auto; padding: 0; border: 0; box-shadow: none; background: transparent; color: inherit; font-size: .75rem; text-align: center; visibility: visible; }
+}
